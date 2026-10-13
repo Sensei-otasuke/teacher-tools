@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>授業用大型タイマー</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&family=Chivo+Mono:wght@800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; }
+    .font-timer { font-family: 'Chivo Mono', monospace; font-variant-numeric: tabular-nums; }
+    
+    /* スクロールバーの非表示 */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* プログレスサークルの回転基点 */
+    .progress-ring-circle {
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      transition: stroke-dashoffset 0.1s linear, stroke 0.4s ease;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex flex-col justify-between select-none overflow-x-hidden">
+
+  <!-- ヘッダーツールバー -->
+  <header class="p-3 sm:p-4 flex items-center justify-between z-20">
+    <div class="flex items-center gap-2">
+      <a href="../" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition" title="ポータルへ戻る">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+      </a>
+      <span class="text-xs sm:text-sm font-bold text-slate-400 flex items-center gap-1.5">
+        <span class="text-indigo-400">⏱️</span> 授業用大型タイマー
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <!-- サウンドテストボタン -->
+      <button id="testSoundBtn" class="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs text-slate-300 font-bold flex items-center gap-1.5 transition">
+        <i data-lucide="bell" class="w-3.5 h-3.5 text-indigo-400"></i>
+        <span class="hidden sm:inline">チャイム試聴</span>
+      </button>
+      <!-- 消音トグル -->
+      <button id="muteBtn" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-300 transition" title="ミュート切り替え">
+        <i data-lucide="volume-2" class="w-4 h-4" id="muteIcon"></i>
+      </button>
+      <!-- 全画面トグル -->
+      <button id="fullscreenBtn" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-300 transition" title="全画面表示">
+        <i data-lucide="maximize" class="w-4 h-4" id="fullscreenIcon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- 中央メインタイマー表示エリア（画面の縦横比に合わせて自動拡大） -->
+  <main class="flex-1 flex flex-col items-center justify-center relative px-4 my-auto">
+    <div class="relative w-[75vw] max-w-[500px] sm:max-w-[580px] lg:max-w-[640px] aspect-square flex items-center justify-center">
+      
+      <!-- 円形プログレスリング -->
+      <svg class="w-full h-full" viewBox="0 0 400 400">
+        <!-- 背景の薄い円 -->
+        <circle
+          cx="200" cy="200" r="175"
+          fill="none"
+          stroke="#1e293b"
+          stroke-width="14"
+        />
+        <!-- 進行度を示す円 -->
+        <circle
+          id="progressCircle"
+          class="progress-ring-circle"
+          cx="200" cy="200" r="175"
+          fill="none"
+          stroke="#38bdf8"
+          stroke-width="14"
+          stroke-linecap="round"
+          stroke-dasharray="1099.5"
+          stroke-dashoffset="0"
+        />
+      </svg>
+
+      <!-- 円の中央：特大デジタル文字 -->
+      <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <!-- 状態ラベル -->
+        <span id="timerStatus" class="text-xs sm:text-base font-bold text-slate-400 tracking-wider mb-1 sm:mb-2 uppercase">SET TIMER</span>
+
+        <!-- 極大デジタル文字 (分:秒) -->
+        <div id="timeDisplay" class="font-timer text-7xl sm:text-8xl md:text-9xl lg:text-[11rem] font-black tracking-tight leading-none text-white drop-shadow-md">
+          03:00
+        </div>
+
+        <!-- 残り時間のパーセンテージ -->
+        <span id="percentDisplay" class="text-xs sm:text-sm font-bold text-slate-500 mt-2 sm:mt-3">100%</span>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 下部操作パネル -->
+  <footer class="p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md border-t border-slate-800/80 z-20 flex flex-col items-center gap-4">
+    
+    <!-- プリセットボタン ＆ クイック追加 -->
+    <div class="flex flex-wrap items-center justify-center gap-2 max-w-2xl w-full">
+      <span class="text-xs font-bold text-slate-400 mr-1 hidden sm:inline">プリセット:</span>
+      <button data-sec="60" class="preset-btn px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 hover:text-white rounded-xl text-xs sm:text-sm font-bold text-slate-300 transition border border-slate-700/60 active:scale-95">1分</button>
+      <button data-sec="180" class="preset-btn px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 hover:text-white rounded-xl text-xs sm:text-sm font-bold text-slate-300 transition border border-slate-700/60 active:scale-95">3分</button>
+      <button data-sec="300" class="preset-btn px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 hover:text-white rounded-xl text-xs sm:text-sm font-bold text-slate-300 transition border border-slate-700/60 active:scale-95">5分</button>
+      <button data-sec="600" class="preset-btn px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 hover:text-white rounded-xl text-xs sm:text-sm font-bold text-slate-300 transition border border-slate-700/60 active:scale-95">10分</button>
+      <button data-sec="900" class="preset-btn px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 hover:text-white rounded-xl text-xs sm:text-sm font-bold text-slate-300 transition border border-slate-700/60 active:scale-95">15分</button>
+
+      <div class="h-4 w-px bg-slate-700 mx-1 hidden sm:block"></div>
+
+      <!-- +1分 / +10秒 クイック追加 -->
+      <button id="add1MinBtn" class="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 rounded-xl text-xs font-bold text-slate-300 transition border border-slate-700/60 active:scale-95">+1分</button>
+      <button id="add10SecBtn" class="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 rounded-xl text-xs font-bold text-slate-300 transition border border-slate-700/60 active:scale-95">+10秒</button>
+    </div>
+
+    <!-- スタート / ストップ / リセット ＆ スクロール設定ピッカー呼び出し -->
+    <div class="flex items-center gap-3 w-full max-w-md justify-center">
+      <!-- リセットボタン -->
+      <button id="resetBtn" class="p-3.5 sm:px-5 sm:py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl font-black text-sm transition border border-slate-700 flex items-center gap-2 active:scale-95" title="最初に戻す">
+        <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+        <span class="hidden sm:inline">リセット</span>
+      </button>
+
+      <!-- スタート / 一時停止ボタン -->
+      <button id="startStopBtn" class="flex-1 py-3.5 sm:py-4 px-8 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black text-lg sm:text-xl rounded-2xl shadow-lg shadow-emerald-500/20 active:scale-95 transition flex items-center justify-center gap-2 tracking-wider">
+        <i data-lucide="play" class="w-6 h-6 fill-current" id="startIcon"></i>
+        <span id="startText">スタート</span>
+      </button>
+
+      <!-- 時間設定（スクロールピッカー呼び出し） -->
+      <button id="openPickerBtn" class="p-3.5 sm:px-5 sm:py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl font-black text-sm transition border border-slate-700 flex items-center gap-2 active:scale-95" title="時間を手動設定">
+        <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i>
+        <span class="hidden sm:inline">設定</span>
+      </button>
+    </div>
+
+  </footer>
+
+  <!-- スクロール式（ドラムロール風）分・秒ピッカーモーダル -->
+  <div id="pickerModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl flex flex-col items-center">
+      <h3 class="text-base font-extrabold text-white mb-4 flex items-center gap-2">
+        <i data-lucide="clock" class="w-5 h-5 text-indigo-400"></i>
+        <span>スクロールで時間を設定</span>
+      </h3>
+
+      <!-- ドラムロールピッカー本体 -->
+      <div class="relative w-full flex items-center justify-center gap-4 py-6 bg-slate-950 rounded-2xl border border-slate-800">
+        <!-- 選択帯のハイライトライン -->
+        <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 h-12 bg-indigo-500/10 border-y border-indigo-500/40 pointer-events-none rounded-lg"></div>
+
+        <!-- 分ピッカー (0〜99) -->
+        <div class="flex items-center gap-1.5">
+          <div id="minuteWheel" class="no-scrollbar h-36 w-16 overflow-y-scroll snap-y snap-mandatory text-center text-2xl font-black font-timer">
+            <!-- JSで動的生成 -->
+          </div>
+          <span class="text-sm font-bold text-slate-400 z-10">分</span>
+        </div>
+
+        <span class="text-2xl font-black text-slate-600">:</span>
+
+        <!-- 秒ピッカー (0〜59) -->
+        <div class="flex items-center gap-1.5">
+          <div id="secondWheel" class="no-scrollbar h-36 w-16 overflow-y-scroll snap-y snap-mandatory text-center text-2xl font-black font-timer">
+            <!-- JSで動的生成 -->
+          </div>
+          <span class="text-sm font-bold text-slate-400 z-10">秒</span>
+        </div>
+      </div>
+
+      <!-- 決定ボタン -->
+      <div class="flex gap-2 w-full mt-6">
+        <button id="cancelPickerBtn" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-sm transition">キャンセル</button>
+        <button id="applyPickerBtn" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition">セットする</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- アプリケーションロジック -->
+  <script>
+    // --- 状態管理 ---
+    const state = {
+      initialSeconds: 180, // 初期3分
+      remainingSeconds: 180,
+      isRunning: false,
+      timerId: null,
+      soundEnabled: true,
+      lastTickTime: null,
+    };
+
+    // 円の円周長: 2 * Math.PI * 175 ≈ 1099.55
+    const CIRCLE_CIRCUMFERENCE = 1099.55;
+
+    // --- Web Audio API（優しい和音チャイム） ---
+    class GentleAudioEngine {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      playGentleChime() {
+        if (!state.soundEnabled) return;
+        this.init();
+        
+        // 優しいオルゴール・マリンバ風メジャー和音 (C5, G5, C6, E6)
+        const chord = [
+          { freq: 523.25, time: 0.00, dur: 1.2 }, // C5
+          { freq: 659.25, time: 0.18, dur: 1.2 }, // E5
+          { freq: 783.99, time: 0.36, dur: 1.4 }, // G5
+          { freq: 1046.50, time: 0.54, dur: 2.0 }, // C6
+          { freq: 1318.51, time: 0.72, dur: 2.2 }, // E6
+        ];
+
+        chord.forEach(note => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine'; // 刺激の少ない純粋なサイン波
+          osc.frequency.setValueAtTime(note.freq, this.ctx.currentTime + note.time);
+
+          const startTime = this.ctx.currentTime + note.time;
+          gain.gain.setValueAtTime(0.001, startTime);
+          gain.gain.linearRampToValueAtTime(0.18, startTime + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + note.dur);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(startTime);
+          osc.stop(startTime + note.dur);
+        });
+      }
+    }
+    const audio = new GentleAudioEngine();
+
+    // --- UI表示の更新 ---
+    function updateDisplay() {
+      const mins = Math.floor(state.remainingSeconds / 60);
+      const secs = Math.floor(state.remainingSeconds % 60);
+      const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      
+      const displayEl = document.getElementById('timeDisplay');
+      displayEl.textContent = timeStr;
+      document.title = state.isRunning ? `(${timeStr}) 授業用タイマー` : '授業用大型タイマー';
+
+      // プログレスサークルの計算
+      const circle = document.getElementById('progressCircle');
+      const ratio = state.initialSeconds > 0 ? (state.remainingSeconds / state.initialSeconds) : 0;
+      const offset = CIRCLE_CIRCUMFERENCE * (1 - ratio);
+      circle.style.strokeDashoffset = offset;
+
+      // パーセンテージ表示
+      const pct = Math.round(ratio * 100);
+      document.getElementById('percentDisplay').textContent = `${pct}%`;
+
+      // 残り時間に応じた色の演出（威圧感のない変化）
+      if (ratio <= 0.1) {
+        // ラスト10%: 落ち着いた暖色（アンバー/オレンジ）
+        circle.setAttribute('stroke', '#f97316');
+        displayEl.classList.remove('text-white', 'text-sky-400');
+        displayEl.classList.add('text-orange-400');
+      } else if (ratio <= 0.3) {
+        // ラスト30%: イエロー
+        circle.setAttribute('stroke', '#facc15');
+        displayEl.classList.remove('text-orange-400', 'text-sky-400');
+        displayEl.classList.add('text-yellow-300');
+      } else {
+        // 通常: 爽やかなシアンブルー
+        circle.setAttribute('stroke', '#38bdf8');
+        displayEl.classList.remove('text-orange-400', 'text-yellow-300');
+        displayEl.classList.add('text-white');
+      }
+    }
+
+    // --- タイマー動作制御 ---
+    function startTimer() {
+      if (state.remainingSeconds <= 0) return;
+      state.isRunning = true;
+      state.lastTickTime = performance.now();
+
+      document.getElementById('timerStatus').textContent = 'COUNTING DOWN';
+      document.getElementById('startText').textContent = '一時停止';
+      document.getElementById('startIcon').setAttribute('data-lucide', 'pause');
+      document.getElementById('startStopBtn').className = 'flex-1 py-3.5 sm:py-4 px-8 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-lg sm:text-xl rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2 tracking-wider';
+      lucide.createIcons();
+
+      state.timerId = setInterval(() => {
+        const now = performance.now();
+        const delta = (now - state.lastTickTime) / 1000;
+        state.lastTickTime = now;
+
+        state.remainingSeconds = Math.max(0, state.remainingSeconds - delta);
+        updateDisplay();
+
+        if (state.remainingSeconds <= 0) {
+          timerFinished();
+        }
+      }, 100);
+    }
+
+    function pauseTimer() {
+      state.isRunning = false;
+      clearInterval(state.timerId);
+      document.getElementById('timerStatus').textContent = 'PAUSED';
+      document.getElementById('startText').textContent = '再開';
+      document.getElementById('startIcon').setAttribute('data-lucide', 'play');
+      document.getElementById('startStopBtn').className = 'flex-1 py-3.5 sm:py-4 px-8 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black text-lg sm:text-xl rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2 tracking-wider';
+      lucide.createIcons();
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      state.remainingSeconds = state.initialSeconds;
+      document.getElementById('timerStatus').textContent = 'READY';
+      document.getElementById('startText').textContent = 'スタート';
+      updateDisplay();
+    }
+
+    function timerFinished() {
+      pauseTimer();
+      document.getElementById('timerStatus').textContent = 'TIME UP!';
+      audio.playGentleChime();
+      
+      // 紙吹雪演出
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 100,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    function setTime(seconds) {
+      pauseTimer();
+      state.initialSeconds = seconds;
+      state.remainingSeconds = seconds;
+      document.getElementById('timerStatus').textContent = 'READY';
+      document.getElementById('startText').textContent = 'スタート';
+      updateDisplay();
+    }
+
+    // --- ドラムロールピッカー生成と設定 ---
+    function initWheelPickers() {
+      const minWheel = document.getElementById('minuteWheel');
+      const secWheel = document.getElementById('secondWheel');
+
+      // 分（0〜99）
+      let minHtml = '<div class="h-12"></div>'; // パディング
+      for (let i = 0; i <= 99; i++) {
+        minHtml += `<div class="h-12 flex items-center justify-center snap-center text-slate-400 hover:text-white" data-val="${i}">${String(i).padStart(2, '0')}</div>`;
+      }
+      minHtml += '<div class="h-12"></div>';
+      minWheel.innerHTML = minHtml;
+
+      // 秒（0〜59）
+      let secHtml = '<div class="h-12"></div>';
+      for (let i = 0; i <= 59; i++) {
+        secHtml += `<div class="h-12 flex items-center justify-center snap-center text-slate-400 hover:text-white" data-val="${i}">${String(i).padStart(2, '0')}</div>`;
+      }
+      secHtml += '<div class="h-12"></div>';
+      secWheel.innerHTML = secHtml;
+    }
+
+    function scrollToPickerVal(wheelEl, val) {
+      const itemHeight = 48; // h-12 = 48px
+      wheelEl.scrollTop = val * itemHeight;
+    }
+
+    function getWheelVal(wheelEl) {
+      const itemHeight = 48;
+      const index = Math.round(wheelEl.scrollTop / itemHeight);
+      return Math.max(0, index);
+    }
+
+    // --- イベントリスナー設定 ---
+    function setupEventListeners() {
+      // スタート / ストップ
+      document.getElementById('startStopBtn').onclick = () => {
+        if (state.isRunning) pauseTimer();
+        else startTimer();
+      };
+
+      // リセット
+      document.getElementById('resetBtn').onclick = resetTimer;
+
+      // プリセットボタン
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.onclick = () => setTime(parseInt(btn.dataset.sec));
+      });
+
+      // クイック追加
+      document.getElementById('add1MinBtn').onclick = () => {
+        state.remainingSeconds += 60;
+        state.initialSeconds = Math.max(state.initialSeconds, state.remainingSeconds);
+        updateDisplay();
+      };
+      document.getElementById('add10SecBtn').onclick = () => {
+        state.remainingSeconds += 10;
+        state.initialSeconds = Math.max(state.initialSeconds, state.remainingSeconds);
+        updateDisplay();
+      };
+
+      // サウンドテスト & ミュート
+      document.getElementById('testSoundBtn').onclick = () => audio.playGentleChime();
+      document.getElementById('muteBtn').onclick = () => {
+        state.soundEnabled = !state.soundEnabled;
+        const icon = document.getElementById('muteIcon');
+        icon.setAttribute('data-lucide', state.soundEnabled ? 'volume-2' : 'volume-x');
+        lucide.createIcons();
+      };
+
+      // 全画面表示切替
+      document.getElementById('fullscreenBtn').onclick = () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      };
+
+      document.addEventListener('fullscreenchange', () => {
+        const icon = document.getElementById('fullscreenIcon');
+        icon.setAttribute('data-lucide', document.fullscreenElement ? 'minimize' : 'maximize');
+        lucide.createIcons();
+      });
+
+      // ピッカーモーダル開閉
+      const modal = document.getElementById('pickerModal');
+      const minWheel = document.getElementById('minuteWheel');
+      const secWheel = document.getElementById('secondWheel');
+
+      document.getElementById('openPickerBtn').onclick = () => {
+        const curMins = Math.floor(state.remainingSeconds / 60);
+        const curSecs = Math.floor(state.remainingSeconds % 60);
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          scrollToPickerVal(minWheel, Math.min(99, curMins));
+          scrollToPickerVal(secWheel, curSecs);
+        }, 50);
+      };
+
+      document.getElementById('cancelPickerBtn').onclick = () => modal.classList.add('hidden');
+      document.getElementById('applyPickerBtn').onclick = () => {
+        const m = getWheelVal(minWheel);
+        const s = getWheelVal(secWheel);
+        const total = m * 60 + s;
+        if (total > 0) setTime(total);
+        modal.classList.add('hidden');
+      };
+    }
+
+    // --- 初期ロード ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initWheelPickers();
+      setupEventListeners();
+      updateDisplay();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
