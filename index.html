@@ -3,47 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>教員向けWeb便利ツール集</title>
+
+  <!-- ===== 検索エンジン向けSEO設定 ===== -->
+  <title>教員向け無料Web便利ツール集 | 席替えルーレット・授業用大型タイマー【登録不要・完全安全】</title>
+  <meta name="description" content="現役教員が作成する小学校・中学校・高校の先生のための無料Web便利ツール集。児童生徒の個人情報をサーバーに送信・保存しない完全安心設計の「スマート席替えメーカー」や、電子黒板・プロジェクター投影用の「授業用大型タイマー」を公開中。インストール・会員登録不要で即座に使えます。">
+  <meta name="keywords" content="席替え アプリ, 席替え ルーレット, 授業用タイマー, 教員 便利ツール, 小学校 席替え, 電子黒板 タイマー, ICT教育 ツール, 教師 便利サイト">
+  <meta name="robots" content="index, follow">
+
+  <!-- ===== OGP（SNS・LINEシェア時の表示カード） ===== -->
+  <meta property="og:title" content="教員向け無料Web便利ツール集 | 席替え・授業タイマー">
+  <meta property="og:description" content="インストール不要・個人情報の外部送信ゼロ。先生のためのスマートな教室支援Webツール集。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="先生のおたすけツール集">
+
+  <!-- Tailwind CSS & Google Fonts & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
-  <header class="bg-white border-b border-slate-200 py-6 px-4">
-    <div class="max-w-4xl mx-auto">
-      <h1 class="text-2xl font-bold text-slate-900">📚 授業・学級経営 Webツール集</h1>
-      <p class="text-sm text-slate-500 mt-1">現役教員が作成しているインストール不要・ブラウザ上で安全に動作する教員向けツール集です。</p>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- ヘッダー -->
+  <header class="bg-white border-b border-slate-200 py-6 px-4 sm:px-6 shadow-2xs">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-2xl">📚</span>
+          <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">先生のおたすけWebツール集</h1>
+          <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">無料・登録不要</span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500">学校の電子黒板やPCですぐに動く、授業・学級経営のための支援ツールです。</p>
+      </div>
+
+      <!-- 個人情報保護バッジ -->
+      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 self-start sm:self-auto">
+        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+        <span>通信・外部保存なし（安心設計）</span>
+      </div>
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto p-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      
-      <!-- 席替えツールカード -->
-      <a href="./sekigae/" target="_blank" rel="noopener noreferrer" class="block bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition group">
-        <div class="text-3xl mb-3">🪑</div>
-        <div class="flex items-center justify-between mb-1">
-          <h2 class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition">席替えルーレット</h2>
-          <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </div>
-        <p class="text-sm text-slate-600 mb-4">先生用事前決定・児童向けスロット演出・固定席・Excel出力に対応した席替えツール。</p>
-        <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">別タブで開く ↗</span>
-      </a>
+  <!-- メインコンテンツ -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8 sm:py-10 space-y-10">
 
-      <!-- 授業用大型タイマーカード -->
-      <a href="./timer/" target="_blank" rel="noopener noreferrer" class="block bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition group">
-        <div class="text-3xl mb-3">⏱️</div>
-        <div class="flex items-center justify-between mb-1">
-          <h2 class="text-lg font-bold text-slate-900 group-hover:text-emerald-600 transition">授業用大型タイマー</h2>
-          <svg class="w-4 h-4 text-slate-400 group-hover:text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </div>
-        <p class="text-sm text-slate-600 mb-4">極大表示・円形プログレス・優しいチャイム音・全画面投影に対応した授業用タイマー。</p>
-        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">別タブで開く ↗</span>
-      </a>
+    <!-- ツール一覧セクション -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+          <span>🛠️</span>
+          <span>公開中のツール一覧</span>
+        </h2>
+        <span class="text-xs text-slate-500 font-bold">2つのツールが利用可能</span>
+      </div>
 
-    </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        
+        <!-- 席替えルーレットカード -->
+        <a href="./sekigae/" target="_blank" rel="noopener noreferrer" class="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-lg transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🪑</span>
+              <span class="text-xs font-bold text-indigo-600 bg-indigo-50 group-hover:bg-indigo-600 group-hover:text-white px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                <span>開く</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+            <h3 class="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors mb-2">スマート席替えメーカー</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+              先生用の事前配置・固定席設定と、児童に見せるドキドキ抽選演出（カモフラージュ機能）を完全分離。Excel出力（.xlsx）や印刷にも対応しています。
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[11px] font-bold text-slate-500">
+            <span class="bg-slate-100 px-2 py-0.5 rounded">児童用演出</span>
+            <span class="bg-slate-100 px-2 py-0.5 rounded">Excel出力</span>
+            <span class="bg-slate-100 px-2 py-0.5 rounded">配慮席ピン留め</span>
+          </div>
+        </a>
+
+        <!-- 授業用大型タイマーカード -->
+        <a href="./timer/" target="_blank" rel="noopener noreferrer" class="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-emerald-400 hover:shadow-lg transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">⏱️</span>
+              <span class="text-xs font-bold text-emerald-600 bg-emerald-50 group-hover:bg-emerald-600 group-hover:text-white px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                <span>開く</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+            <h3 class="text-lg font-black text-slate-900 group-hover:text-emerald-600 transition-colors mb-2">授業用大型タイマー</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+              教室の一番後ろからでもハッキリ見える特大デジタル文字と円形プログレスリング。スクロールピッカー、全画面投影、耳に優しいオルゴールチャイムを搭載。
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[11px] font-bold text-slate-500">
+            <span class="bg-slate-100 px-2 py-0.5 rounded">円形ゲージ</span>
+            <span class="bg-slate-100 px-2 py-0.5 rounded">優しいチャイム</span>
+            <span class="bg-slate-100 px-2 py-0.5 rounded">全画面対応</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- 安全性・特徴のアピールセクション（SEOと安心感向上） -->
+    <section class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs space-y-3">
+      <h2 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+        <i data-lucide="lock" class="w-4 h-4 text-indigo-600"></i>
+        <span>学校現場で安心してご利用いただける理由</span>
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-600 leading-relaxed pt-1">
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-150">
+          <strong class="block text-slate-800 font-bold mb-1">🔒 個人情報を送信・保存しない</strong>
+          生徒の氏名等のデータはすべてお使いのブラウザ内部でのみ処理され、外部サーバーに送信・蓄積されることは一切ありません。
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-150">
+          <strong class="block text-slate-800 font-bold mb-1">💻 アカウント・登録不要</strong>
+          ログインやメールアドレスの登録は一切不要。ブックマークしておくだけで、どの教室の端末からでも即座に利用可能です。
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-150">
+          <strong class="block text-slate-800 font-bold mb-1">⚡ 端末を選ばず軽量動作</strong>
+          プロジェクターや電子黒板、Windows PC、Mac、iPad、Chromebookなど、あらゆる端末の標準ブラウザで軽快に動作します。
+        </div>
+      </div>
+    </section>
+
+    <!-- ご意見・改善要望 募集セクション -->
+    <section class="bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/80 rounded-2xl border border-indigo-200/70 p-6 sm:p-8 text-center space-y-4">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 mb-1">
+        <i data-lucide="message-square-heart" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h2 class="text-lg sm:text-xl font-black text-slate-900">ご意見・機能リクエスト募集中</h2>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 max-w-lg mx-auto leading-relaxed">
+          「席替えにこんな機能がほしい」「授業で使えるこんなツールを作ってほしい」など、現場の先生方からの率直なご意見・アイデアをお待ちしております！
+        </p>
+      </div>
+      <div class="pt-2">
+        <!-- Googleフォームへのリンクボタン（※URLをご自身のフォームに変更可能） -->
+        <a id="feedbackBtn" href="https://docs.google.com/forms/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>ご意見・リクエストを送る（Googleフォーム）</span>
+        </a>
+        <p class="text-[11px] text-slate-400 mt-2">※匿名で簡単に送信いただけます</p>
+      </div>
+    </section>
+
   </main>
+
+  <!-- フッター -->
+  <footer class="mt-auto py-6 px-4 border-t border-slate-200 bg-white text-center text-xs text-slate-400">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>先生のおたすけWebツール集 &copy; 2026 | 全ツール完全無料・登録不要</p>
+      <div class="flex items-center gap-4 text-slate-500">
+        <a href="./sekigae/" class="hover:underline">席替えメーカー</a>
+        <a href="./timer/" class="hover:underline">授業用タイマー</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
 </html>
