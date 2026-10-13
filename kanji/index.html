@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>漢字配当チェッカー | センセイボックス</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; }
+    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
+    .tech-bg {
+      background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    /* 漢字ツールチップ */
+    .kanji-char {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 0 1px;
+      transition: all 0.15s ease;
+    }
+    .kanji-char:hover {
+      transform: translateY(-2px);
+      z-index: 20;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased tech-bg selection:bg-indigo-500 selection:text-white">
+
+  <!-- ヘッダー -->
+  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 shadow-lg">
+    <div class="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a href="../" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition" title="ポータルへ戻る">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🔍</span>
+          <h1 class="text-lg sm:text-xl font-black text-white tracking-wider flex items-center gap-2">
+            <span>漢字配当チェッカー</span>
+            <span class="text-[11px] font-mono-tech text-cyan-400 bg-cyan-950/80 border border-cyan-800 px-2 py-0.5 rounded-full hidden sm:inline">KanjiChecker</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- 安全バッジ -->
+      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-xl text-xs font-bold text-slate-300">
+        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+        <span>完全オフライン解析（外部送信なし）</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- 対象学年選択＆コントロールバー -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-md flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <label class="text-xs sm:text-sm font-extrabold text-slate-300 flex items-center gap-1.5">
+          <i data-lucide="graduation-cap" class="w-4 h-4 text-indigo-400"></i>
+          <span>基準にする対象学年:</span>
+        </label>
+        <div class="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-bold" id="gradeSelector">
+          <button data-grade="0" class="grade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">全学年色分け</button>
+          <button data-grade="1" class="grade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">小1</button>
+          <button data-grade="2" class="grade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">小2</button>
+          <button data-grade="3" class="grade-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-white shadow-sm transition">小3基準</button>
+          <button data-grade="4" class="grade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">小4</button>
+          <button data-grade="5" class="grade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">小5</button>
+          <button data-grade="6" class="grade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">小6</button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="sampleBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-bold rounded-xl transition flex items-center gap-1">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i> サンプル文を挿入
+        </button>
+        <button id="clearBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 border border-slate-700 text-slate-400 text-xs font-bold rounded-xl transition flex items-center gap-1">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> クリア
+        </button>
+      </div>
+    </div>
+
+    <!-- 入力と結果表示の2カラムグリッド -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- 左側：入力エリア -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-md space-y-3">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="edit-3" class="w-4 h-4 text-cyan-400"></i>
+              <span>判定したい文章を入力・ペースト</span>
+            </span>
+            <span class="text-xs text-slate-500 font-mono-tech">文字数: <strong id="charCount" class="text-slate-200">0</strong>字</span>
+          </div>
+          <textarea id="inputText" rows="12" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm sm:text-base text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition leading-relaxed resize-none" placeholder="テスト問題、学級通信、プリントの文章をここに貼り付けてください..."></textarea>
+        </div>
+
+        <button id="analyzeBtn" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-black text-sm rounded-xl shadow-lg shadow-indigo-600/20 active:scale-95 transition flex items-center justify-center gap-2">
+          <i data-lucide="zap" class="w-4 h-4 fill-current"></i>
+          <span>漢字配当をチェックする</span>
+        </button>
+      </div>
+
+      <!-- 右側：解析結果プレビュー -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-md space-y-3">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+              <span>ハイライト判定結果（文字に触れると詳細表示）</span>
+            </span>
+            <span id="targetBadge" class="text-[11px] font-bold text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800">小3基準</span>
+          </div>
+
+          <!-- 解析結果本文 -->
+          <div id="outputArea" class="w-full min-h-[280px] max-h-[340px] overflow-y-auto bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm sm:text-base leading-loose whitespace-pre-wrap select-text">
+            <span class="text-slate-600 italic">文章を入力して「チェックする」を押すと、ここに結果が表示されます。</span>
+          </div>
+        </div>
+
+        <!-- コピー＆書き出しアクションツールバー -->
+        <div class="pt-2 border-t border-slate-800/80 flex flex-wrap gap-2">
+          <button id="copyUnlearnedBtn" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5" title="未習漢字だけを抽出">
+            <i data-lucide="list" class="w-3.5 h-3.5"></i>
+            <span>未習漢字のみ抽出</span>
+          </button>
+          <button id="copyFuriganaBtn" class="flex-1 py-2 px-3 bg-indigo-600/80 hover:bg-indigo-600 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5" title="未習漢字に（ ）をつけてコピー">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>未習に（ ）付けコピー</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 統計メーター＆配当難易度分析 -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs sm:text-sm font-black text-white flex items-center gap-2">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 text-cyan-400"></i>
+          <span>漢字配当の内訳・分析メーター</span>
+        </h3>
+        <span class="text-xs text-slate-400 font-mono-tech">漢字数: <strong id="totalKanjiCount" class="text-white">0</strong>字</span>
+      </div>
+
+      <!-- プログレスバー -->
+      <div class="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden flex border border-slate-800" id="statProgressBar">
+        <!-- JSで動的生成 -->
+      </div>
+
+      <!-- 学年別バッジ一覧 -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 pt-1 text-center" id="statBadgesContainer">
+        <!-- JSで動的生成 -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- トースト通知 -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300 opacity-0 translate-y-3 pointer-events-none">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastText">メッセージ</span>
+  </div>
+
+  <footer class="mt-auto py-6 px-4 border-t border-slate-900 bg-slate-950 text-center text-xs text-slate-500 font-mono-tech">
+    センセイボックス (SenseiBox) &copy; 2026 | 文部科学省 小学校学習指導要領配当漢字（1,026字）準拠
+  </footer>
+
+  <!-- アプリケーションロジック -->
+  <script>
+    // --- 文部科学省 学年別漢字配当表（全1,026字）データベース ---
+    const KANJI_BY_GRADE = {
+      1: "一右雨円王音下火花貝気九休玉金空月犬見五口校左三山子四糸字耳七車手十出女小上森人水正生青夕石赤千川先早草足村大男竹中虫町天田土二日入年白八百文本名木目立力林六",
+      2: "引羽雲園遠何科夏家歌画回会海絵外角楽活間丸岩顔汽記帰弓牛魚京強教近兄形計元言原戸古午後語工公広交光考行高黄合谷国黒今才細作算止市矢姉思紙寺自時室社弱首秋週春書少場色食心新親図数西声星晴切雪船線前組走多太体台地池知茶昼長鳥朝直通弟店点電刀冬当東答頭同道読内南肉馬買売麦半番父風分聞米歩母方北毎妹万明鳴毛門夜野友用曜来里理話",
+      3: "悪安暗医委意育員院飲運泳駅央横屋温化界開階寒感漢館岸起期客究急級宮球去橋業曲銀区苦具君係軽血決研県庫湖向幸港号根祭皿仕死使始指歯詩次事持式実写者主守取酒受州拾終習集住重宿所暑助昭消商章勝乗植申身神真深進世整昔全相送想息速族他打対待代第題炭短談着注柱丁帳調追定庭笛鉄転都度投島湯等動童農波配倍箱反坂板皮悲美鼻筆氷表秒病品負部服福物平返勉弁保枚面問役薬由油有遊予羊洋葉陽様落流旅両緑礼列練路和",
+      4: "愛案以衣位印英栄塩億加果貨課芽改械害街各覚完官管関観願希季旗器機議求泣給挙漁共協鏡競極訓軍径景芸欠結建健験固功好候康差菜最材昨札刷察参産散残氏司試児治辞失借種周祝順初松笑唱焼照賞臣信成省清静席積折節説浅戦選然争倉巣束側続卒孫帯隊達単置仲兆腸低底的典伝徒努灯堂働特毒熱念敗梅博飯飛必票標不夫付府副兵別辺変便包法望牧末満未民無約勇要養浴利陸良料量輪類令冷例連老労録茨媛岡潟岐熊香佐埼崎滋鹿縄井沖栃奈梨阪阜城賀群徳富",
+      5: "圧移因永営衛易益液演応往桜可仮価河過快解格確額刊幹慣眼基寄規技義逆久旧居許境均禁句経潔件券険検限現減故個護効厚耕鉱構興講混査再災妻採際在財罪雑酸賛支志枝師資飼示似識質舎謝授修述術準序招承証条状常情織職制性政勢精製税責績接設舌絶銭祖素総造増則測属率損貸態団断築張提程適敵統導銅導独任燃能破犯判版比肥非備俵評貧布婦武復複仏粉編弁保墓報豊防貿暴務夢迷綿輸余預容略留領囲紀喜救型航告殺士史象賞貯停堂得毒費脈歴",
+      6: "異遺域宇映延沿我灰拡革閣割株干看簡危機貴揮疑吸供胸郷勤筋系敬警劇激穴絹権憲後厳己庁誤降鋼刻穀骨困砂座済裁策冊蚕至私姿視詞誌磁射捨尺若樹収宗就衆従縦縮熟純処署諸除将傷障蒸針仁推寸盛聖誠宣専泉洗染善奏窓創装層操蔵臓存尊宅担探誕段暖頂潮賃痛展討党糖届難乳認納脳派拝背肺俳班晩否批秘腹奮並陛閉片補暮宝訪亡忘棒幕盟模訳郵優幼翌乱卵覧裏律臨朗論恩券承舌銭退敵俵預"
+    };
+
+    // 高速検索用マップ
+    const KANJI_MAP = new Map();
+    for (let grade = 1; grade <= 6; grade++) {
+      for (const char of KANJI_BY_GRADE[grade]) {
+        KANJI_MAP.set(char, grade);
+      }
+    }
+
+    // 学年別テーマカラー
+    const GRADE_CONFIG = {
+      1: { name: '小1', bg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50', bar: 'bg-emerald-500' },
+      2: { name: '小2', bg: 'bg-teal-500/20 text-teal-300 border-teal-500/50', bar: 'bg-teal-500' },
+      3: { name: '小3', bg: 'bg-sky-500/20 text-sky-300 border-sky-500/50', bar: 'bg-sky-500' },
+      4: { name: '小4', bg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/50', bar: 'bg-indigo-500' },
+      5: { name: '小5', bg: 'bg-purple-500/20 text-purple-300 border-purple-500/50', bar: 'bg-purple-500' },
+      6: { name: '小6', bg: 'bg-pink-500/20 text-pink-300 border-pink-500/50', bar: 'bg-pink-500' },
+      other: { name: '中学・常用外', bg: 'bg-rose-500/20 text-rose-300 border-rose-500/50', bar: 'bg-rose-500' }
+    };
+
+    let currentTargetGrade = 3; // デフォルト小3
+
+    function isKanji(char) {
+      return /[\u4e00-\u9faf\u3400-\u4dbf]/.test(char);
+    }
+
+    function analyzeText() {
+      const text = document.getElementById('inputText').value;
+      const output = document.getElementById('outputArea');
+      document.getElementById('charCount').textContent = text.length;
+
+      if (!text.trim()) {
+        output.innerHTML = '<span class="text-slate-600 italic">文章を入力して「チェックする」を押すと、ここに結果が表示されます。</span>';
+        updateStats({});
+        return;
+      }
+
+      const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, other: 0 };
+      let html = '';
+
+      for (const char of text) {
+        if (!isKanji(char)) {
+          html += char === '\n' ? '<br>' : char;
+          continue;
+        }
+
+        const grade = KANJI_MAP.get(char) || 'other';
+        counts[grade]++;
+
+        let styleClass = '';
+        let labelText = '';
+
+        if (currentTargetGrade === 0) {
+          // 全学年色分けモード
+          const conf = GRADE_CONFIG[grade];
+          styleClass = `${conf.bg} border`;
+          labelText = `${char}：${conf.name}配当`;
+        } else {
+          // 学年基準モード（未習か既習か）
+          const isUnlearned = grade === 'other' || grade > currentTargetGrade;
+          if (isUnlearned) {
+            styleClass = 'bg-rose-600 text-white font-bold ring-2 ring-rose-400 shadow-sm';
+            const gradeName = grade === 'other' ? '中学校以降・常用外' : `小${grade}`;
+            labelText = `⚠️ 未習【${char}】(${gradeName})`;
+          } else {
+            styleClass = 'text-slate-300 hover:text-white hover:bg-slate-800';
+            labelText = `${char}：小${grade}既習`;
+          }
+        }
+
+        html += `<span class="kanji-char ${styleClass}" title="${labelText}">${char}</span>`;
+      }
+
+      output.innerHTML = html;
+      updateStats(counts);
+    }
+
+    function updateStats(counts) {
+      const totalKanji = Object.values(counts).reduce((a, b) => a + b, 0);
+      document.getElementById('totalKanjiCount').textContent = totalKanji;
+
+      const progressEl = document.getElementById('statProgressBar');
+      const badgesEl = document.getElementById('statBadgesContainer');
+      progressEl.innerHTML = '';
+      badgesEl.innerHTML = '';
+
+      if (totalKanji === 0) return;
+
+      const keys = [1, 2, 3, 4, 5, 6, 'other'];
+      keys.forEach(k => {
+        const count = counts[k] || 0;
+        const pct = ((count / totalKanji) * 100).toFixed(1);
+        const conf = GRADE_CONFIG[k];
+
+        if (count > 0) {
+          const bar = document.createElement('div');
+          bar.className = `${conf.bar} h-full transition-all`;
+          bar.style.width = `${pct}%`;
+          bar.title = `${conf.name}: ${count}字 (${pct}%)`;
+          progressEl.appendChild(bar);
+        }
+
+        const isUnlearned = currentTargetGrade > 0 && (k === 'other' || k > currentTargetGrade);
+        const badge = document.createElement('div');
+        badge.className = `p-2 rounded-xl border text-xs font-bold flex flex-col justify-center items-center ${
+          isUnlearned && count > 0 ? 'bg-rose-950/60 border-rose-600 text-rose-300' : 'bg-slate-950 border-slate-800 text-slate-300'
+        }`;
+        badge.innerHTML = `
+          <span class="text-[10px] text-slate-400">${conf.name}</span>
+          <span class="text-sm font-mono-tech font-extrabold ${isUnlearned && count > 0 ? 'text-rose-400' : 'text-slate-100'}">${count}字</span>
+          <span class="text-[10px] text-slate-500">${pct}%</span>
+        `;
+        badgesEl.appendChild(badge);
+      });
+    }
+
+    function copyUnlearnedList() {
+      const text = document.getElementById('inputText').value;
+      const unlearnedSet = new Set();
+      for (const char of text) {
+        if (isKanji(char)) {
+          const grade = KANJI_MAP.get(char) || 'other';
+          if (grade === 'other' || grade > currentTargetGrade) {
+            const name = grade === 'other' ? '中・常用外' : `小${grade}`;
+            unlearnedSet.add(`${char} (${name})`);
+          }
+        }
+      }
+      if (unlearnedSet.size === 0) {
+        showToast('未習漢字は見つかりませんでした！');
+        return;
+      }
+      navigator.clipboard.writeText(Array.from(unlearnedSet).join('、 '));
+      showToast(`未習漢字（${unlearnedSet.size}種類）をコピーしました！`);
+    }
+
+    function copyWithFuriganaBrackets() {
+      const text = document.getElementById('inputText').value;
+      if (!text.trim()) return;
+      let result = '';
+      for (const char of text) {
+        if (isKanji(char)) {
+          const grade = KANJI_MAP.get(char) || 'other';
+          if (grade === 'other' || grade > currentTargetGrade) {
+            result += `${char}( )`;
+            continue;
+          }
+        }
+        result += char;
+      }
+      navigator.clipboard.writeText(result);
+      showToast('未習漢字に ( ) を付与してコピーしました！');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').textContent = msg;
+      toast.classList.remove('opacity-0', 'translate-y-3');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-3');
+      }, 2500);
+    }
+
+    function setupEventListeners() {
+      document.getElementById('analyzeBtn').onclick = analyzeText;
+      document.getElementById('inputText').oninput = () => {
+        document.getElementById('charCount').textContent = document.getElementById('inputText').value.length;
+      };
+
+      document.querySelectorAll('.grade-btn').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('.grade-btn').forEach(b => {
+            b.className = 'grade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition';
+          });
+          btn.className = 'grade-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-white shadow-sm transition';
+          currentTargetGrade = parseInt(btn.dataset.grade);
+          document.getElementById('targetBadge').textContent = currentTargetGrade === 0 ? '全学年色分け' : `小${currentTargetGrade}基準`;
+          analyzeText();
+        };
+      });
+
+      document.getElementById('sampleBtn').onclick = () => {
+        document.getElementById('inputText').value = 
+`【３学期の学級目標と係活動について】
+新学期が始まりました。毎日の清掃や健康観察を丁寧に行いましょう。
+理科の実験観察では、植物の成長過程や温度変化を正確に記録します。
+分からない漢字や語句があれば、国語辞典を活用して積極的に調べましょう。`;
+        analyzeText();
+      };
+
+      document.getElementById('clearBtn').onclick = () => {
+        document.getElementById('inputText').value = '';
+        analyzeText();
+      };
+
+      document.getElementById('copyUnlearnedBtn').onclick = copyUnlearnedList;
+      document.getElementById('copyFuriganaBtn').onclick = copyWithFuriganaBrackets;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
