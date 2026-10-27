@@ -20,12 +20,11 @@
       background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px);
       background-size: 24px 24px;
     }
-    /* パッド押下時の発光エフェクト */
     .pad-btn {
       transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .pad-btn:active, .pad-btn.playing {
-      transform: translateY(2px) scale(0.97);
+      transform: translateY(3px) scale(0.97);
     }
     @keyframes eq-bar {
       0%, 100% { height: 4px; }
@@ -49,14 +48,13 @@
           <span class="text-2xl">🔊</span>
           <h1 class="text-lg sm:text-xl font-black text-white tracking-wider flex items-center gap-2">
             <span>教室サウンドパッド</span>
-            <span class="text-[11px] font-mono-tech text-cyan-400 bg-cyan-950/80 border border-cyan-800 px-2 py-0.5 rounded-full hidden sm:inline">SoundPad Synth</span>
+            <span class="text-[11px] font-mono-tech text-cyan-400 bg-cyan-950/80 border border-cyan-800 px-2 py-0.5 rounded-full hidden sm:inline">SoundPad Studio</span>
           </h1>
         </div>
       </div>
 
       <!-- ステータス＆音量コントロール -->
       <div class="flex items-center gap-3">
-        <!-- イコライザー表示 -->
         <div id="eqVisualizer" class="hidden sm:flex items-center gap-1 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl h-8 w-28 justify-center">
           <div class="bar w-1 bg-cyan-400 rounded-full h-1 transition-all"></div>
           <div class="bar w-1 bg-indigo-400 rounded-full h-1 transition-all" style="animation-delay: 0.1s"></div>
@@ -65,14 +63,12 @@
           <span id="statusText" class="text-[10px] font-mono-tech text-slate-400 ml-1.5">READY</span>
         </div>
 
-        <!-- 音量スライダー -->
         <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl">
           <i data-lucide="volume-2" class="w-4 h-4 text-cyan-400"></i>
-          <input id="volumeSlider" type="range" min="0" max="100" value="80" class="w-20 sm:w-24 accent-cyan-400 cursor-pointer h-1.5 bg-slate-950 rounded-lg">
+          <input id="volumeSlider" type="range" min="0" max="100" value="85" class="w-20 sm:w-24 accent-cyan-400 cursor-pointer h-1.5 bg-slate-950 rounded-lg">
         </div>
 
-        <!-- 全停止ボタン -->
-        <button id="stopAllBtn" class="px-3 py-1.5 bg-rose-950/80 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm" title="Spaceキーでも停止可能">
+        <button id="stopAllBtn" class="px-3 py-1.5 bg-rose-950/80 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm">
           <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
           <span>停止</span>
         </button>
@@ -83,11 +79,10 @@
   <!-- メインコンテンツ -->
   <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-between gap-6">
 
-    <!-- 操作ガイドバー -->
     <div class="bg-slate-900/70 border border-slate-800/90 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
       <div class="flex items-center gap-2">
-        <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
-        <span>ボタンをタップすると<strong>遅延ゼロ</strong>で即座に鳴ります（連打可能）。</span>
+        <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+        <span>テレビ番組仕様のリアル高音質サウンド。連打・同時再生に対応しています。</span>
       </div>
       <div class="hidden md:flex items-center gap-2 font-mono-tech text-[11px] text-slate-400">
         <span class="bg-slate-800 text-slate-200 px-2 py-0.5 rounded border border-slate-700">1</span>〜<span class="bg-slate-800 text-slate-200 px-2 py-0.5 rounded border border-slate-700">0</span> キーで即再生 / <span class="bg-slate-800 text-slate-200 px-2 py-0.5 rounded border border-slate-700">Space</span> で全停止
@@ -98,7 +93,7 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 my-auto">
 
       <!-- 1: 正解ピンポン -->
-      <button data-sound="correct" data-key="1" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-emerald-500/40 hover:border-emerald-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-emerald-950/20">
+      <button data-id="1" data-file="1.クイズ正解1.mp3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-emerald-500/40 hover:border-emerald-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-emerald-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-emerald-400/80 bg-emerald-950/80 border border-emerald-800/60 px-2 py-0.5 rounded-md">[1]</span>
         <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           ⭕
@@ -110,7 +105,7 @@
       </button>
 
       <!-- 2: 不正解ブザー -->
-      <button data-sound="wrong" data-key="2" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-rose-500/40 hover:border-rose-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-rose-950/20">
+      <button data-id="2" data-file="2.クイズ不正解1.mp3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-rose-500/40 hover:border-rose-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-rose-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-rose-400/80 bg-rose-950/80 border border-rose-800/60 px-2 py-0.5 rounded-md">[2]</span>
         <div class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           ❌
@@ -121,8 +116,8 @@
         </div>
       </button>
 
-      <!-- 3: 問題出題（デデン！） -->
-      <button data-sound="question" data-key="3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-indigo-500/40 hover:border-indigo-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-indigo-950/20">
+      <!-- 3: 問題出題 -->
+      <button data-id="3" data-file="3.出題1.mp3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-indigo-500/40 hover:border-indigo-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-indigo-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-indigo-400/80 bg-indigo-950/80 border border-indigo-800/60 px-2 py-0.5 rounded-md">[3]</span>
         <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           ❓
@@ -133,32 +128,32 @@
         </div>
       </button>
 
-      <!-- 4: ジャジャン！（発表・注目） -->
-      <button data-sound="tada" data-key="4" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-amber-500/40 hover:border-amber-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-amber-950/20">
+      <!-- 4: ジャジャン！ -->
+      <button data-id="4" data-file="4.ジャジャーン.mp3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-amber-500/40 hover:border-amber-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-amber-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-amber-400/80 bg-amber-950/80 border border-amber-800/60 px-2 py-0.5 rounded-md">[4]</span>
         <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           ✨
         </div>
         <div class="text-center">
           <div class="text-base sm:text-lg font-black text-white group-hover:text-amber-300">ジャジャン！</div>
-          <div class="text-[11px] text-slate-400 font-bold mt-0.5">結果・ポイント</div>
+          <div class="text-[11px] text-slate-400 font-bold mt-0.5">発表・注目</div>
         </div>
       </button>
 
-      <!-- 5: ドラムロール＆シンバル -->
-      <button data-sound="drumroll" data-key="5" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-purple-500/40 hover:border-purple-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-purple-950/20">
+      <!-- 5: ドラムロール -->
+      <button data-id="5" data-file="5.ドラムロール.mp3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-purple-500/40 hover:border-purple-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-purple-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-purple-400/80 bg-purple-950/80 border border-purple-800/60 px-2 py-0.5 rounded-md">[5]</span>
         <div class="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           🥁
         </div>
         <div class="text-center">
           <div class="text-base sm:text-lg font-black text-white group-hover:text-purple-300">ドラムロール</div>
-          <div class="text-[11px] text-slate-400 font-bold mt-0.5">ドコドコ…ジャン！</div>
+          <div class="text-[11px] text-slate-400 font-bold mt-0.5">ドコドコ！</div>
         </div>
       </button>
 
-      <!-- 6: RPGレベルアップ -->
-      <button data-sound="levelup" data-key="6" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-cyan-500/40 hover:border-cyan-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-cyan-950/20">
+      <!-- 6: レベルアップ -->
+      <button data-id="6" data-file="7.レベルアップ.mp3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-cyan-500/40 hover:border-cyan-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-cyan-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-cyan-400/80 bg-cyan-950/80 border border-cyan-800/60 px-2 py-0.5 rounded-md">[6]</span>
         <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           ⚔️
@@ -170,7 +165,7 @@
       </button>
 
       <!-- 7: ファンファーレ -->
-      <button data-sound="fanfare" data-key="7" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-pink-500/40 hover:border-pink-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-pink-950/20">
+      <button data-id="7" data-file="10.拍手1.mp3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-pink-500/40 hover:border-pink-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-pink-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-pink-400/80 bg-pink-950/80 border border-pink-800/60 px-2 py-0.5 rounded-md">[7]</span>
         <div class="w-16 h-16 rounded-2xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           🎺
@@ -182,7 +177,7 @@
       </button>
 
       <!-- 8: シンキングタイム（ループ） -->
-      <button id="thinkingBtn" data-sound="thinking" data-key="8" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-sky-500/40 hover:border-sky-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-sky-950/20">
+      <button id="thinkingBtn" data-id="8" data-file="10.拍手1.mp3" data-loop="true" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-sky-500/40 hover:border-sky-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-sky-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-sky-400/80 bg-sky-950/80 border border-sky-800/60 px-2 py-0.5 rounded-md">[8]</span>
         <span id="loopBadge" class="absolute top-2.5 right-3 text-[10px] font-bold bg-sky-950 text-sky-300 border border-sky-700 px-1.5 py-0.5 rounded">LOOP</span>
         <div class="w-16 h-16 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
@@ -190,66 +185,66 @@
         </div>
         <div class="text-center">
           <div class="text-base sm:text-lg font-black text-white group-hover:text-sky-300">シンキング</div>
-          <div class="text-[11px] text-slate-400 font-bold mt-0.5">チクタク音（連続）</div>
+          <div class="text-[11px] text-slate-400 font-bold mt-0.5">チクタク（連続）</div>
         </div>
       </button>
 
-      <!-- 9: ホイッスル（ピピッ！） -->
-      <button data-sound="whistle" data-key="9" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-orange-500/40 hover:border-orange-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-orange-950/20">
+      <!-- 9: チーン -->
+      <button data-id="9" data-file="9_whistle.mp3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-orange-500/40 hover:border-orange-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-orange-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-orange-400/80 bg-orange-950/80 border border-orange-800/60 px-2 py-0.5 rounded-md">[9]</span>
         <div class="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           📢
         </div>
         <div class="text-center">
-          <div class="text-base sm:text-lg font-black text-white group-hover:text-orange-300">ホイッスル</div>
-          <div class="text-[11px] text-slate-400 font-bold mt-0.5">ピピッ！（集合・終了）</div>
+          <div class="text-base sm:text-lg font-black text-white group-hover:text-orange-300">チーン</div>
+          <div class="text-[11px] text-slate-400 font-bold mt-0.5">静まる</div>
         </div>
       </button>
 
-      <!-- 0: 静寂のゴング（チーン） -->
-      <button data-sound="gong" data-key="0" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-teal-500/40 hover:border-teal-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-teal-950/20">
+      <!-- 0: シンバル -->
+      <button data-id="0" data-file="6.シンバル.mp3" class="pad-btn group relative bg-slate-900 hover:bg-slate-800/90 border-2 border-teal-500/40 hover:border-teal-400 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-lg shadow-teal-950/20">
         <span class="absolute top-2.5 left-3 text-[11px] font-mono-tech font-bold text-teal-400/80 bg-teal-950/80 border border-teal-800/60 px-2 py-0.5 rounded-md">[0]</span>
         <div class="w-16 h-16 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           🔔
         </div>
         <div class="text-center">
-          <div class="text-base sm:text-lg font-black text-white group-hover:text-teal-300">切り替えの鐘</div>
-          <div class="text-[11px] text-slate-400 font-bold mt-0.5">チーン…（静寂・注目）</div>
+          <div class="text-base sm:text-lg font-black text-white group-hover:text-teal-300">シンバル</div>
+          <div class="text-[11px] text-slate-400 font-bold mt-0.5">シャーン</div>
         </div>
       </button>
 
     </div>
 
-    <!-- 活用シーンのヒント -->
     <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-400">
       <div class="flex items-start gap-2.5">
-        <span class="text-base">💡</span>
-        <div><strong class="text-slate-200">授業のテンポアップに:</strong> 発問時に「デデン！」、発表後に「ピンポン♪」や「レベルアップ」を鳴らすと全員の集中力が跳ね上がります。</div>
+        <span class="text-base">⚡</span>
+        <div><strong class="text-slate-200">キャッシュ済み高速再生:</strong> 初回読み込み完了後は、ボタンを押した瞬間（0秒遅延）で迫力のサウンドが再生されます。</div>
       </div>
       <div class="flex items-start gap-2.5">
         <span class="text-base">🤫</span>
-        <div><strong class="text-slate-200">声を張らない指示出しに:</strong> 話し合い活動の終了時は「ホイッスル」や「切り替えの鐘」を鳴らすルールにすると喉を痛めません。</div>
+        <div><strong class="text-slate-200">授業のメリハリに:</strong> クイズ形式の授業や話し合い活動の終了合図に使うと、子どもたちの反応が劇的に変わります。</div>
       </div>
       <div class="flex items-start gap-2.5">
-        <span class="text-base">オフライン</span>
-        <div><strong class="text-slate-200">通信量ゼロ・即時再生:</strong> 外部の音声ファイルを使わずブラウザ内部で音波を直接合成しているため、Wi-Fiが不安定な教室でも確実に鳴ります。</div>
+        <span class="text-base">⌨️</span>
+        <div><strong class="text-slate-200">ショートカット操作:</strong> キーボードの「1〜0」で即再生、「Space」キーで一発停止できます。</div>
       </div>
     </div>
 
   </main>
 
   <footer class="mt-auto py-5 px-4 border-t border-slate-900 bg-slate-950 text-center text-xs text-slate-500 font-mono-tech">
-    センセイボックス (SenseiBox) &copy; 2026 | Web Audio Synthesizer Engine
+    センセイボックス (SenseiBox) &copy; 2026 | Real Audio Engine
   </footer>
 
-  <!-- Web Audio API サウンド合成エンジン -->
+  <!-- Web Audio API プリロード＆再生エンジン -->
   <script>
     let audioCtx = null;
     let masterGain = null;
-    let thinkingInterval = null;
-    let activeTimers = [];
+    const audioBufferCache = new Map();
+    const activeSources = [];
+    let loopingSource = null;
 
-    function initAudio() {
+    function getAudioContext() {
       if (!audioCtx) {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioContext();
@@ -260,12 +255,36 @@
       if (audioCtx.state === 'suspended') {
         audioCtx.resume();
       }
+      return audioCtx;
     }
 
     function updateVolume() {
       if (!masterGain) return;
       const val = document.getElementById('volumeSlider').value / 100;
       masterGain.gain.setValueAtTime(val, audioCtx.currentTime);
+    }
+
+    // MP3プリロード（メモリ上にデコードして即時再生可能にする）
+    async function preloadSounds() {
+      const ctx = getAudioContext();
+      const buttons = document.querySelectorAll('.pad-btn');
+      
+      for (const btn of buttons) {
+        const fileName = btn.dataset.file;
+        if (!fileName) continue;
+        try {
+          const response = await fetch(`./${fileName}`);
+          if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+          const arrayBuffer = await response.arrayBuffer();
+          const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
+          audioBufferCache.set(fileName, decodedBuffer);
+        } catch (err) {
+          console.warn(`音声ファイルの読み込みをスキップしました: ${fileName}`, err);
+        }
+      }
+      const st = document.getElementById('statusText');
+      st.textContent = 'READY';
+      st.classList.add('text-emerald-400');
     }
 
     function setVisualStatus(text, duration = 800) {
@@ -275,294 +294,117 @@
       st.textContent = text;
       st.classList.add('text-cyan-400');
 
-      const t = setTimeout(() => {
-        if (!thinkingInterval) {
+      setTimeout(() => {
+        if (!loopingSource) {
           eq.classList.remove('eq-active');
           st.textContent = 'READY';
           st.classList.remove('text-cyan-400');
         }
       }, duration);
-      activeTimers.push(t);
     }
 
-    // 基本トーン再生ヘルパー
-    function playTone(freq, type, startTime, duration, vol = 0.5, pitchEnd = null) {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, startTime);
-      if (pitchEnd) {
-        osc.frequency.exponentialRampToValueAtTime(pitchEnd, startTime + duration);
+    function playSound(btn) {
+      const ctx = getAudioContext();
+      const fileName = btn.dataset.file;
+      const isLoop = btn.dataset.loop === 'true';
+
+      // シンキングタイムのループ解除処理
+      if (isLoop && loopingSource) {
+        stopAll();
+        return;
       }
 
-      gain.gain.setValueAtTime(0.001, startTime);
-      gain.gain.linearRampToValueAtTime(vol, startTime + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-
-      osc.connect(gain);
-      gain.connect(masterGain);
-      osc.start(startTime);
-      osc.stop(startTime + duration + 0.02);
-    }
-
-    // ホワイトノイズ（スネア・シンバル用）ヘルパー
-    function playNoise(startTime, duration, vol = 0.4, filterFreq = 1200) {
-      const bufferSize = audioCtx.sampleRate * duration;
-      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
+      const buffer = audioBufferCache.get(fileName);
+      if (!buffer) {
+        // フォールバック: キャッシュがない場合は通常のAudio要素で再生
+        const fallbackAudio = new Audio(`./${fileName}`);
+        fallbackAudio.volume = document.getElementById('volumeSlider').value / 100;
+        fallbackAudio.play().catch(e => console.error(e));
+        return;
       }
 
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = buffer;
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(masterGain);
 
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(filterFreq, startTime);
-
-      const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(vol, startTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-
-      noise.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterGain);
-      noise.start(startTime);
-      noise.stop(startTime + duration);
-    }
-
-    // --- 各サウンドの合成レシピ ---
-    const SOUNDS = {
-      // 1. 正解！（ピンポン♪ 本格2和音チャイム）
-      correct: () => {
-        const now = audioCtx.currentTime;
-        // ピン (B5)
-        playTone(987.77, 'sine', now, 0.45, 0.6);
-        playTone(1975.53, 'triangle', now, 0.25, 0.15);
-        // ポン (G#5)
-        playTone(830.61, 'sine', now + 0.22, 0.85, 0.6);
-        playTone(1661.22, 'triangle', now + 0.22, 0.45, 0.15);
-        setVisualStatus('CORRECT!', 900);
-      },
-
-      // 2. 不正解（ブブーッ！）
-      wrong: () => {
-        const now = audioCtx.currentTime;
-        [0, 0.22].forEach((offset, idx) => {
-          const dur = idx === 0 ? 0.16 : 0.48;
-          playTone(130.81, 'sawtooth', now + offset, dur, 0.35);
-          playTone(138.59, 'sawtooth', now + offset, dur, 0.35); // 不協和音で厚み出し
-        });
-        setVisualStatus('WRONG', 700);
-      },
-
-      // 3. 問題出題（デデン！！）
-      question: () => {
-        const now = audioCtx.currentTime;
-        // デ (D3 + D4)
-        playTone(146.83, 'sawtooth', now, 0.14, 0.45);
-        playTone(293.66, 'square', now, 0.14, 0.3);
-        // デン！ (G3 + G4 + D4)
-        playTone(196.00, 'sawtooth', now + 0.15, 0.7, 0.5);
-        playTone(293.66, 'sawtooth', now + 0.15, 0.7, 0.35);
-        playTone(392.00, 'square', now + 0.15, 0.7, 0.35);
-        setVisualStatus('QUESTION', 850);
-      },
-
-      // 4. ジャジャン！（Cメジャーコード一撃）
-      tada: () => {
-        const now = audioCtx.currentTime;
-        const chord = [261.63, 329.63, 392.00, 523.25];
-        // ジャ
-        chord.forEach(f => playTone(f * 0.89, 'sawtooth', now, 0.12, 0.2));
-        // ジャン！
-        chord.forEach(f => playTone(f, 'sawtooth', now + 0.14, 0.8, 0.25));
-        playNoise(now + 0.14, 0.5, 0.2, 3000);
-        setVisualStatus('TA-DA!', 900);
-      },
-
-      // 5. ドラムロール＆シンバル
-      drumroll: () => {
-        const now = audioCtx.currentTime;
-        const rollLength = 1.9;
-        const hits = 28;
-        for (let i = 0; i < hits; i++) {
-          const t = now + (i / hits) * rollLength;
-          const v = 0.15 + (i / hits) * 0.35;
-          playNoise(t, 0.08, v, 900 + i * 15);
-          playTone(140, 'triangle', t, 0.05, v * 0.6, 80);
-        }
-        // 最後のジャーン！（シンバル＋バスドラ）
-        const fin = now + rollLength + 0.04;
-        playNoise(fin, 1.3, 0.65, 3800);
-        playTone(120, 'sine', fin, 0.5, 0.8, 40);
-        playTone(261.63, 'sawtooth', fin, 0.8, 0.25);
-        playTone(392.00, 'sawtooth', fin, 0.8, 0.25);
-        playTone(523.25, 'sawtooth', fin, 0.8, 0.25);
-        setVisualStatus('DRUMROLL', 3000);
-      },
-
-      // 6. RPG風レベルアップ（テッテレー♪）
-      levelup: () => {
-        const now = audioCtx.currentTime;
-        const notes = [
-          { f: 587.33, t: 0.00, d: 0.11 }, // D5
-          { f: 587.33, t: 0.12, d: 0.11 }, // D5
-          { f: 587.33, t: 0.24, d: 0.11 }, // D5
-          { f: 587.33, t: 0.36, d: 0.28 }, // D5
-          { f: 466.16, t: 0.66, d: 0.28 }, // Bb4
-          { f: 523.25, t: 0.96, d: 0.28 }, // C5
-          { f: 587.33, t: 1.26, d: 0.18 }, // D5
-          { f: 523.25, t: 1.48, d: 0.12 }, // C5
-          { f: 587.33, t: 1.62, d: 0.75 }  // D5
-        ];
-        notes.forEach(n => {
-          playTone(n.f, 'square', now + n.t, n.d, 0.3);
-          playTone(n.f * 0.5, 'triangle', now + n.t, n.d, 0.25);
-        });
-        setVisualStatus('LEVEL UP!', 2300);
-      },
-
-      // 7. ファンファーレ（タダダダーン！）
-      fanfare: () => {
-        const now = audioCtx.currentTime;
-        const seq = [
-          { f: 523.25, t: 0.00, d: 0.14 }, // C5
-          { f: 523.25, t: 0.16, d: 0.14 }, // C5
-          { f: 523.25, t: 0.32, d: 0.14 }, // C5
-          { f: 659.25, t: 0.48, d: 0.40 }, // E5
-          { f: 587.33, t: 0.92, d: 0.20 }, // D5
-          { f: 659.25, t: 1.15, d: 0.20 }, // E5
-          { f: 783.99, t: 1.38, d: 0.90 }  // G5
-        ];
-        seq.forEach(n => {
-          playTone(n.f, 'sawtooth', now + n.t, n.d, 0.35);
-          playTone(n.f * 0.5, 'sawtooth', now + n.t, n.d, 0.25);
-        });
-        // 最後の和音厚み付け
-        playTone(523.25, 'sawtooth', now + 1.38, 0.90, 0.25);
-        playTone(659.25, 'sawtooth', now + 1.38, 0.90, 0.25);
-        setVisualStatus('FANFARE!', 2300);
-      },
-
-      // 8. シンキングタイム（ループ切替）
-      thinking: () => {
-        const btn = document.getElementById('thinkingBtn');
-        const badge = document.getElementById('loopBadge');
-        if (thinkingInterval) {
-          stopAllSounds();
-          return;
-        }
+      if (isLoop) {
+        source.loop = true;
+        loopingSource = source;
         btn.classList.add('ring-4', 'ring-sky-400', 'bg-sky-950/60');
+        const badge = document.getElementById('loopBadge');
         badge.textContent = '再生中';
         badge.className = 'absolute top-2.5 right-3 text-[10px] font-bold bg-sky-400 text-slate-950 px-1.5 py-0.5 rounded animate-pulse';
-        setVisualStatus('THINKING...', 999999);
-
-        let step = 0;
-        const tick = () => {
-          if (!audioCtx) return;
-          const now = audioCtx.currentTime;
-          // チク・タク＋ベース音
-          const isHigh = step % 2 === 0;
-          playTone(isHigh ? 1100 : 850, 'sine', now, 0.05, 0.35);
-          if (step % 4 === 0) playTone(220, 'triangle', now, 0.15, 0.25);
-          if (step % 4 === 2) playTone(164.81, 'triangle', now, 0.15, 0.25);
-          step++;
+        setVisualStatus('LOOPING', 999999);
+      } else {
+        activeSources.push(source);
+        source.onended = () => {
+          const index = activeSources.indexOf(source);
+          if (index > -1) activeSources.splice(index, 1);
         };
-        tick();
-        thinkingInterval = setInterval(tick, 420);
-      },
-
-      // 9. ホイッスル（ピピッ！）
-      whistle: () => {
-        const now = audioCtx.currentTime;
-        // ピ (短) + ピッ！ (長)
-        [
-          { start: 0, dur: 0.15 },
-          { start: 0.22, dur: 0.45 }
-        ].forEach(w => {
-          playTone(2800, 'sine', now + w.start, w.dur, 0.5, 2920);
-          playTone(2890, 'triangle', now + w.start, w.dur, 0.3, 2750); // コルク玉の揺れ感
-        });
-        setVisualStatus('WHISTLE!', 750);
-      },
-
-      // 0. 切り替えの鐘（おりん・チーン…）
-      gong: () => {
-        const now = audioCtx.currentTime;
-        playTone(1046.50, 'sine', now, 2.5, 0.65);     // C6 基音
-        playTone(2093.00, 'sine', now, 1.8, 0.25);     // 倍音1
-        playTone(3180.00, 'sine', now, 1.1, 0.15);     // 倍音2（金属感）
-        playTone(4210.00, 'triangle', now, 0.4, 0.1);  // アタック音
-        setVisualStatus('GONG...', 2200);
+        setVisualStatus('PLAYING', Math.min(buffer.duration * 1000, 2500));
       }
-    };
 
-    function stopAllSounds() {
-      if (thinkingInterval) {
-        clearInterval(thinkingInterval);
-        thinkingInterval = null;
+      source.start(0);
+
+      btn.classList.add('playing', 'ring-2', 'ring-white/60');
+      setTimeout(() => btn.classList.remove('playing', 'ring-2', 'ring-white/60'), 150);
+    }
+
+    function stopAll() {
+      if (loopingSource) {
+        try { loopingSource.stop(); } catch (e) {}
+        loopingSource = null;
       }
-      activeTimers.forEach(t => clearTimeout(t));
-      activeTimers = [];
+      activeSources.forEach(s => {
+        try { s.stop(); } catch (e) {}
+      });
+      activeSources.length = 0;
 
-      const btn = document.getElementById('thinkingBtn');
+      const thinkBtn = document.getElementById('thinkingBtn');
       const badge = document.getElementById('loopBadge');
-      btn.classList.remove('ring-4', 'ring-sky-400', 'bg-sky-950/60');
+      thinkBtn.classList.remove('ring-4', 'ring-sky-400', 'bg-sky-950/60');
       badge.textContent = 'LOOP';
       badge.className = 'absolute top-2.5 right-3 text-[10px] font-bold bg-sky-950 text-sky-300 border border-sky-700 px-1.5 py-0.5 rounded';
 
-      if (audioCtx) {
-        audioCtx.close();
-        audioCtx = null;
-        masterGain = null;
-      }
-      document.getElementById('eqVisualizer').classList.remove('eq-active');
+      const eq = document.getElementById('eqVisualizer');
       const st = document.getElementById('statusText');
+      eq.classList.remove('eq-active');
       st.textContent = 'READY';
       st.classList.remove('text-cyan-400');
-    }
-
-    function triggerSound(soundName, btnEl) {
-      initAudio();
-      if (SOUNDS[soundName]) {
-        SOUNDS[soundName]();
-      }
-      if (btnEl) {
-        btnEl.classList.add('playing', 'ring-2', 'ring-white/60');
-        setTimeout(() => btnEl.classList.remove('playing', 'ring-2', 'ring-white/60'), 150);
-      }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
 
-      // パッドクリックイベント
+      // 初回クリック時にオーディオコンテキスト起動＋プリロード
+      const enableAudio = () => {
+        getAudioContext();
+        preloadSounds();
+        window.removeEventListener('click', enableAudio);
+        window.removeEventListener('keydown', enableAudio);
+      };
+      window.addEventListener('click', enableAudio);
+      window.addEventListener('keydown', enableAudio);
+
       document.querySelectorAll('.pad-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          triggerSound(btn.dataset.sound, btn);
-        });
+        btn.addEventListener('click', () => playSound(btn));
       });
 
-      // 音量スライダー
       document.getElementById('volumeSlider').addEventListener('input', updateVolume);
+      document.getElementById('stopAllBtn').addEventListener('click', stopAll);
 
-      // 停止ボタン
-      document.getElementById('stopAllBtn').addEventListener('click', stopAllSounds);
-
-      // キーボードショートカット (1〜9, 0, Space)
+      // キーボード操作
       window.addEventListener('keydown', (e) => {
         if (e.repeat) return;
         if (e.code === 'Space') {
           e.preventDefault();
-          stopAllSounds();
+          stopAll();
           return;
         }
         const key = e.key;
-        const targetBtn = document.querySelector(`.pad-btn[data-key="${key}"]`);
+        const targetBtn = document.querySelector(`.pad-btn[data-id="${key}"]`);
         if (targetBtn) {
-          triggerSound(targetBtn.dataset.sound, targetBtn);
+          playSound(targetBtn);
         }
       });
     });
