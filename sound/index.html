@@ -60,7 +60,7 @@
           <div class="bar w-1 bg-indigo-400 rounded-full h-1 transition-all" style="animation-delay: 0.1s"></div>
           <div class="bar w-1 bg-emerald-400 rounded-full h-1 transition-all" style="animation-delay: 0.2s"></div>
           <div class="bar w-1 bg-amber-400 rounded-full h-1 transition-all" style="animation-delay: 0.15s"></div>
-          <span id="statusText" class="text-[10px] font-mono-tech text-slate-400 ml-1.5">READY</span>
+          <span id="statusText" class="text-[10px] font-mono-tech text-emerald-400 ml-1.5">READY</span>
         </div>
 
         <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl">
@@ -236,129 +236,105 @@
     センセイボックス (SenseiBox) &copy; 2026 | Real Audio Engine
   </footer>
 
-  <!-- Web Audio API プリロード＆再生エンジン -->
+  <!-- シンプル＆確実な HTML5 Audio プリロード・多重再生エンジン -->
   <script>
-    let audioCtx = null;
-    let masterGain = null;
-    const audioBufferCache = new Map();
-    const activeSources = [];
-    let loopingSource = null;
+    const baseAudioCache = new Map();
+    const activePlayers = new Set();
+    let loopingAudio = null;
+    let visualTimer = null;
 
-    function getAudioContext() {
-      if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioContext();
-        masterGain = audioCtx.createGain();
-        updateVolume();
-        masterGain.connect(audioCtx.destination);
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      return audioCtx;
+    function getVolume() {
+      return document.getElementById('volumeSlider').value / 100;
+    }
+
+    // ページ読み込み時に全10個の音源をあらかじめブラウザに準備させておく
+    function preloadAllSounds() {
+      document.querySelectorAll('.pad-btn').forEach(btn => {
+        const fileName = btn.dataset.file;
+        if (!fileName) return;
+        const audio = new Audio(`./${fileName}`);
+        audio.preload = 'auto';
+        audio.load();
+        baseAudioCache.set(fileName, audio);
+      });
     }
 
     function updateVolume() {
-      if (!masterGain) return;
-      const val = document.getElementById('volumeSlider').value / 100;
-      masterGain.gain.setValueAtTime(val, audioCtx.currentTime);
+      const vol = getVolume();
+      activePlayers.forEach(a => { a.volume = vol; });
+      if (loopingAudio) loopingAudio.volume = vol;
     }
 
-    // MP3プリロード（メモリ上にデコードして即時再生可能にする）
-    async function preloadSounds() {
-      const ctx = getAudioContext();
-      const buttons = document.querySelectorAll('.pad-btn');
-      
-      for (const btn of buttons) {
-        const fileName = btn.dataset.file;
-        if (!fileName) continue;
-        try {
-          const response = await fetch(`./${encodeURIComponent(fileName)}`);
-          if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-          const arrayBuffer = await response.arrayBuffer();
-          const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
-          audioBufferCache.set(fileName, decodedBuffer);
-        } catch (err) {
-          console.warn(`音声ファイルの読み込みをスキップしました: ${fileName}`, err);
-        }
-      }
-      const st = document.getElementById('statusText');
-      st.textContent = 'READY';
-      st.classList.add('text-emerald-400');
-    }
-
-    function setVisualStatus(text, duration = 800) {
+    function setVisualStatus(text, duration = 1200) {
       const eq = document.getElementById('eqVisualizer');
       const st = document.getElementById('statusText');
       eq.classList.add('eq-active');
       st.textContent = text;
-      st.classList.add('text-cyan-400');
+      st.classList.replace('text-emerald-400', 'text-cyan-400');
 
-      setTimeout(() => {
-        if (!loopingSource) {
+      if (visualTimer) clearTimeout(visualTimer);
+      visualTimer = setTimeout(() => {
+        if (!loopingAudio) {
           eq.classList.remove('eq-active');
           st.textContent = 'READY';
-          st.classList.remove('text-cyan-400');
+          st.classList.replace('text-cyan-400', 'text-emerald-400');
         }
       }, duration);
     }
 
     function playSound(btn) {
-      const ctx = getAudioContext();
       const fileName = btn.dataset.file;
       const isLoop = btn.dataset.loop === 'true';
 
-      // シンキングタイムのループ解除処理
-      if (isLoop && loopingSource) {
-        stopAll();
-        return;
-      }
+      // ボタンの発光エフェクト
+      btn.classList.add('playing', 'ring-2', 'ring-white/60');
+      setTimeout(() => btn.classList.remove('playing', 'ring-2', 'ring-white/60'), 150);
 
-      const buffer = audioBufferCache.get(fileName);
-      if (!buffer) {
-        // フォールバック: キャッシュがない場合は通常のAudio要素で再生
-        const fallbackAudio = new Audio(`./${encodeURIComponent(fileName)}`);
-        fallbackAudio.volume = document.getElementById('volumeSlider').value / 100;
-        fallbackAudio.play().catch(e => console.error(e));
-        return;
-      }
-
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(masterGain);
-
+      // シンキングタイム（ループ）のON/OFF切り替え
       if (isLoop) {
-        source.loop = true;
-        loopingSource = source;
+        if (loopingAudio) {
+          stopAll();
+          return;
+        }
+        const audio = new Audio(`./${fileName}`);
+        audio.loop = true;
+        audio.volume = getVolume();
+        loopingAudio = audio;
+
         btn.classList.add('ring-4', 'ring-sky-400', 'bg-sky-950/60');
         const badge = document.getElementById('loopBadge');
         badge.textContent = '再生中';
         badge.className = 'absolute top-2.5 right-3 text-[10px] font-bold bg-sky-400 text-slate-950 px-1.5 py-0.5 rounded animate-pulse';
         setVisualStatus('LOOPING', 999999);
-      } else {
-        activeSources.push(source);
-        source.onended = () => {
-          const index = activeSources.indexOf(source);
-          if (index > -1) activeSources.splice(index, 1);
-        };
-        setVisualStatus('PLAYING', Math.min(buffer.duration * 1000, 2500));
+
+        audio.play().catch(err => console.error('再生エラー:', fileName, err));
+        return;
       }
 
-      source.start(0);
+      // 通常効果音（連打しても重なって鳴るようにクローン生成）
+      const base = baseAudioCache.get(fileName);
+      const player = base ? base.cloneNode() : new Audio(`./${fileName}`);
+      player.volume = getVolume();
+      activePlayers.add(player);
 
-      btn.classList.add('playing', 'ring-2', 'ring-white/60');
-      setTimeout(() => btn.classList.remove('playing', 'ring-2', 'ring-white/60'), 150);
+      player.onended = () => activePlayers.delete(player);
+      player.onerror = () => activePlayers.delete(player);
+
+      setVisualStatus('PLAYING', 1200);
+      player.play().catch(err => console.error('再生エラー:', fileName, err));
     }
 
     function stopAll() {
-      if (loopingSource) {
-        try { loopingSource.stop(); } catch (e) {}
-        loopingSource = null;
+      if (loopingAudio) {
+        loopingAudio.pause();
+        loopingAudio.currentTime = 0;
+        loopingAudio = null;
       }
-      activeSources.forEach(s => {
-        try { s.stop(); } catch (e) {}
+      activePlayers.forEach(player => {
+        player.pause();
+        player.currentTime = 0;
       });
-      activeSources.length = 0;
+      activePlayers.clear();
 
       const thinkBtn = document.getElementById('thinkingBtn');
       const badge = document.getElementById('loopBadge');
@@ -370,21 +346,12 @@
       const st = document.getElementById('statusText');
       eq.classList.remove('eq-active');
       st.textContent = 'READY';
-      st.classList.remove('text-cyan-400');
+      st.classList.replace('text-cyan-400', 'text-emerald-400');
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-
-      // 初回クリック時にオーディオコンテキスト起動＋プリロード
-      const enableAudio = () => {
-        getAudioContext();
-        preloadSounds();
-        window.removeEventListener('click', enableAudio);
-        window.removeEventListener('keydown', enableAudio);
-      };
-      window.addEventListener('click', enableAudio);
-      window.addEventListener('keydown', enableAudio);
+      preloadAllSounds();
 
       document.querySelectorAll('.pad-btn').forEach(btn => {
         btn.addEventListener('click', () => playSound(btn));
@@ -393,7 +360,7 @@
       document.getElementById('volumeSlider').addEventListener('input', updateVolume);
       document.getElementById('stopAllBtn').addEventListener('click', stopAll);
 
-      // キーボード操作
+      // キーボードショートカット (1〜9, 0, Space)
       window.addEventListener('keydown', (e) => {
         if (e.repeat) return;
         if (e.code === 'Space') {
@@ -401,8 +368,7 @@
           stopAll();
           return;
         }
-        const key = e.key;
-        const targetBtn = document.querySelector(`.pad-btn[data-id="${key}"]`);
+        const targetBtn = document.querySelector(`.pad-btn[data-id="${e.key}"]`);
         if (targetBtn) {
           playSound(targetBtn);
         }
