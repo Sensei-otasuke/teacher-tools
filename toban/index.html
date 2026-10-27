@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>当番ローテーション表 | センセイボックス</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; }
+    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
+    
+    @media print {
+      .no-print { display: none !important; }
+      .print-area { width: 100% !important; margin: 0 !important; padding: 0 !important; border: none !important; box-shadow: none !important; }
+      .duty-card-print { break-inside: avoid; border: 1.5px solid #0f172a !important; background: #ffffff !important; color: #000000 !important; }
+      body { background: #ffffff !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- ヘッダー -->
+  <header class="no-print bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a href="../" class="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition" title="ポータルへ戻る">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div class="flex items-center gap-2">
+          <span class="text-2xl" id="headerIcon">🍱</span>
+          <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <span>当番ローテーション表</span>
+            <span class="text-[11px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full font-bold hidden sm:inline">白基調・教室投影</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- モード切り替えタブ -->
+      <div class="flex items-center gap-2">
+        <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200">
+          <button id="typeLunchBtn" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1.5 bg-white text-indigo-600 shadow-xs">
+            <span>🍱 給食当番</span>
+          </button>
+          <button id="typeCleanBtn" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+            <span>🧹 掃除当番</span>
+          </button>
+        </div>
+
+        <button id="printBtn" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">印刷</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- サブバー：週送りコントロール＆投影モード切替 -->
+  <div class="no-print bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- 週の操作 -->
+      <div class="flex items-center gap-2">
+        <button id="prevWeekBtn" class="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 transition" title="前の週に戻す">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        </button>
+        <div class="px-4 py-1.5 bg-indigo-50 border border-indigo-100 rounded-xl text-center">
+          <span class="text-xs font-black text-indigo-900" id="currentWeekDisplay">第 1 週目</span>
+        </div>
+        <button id="nextWeekBtn" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 shadow-xs">
+          <span>来週へ進める（1つスライド）</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- 設定パネルの開閉 -->
+      <div class="flex items-center gap-2">
+        <button id="toggleSettingsBtn" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+          <span id="settingsBtnText">当番・名簿を設定する</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6">
+
+    <!-- 先生用設定エリア（折りたたみ可能） -->
+    <div id="settingsPanel" class="no-print bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-6 hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h2 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+          <i data-lucide="sliders" class="w-4 h-4 text-indigo-600"></i>
+          <span>当番場所と児童名簿のカスタマイズ</span>
+        </h2>
+        <div class="flex gap-2">
+          <button id="importSekigaeBtn" class="text-xs px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold transition flex items-center gap-1">
+            <i data-lucide="folder-input" class="w-3.5 h-3.5"></i>
+            <span>席替えメーカーから名簿を読み込む</span>
+          </button>
+          <button id="resetPresetBtn" class="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">
+            標準プリセットに戻す
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- 名簿登録 -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-black text-slate-700">児童名簿（改行区切り・上から順番に割り当て）</label>
+            <span class="text-xs font-bold text-indigo-600" id="rosterCountBadge">0名</span>
+          </div>
+          <textarea id="rosterInput" rows="7" class="w-full text-xs sm:text-sm p-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none font-mono" placeholder="1 佐藤&#10;2 鈴木&#10;3 高橋...&#10;（Excelから直接貼り付けできます）"></textarea>
+        </div>
+
+        <!-- 当番場所と担当人数の設定 -->
+        <div class="space-y-2 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-black text-slate-700">当番場所一覧（ドラッグまたは追加・削除）</label>
+              <button id="addDutyBtn" class="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>場所を追加</span>
+              </button>
+            </div>
+            <div id="dutiesEditorList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <!-- JSで動的生成 -->
+            </div>
+          </div>
+          <button id="saveSettingsBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-sm rounded-2xl shadow-xs transition mt-3">
+            設定を保存して表に反映する
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- メイン当番表（黒板投影・印刷エリア） -->
+    <div class="print-area bg-white rounded-3xl border border-slate-200 p-5 sm:p-8 shadow-xs flex flex-col gap-6">
+      
+      <!-- 表の見出し -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-mono-tech text-indigo-600 font-bold tracking-wider" id="boardSubtitle">LUNCH DUTY ROSTER</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2 mt-0.5" id="boardTitle">
+            <span>今週の給食当番</span>
+            <span class="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full font-mono-tech" id="boardWeekTag">Week 1</span>
+          </h2>
+        </div>
+        <div class="text-xs text-slate-400 no-print flex items-center gap-1.5">
+          <i data-lucide="info" class="w-4 h-4 text-slate-400 shrink-0"></i>
+          <span>毎週月曜日に「来週へ進める」を押すと1つずつスライドします</span>
+        </div>
+      </div>
+
+      <!-- 当番カードグリッド -->
+      <div id="rosterCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- JSで動的にカード描画 -->
+      </div>
+
+      <!-- 印刷時のみ表示される下部情報 -->
+      <div class="hidden print:flex items-center justify-between pt-6 border-t border-slate-200 text-xs text-slate-500">
+        <span>作成日: <span id="printDate"></span></span>
+        <span>センセイボックス 当番ローテーション</span>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="no-print mt-auto py-5 px-4 border-t border-slate-200 bg-white text-center text-xs text-slate-400">
+    センセイボックス (SenseiBox) &copy; 2026 | 白基調・教室管理ツール
+  </footer>
+
+  <script>
+    // デフォルトの標準プリセット
+    const DEFAULT_PRESETS = {
+      lunch: {
+        title: '今週の給食当番',
+        icon: '🍱',
+        subtitle: 'LUNCH DUTY ROSTER',
+        duties: [
+          { name: 'ごはん・主食', count: 2, icon: '🍚' },
+          { name: 'おかず・主菜', count: 2, icon: '🍲' },
+          { name: '汁物・副菜', count: 2, icon: '🥣' },
+          { name: '牛乳・ストロー', count: 2, icon: '🥛' },
+          { name: 'おぼん・食器', count: 2, icon: '🍽️' },
+          { name: '台拭き・配膳台', count: 2, icon: '✨' },
+        ]
+      },
+      clean: {
+        title: '今週の掃除当番',
+        icon: '🧹',
+        subtitle: 'CLEANING DUTY ROSTER',
+        duties: [
+          { name: '教室（前・黒板）', count: 2, icon: '⬛' },
+          { name: '教室（中央・机拭き）', count: 3, icon: '🪑' },
+          { name: '教室（後・床掃き）', count: 3, icon: '🧹' },
+          { name: '廊下・階段', count: 2, icon: '🚶' },
+          { name: '手洗い場・流し', count: 2, icon: '🚰' },
+          { name: 'ゴミ捨て・整頓', count: 2, icon: '🗑️' },
+        ]
+      }
+    };
+
+    const state = {
+      currentType: 'lunch', // 'lunch' | 'clean'
+      weekOffset: 0,
+      data: {
+        lunch: {
+          duties: JSON.parse(JSON.stringify(DEFAULT_PRESETS.lunch.duties)),
+          roster: Array.from({ length: 24 }, (_, i) => `${i + 1}番`), weekOffset: 0, }, clean: { duties: JSON.parse(JSON.stringify(DEFAULT_PRESETS.clean.duties)), roster: Array.from({ length: 24 }, (_, i) => `${i + 1}番`),
+          weekOffset: 0,
+        }
+      }
+    };
+
+    // 保存＆読み込み
+    function saveStorage() {
+      localStorage.setItem('sb_toban_app_state', JSON.stringify(state.data));
+    }
+
+    function loadStorage() {
+      const raw = localStorage.getItem('sb_toban_app_state');
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed.lunch) state.data.lunch = parsed.lunch;
+          if (parsed.clean) state.data.clean = parsed.clean;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    function getActiveData() {
+      return state.data[state.currentType];
+    }
+
+    // 画面の再描画
+    function renderBoard() {
+      const active = getActiveData();
+      const meta = DEFAULT_PRESETS[state.currentType];
+
+      // タイトル＆ヘッダー
+      document.getElementById('headerIcon').textContent = meta.icon;
+      document.getElementById('boardTitle').firstElementChild.textContent = meta.title;
+      document.getElementById('boardSubtitle').textContent = meta.subtitle;
+      
+      const weekNum = (active.weekOffset % 52) + 1;
+      document.getElementById('currentWeekDisplay').textContent = `第 ${weekNum} 週目`; document.getElementById('boardWeekTag').textContent = `Week ${weekNum}`;
+
+      const container = document.getElementById('rosterCardsContainer');
+      container.innerHTML = '';
+
+      const roster = active.roster || [];
+      const duties = active.duties || [];
+
+      // 名簿をスライドさせた配列を作成
+      let shiftedRoster = [...roster];
+      if (roster.length > 0) {
+        // 週のオフセット分だけ先頭から末尾へ回転
+        const shift = active.weekOffset % roster.length;
+        shiftedRoster = [...roster.slice(shift), ...roster.slice(0, shift)];
+      }
+
+      let studentIndex = 0;
+
+      duties.forEach((duty) => {
+        // この当番に割り当てられる児童を取り出す
+        const assigned = [];
+        for (let i = 0; i < duty.count; i++) {
+          if (studentIndex < shiftedRoster.length) {
+            assigned.push(shiftedRoster[studentIndex++]);
+          } else {
+            assigned.push('—');
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = 'duty-card-print bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xl sm:text-2xl">${duty.icon || '📌'}</span>
+                <h3 class="font-black text-slate-800 text-sm sm:text-base">${duty.name}</h3>
+              </div>
