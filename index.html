@@ -80,12 +80,11 @@
           <span>登録不要・サーバー送信ゼロ</span>
         </span>
 
-        <!-- 【修正後】 -->
-<a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 hover:opacity-90 active:scale-95 text-white font-black text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
-  <i data-lucide="instagram" class="w-4 h-4"></i>
-  <span class="hidden sm:inline">公式リール更新中</span>
-  <span class="sm:hidden">Instagram</span>
-</a>
+        <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 hover:opacity-90 active:scale-95 text-white font-black text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+          <i data-lucide="instagram" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">公式リール更新中</span>
+          <span class="sm:hidden">Instagram</span>
+        </a>
       </div>
 
     </div>
@@ -108,11 +107,12 @@
         電子黒板やタブレットですぐに使える先生のための特化ツール集です。
       </p>
     </div>
-    <!-- アプリ一覧グリッド（全6ツール） -->
+
+    <!-- アプリ一覧グリッド（全6ツール：すべて別タブで開く設定） -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
 
       <!-- 1: 席替えメーカー -->
-      <a href="./sekigae/" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
+      <a href="./sekigae/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
         <div>
           <div class="flex items-center justify-between mb-4">
             <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
@@ -126,13 +126,13 @@
           </p>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
-          <span>アプリを開く</span>
+          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
           <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
       <!-- 2: 早押しクイズツール（NEW） -->
-      <a href="./quiz/" class="app-card bg-white rounded-3xl border-2 border-amber-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
+      <a href="./quiz/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border-2 border-amber-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
         <div class="absolute top-0 right-0 bg-amber-400 text-slate-950 font-black text-[10px] px-3 py-1 rounded-bl-xl tracking-wider uppercase">
           NEW RELEASE
         </div>
@@ -149,13 +149,13 @@
           </p>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
-          <span>アプリを開く</span>
+          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
           <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
       <!-- 3: 当番ローテーション表（NEW） -->
-      <a href="./toban/" class="app-card bg-white rounded-3xl border-2 border-emerald-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
+      <a href="./toban/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border-2 border-emerald-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
         <div class="absolute top-0 right-0 bg-emerald-500 text-white font-black text-[10px] px-3 py-1 rounded-bl-xl tracking-wider uppercase">
           NEW RELEASE
         </div>
@@ -172,19 +172,19 @@
           </p>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
-          <span>アプリを開く</span>
+          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
           <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
       <!-- 4: 教室サウンドパッド -->
-      <a href="./sound/" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
+      <a href="./sound/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
         <div>
           <div class="flex items-center justify-between mb-4">
             <div class="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
               🔊
             </div>
-            <span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200/60 px-2.5 py-0.5 rounded-full">簡単再生</span>
+            <span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200/60 px-2.5 py-0.5 rounded-full">簡単操作</span>
           </div>
           <h2 class="text-lg font-black text-slate-900 group-hover:text-rose-600 transition-colors">教室サウンドパッド</h2>
           <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
@@ -192,13 +192,13 @@
           </p>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600">
-          <span>アプリを開く</span>
+          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
           <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
       <!-- 5: 授業用大型タイマー -->
-      <a href="./timer/" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
+      <a href="./timer/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
         <div>
           <div class="flex items-center justify-between mb-4">
             <div class="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
@@ -212,13 +212,13 @@
           </p>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600">
-          <span>アプリを開く</span>
+          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
           <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
       <!-- 6: 漢字配当チェッカー -->
-      <a href="./kanji/" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
+      <a href="./kanji/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
         <div>
           <div class="flex items-center justify-between mb-4">
             <div class="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
@@ -232,7 +232,7 @@
           </p>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-600">
-          <span>アプリを開く</span>
+          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
           <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
@@ -289,10 +289,11 @@
           <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
           <span>公式Instagram</span>
         </a>
-        <span>学校教育現場での利用を応援する教員支援プロジェクト</span>
+        <span>学校教育現場を応援する教員支援プロジェクト</span>
       </div>
     </div>
   </footer>
+
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
