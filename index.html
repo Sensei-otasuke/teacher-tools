@@ -80,11 +80,12 @@
           <span>登録不要・サーバー送信ゼロ</span>
         </span>
 
-        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 hover:opacity-90 active:scale-95 text-white font-black text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
-          <i data-lucide="instagram" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">公式リール更新中</span>
-          <span class="sm:hidden">Instagram</span>
-        </a>
+        <!-- 【修正後】 -->
+<a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 hover:opacity-90 active:scale-95 text-white font-black text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+  <i data-lucide="instagram" class="w-4 h-4"></i>
+  <span class="hidden sm:inline">公式リール更新中</span>
+  <span class="sm:hidden">Instagram</span>
+</a>
       </div>
 
     </div>
@@ -94,20 +95,19 @@
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8 sm:py-12 flex flex-col gap-10">
 
     <!-- ヒーローセクション -->
-    <div class="text-center max-w-2xl mx-auto space-y-3">
+    <div class="text-center max-w-3xl mx-auto space-y-3">
       <div class="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full shadow-2xs text-xs font-bold text-slate-600">
         <span class="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
         <span>新ツール2種を追加！全6アプリ公開中</span>
       </div>
-      <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-        教室の「困った」を、<br class="sm:hidden">秒で解決する道具箱。
+      <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-snug">
+        <span class="inline-block">教室の「困った」を、</span><span class="inline-block">秒で解決する道具箱。</span>
       </h1>
       <p class="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
         アカウント登録もインストールも不要。ブラウザを開くだけで、<br class="hidden sm:inline">
         電子黒板やタブレットですぐに使える先生のための特化ツール集です。
       </p>
     </div>
-
     <!-- アプリ一覧グリッド（全6ツール） -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
 
@@ -284,12 +284,15 @@
         <span class="font-bold text-slate-700">センセイボックス (SenseiBox)</span>
         <span class="font-mono-tech text-[11px]">&copy; 2026</span>
       </div>
-      <p class="text-slate-400 text-[11px]">
-        学校教育現場での利用を応援する教員支援プロジェクト
-      </p>
+      <div class="flex items-center gap-4 text-[11px]">
+        <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="text-slate-500 hover:text-pink-600 font-bold transition flex items-center gap-1">
+          <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
+          <span>公式Instagram</span>
+        </a>
+        <span>学校教育現場での利用を応援する教員支援プロジェクト</span>
+      </div>
     </div>
   </footer>
-
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
