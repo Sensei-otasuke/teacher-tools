@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>早押しクイズツール | センセイボックス</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PeerJS (WebRTC P2P通信ライブラリ) -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
+    .tech-bg {
+      background-image: radial-gradient(rgba(99, 102, 241, 0.12) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    /* 巨大早押しボタンのアニメーション */
+    .buzzer-btn {
+      box-shadow: 0 16px 0 #991b1b, 0 24px 30px rgba(0,0,0,0.6);
+      transition: all 0.08s ease;
+    }
+    .buzzer-btn:active:not(:disabled), .buzzer-btn.pressed {
+      transform: translateY(12px);
+      box-shadow: 0 4px 0 #991b1b, 0 10px 15px rgba(0,0,0,0.4);
+    }
+    .buzzer-btn:disabled {
+      filter: grayscale(0.6) brightness(0.7);
+      cursor: not-allowed;
+      box-shadow: 0 6px 0 #475569;
+      transform: translateY(10px);
+    }
+    @keyframes rankPop {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .rank-card {
+      animation: rankPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased tech-bg selection:bg-indigo-500 selection:text-white">
+
+  <!-- ========================================== -->
+  <!-- 1. 先生用ホスト画面 (電子黒板 / プロジェクター) -->
+  <!-- ========================================== -->
+  <div id="hostApp" class="hidden flex-1 flex flex-col">
+    <!-- ヘッダー -->
+    <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <a href="../" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition" title="ポータルへ戻る">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          </a>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">🚨</span>
+            <h1 class="text-lg sm:text-xl font-black text-white tracking-wider flex items-center gap-2">
+              <span>早押しクイズツール</span>
+              <span class="text-[11px] font-mono-tech text-amber-400 bg-amber-950/80 border border-amber-800 px-2 py-0.5 rounded-full">親機 (黒板画面)</span>
+            </h1>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="bg-slate-800/80 border border-slate-700 px-3.5 py-1.5 rounded-xl flex items-center gap-2 text-xs font-bold">
+            <i data-lucide="users" class="w-4 h-4 text-cyan-400"></i>
+            <span>参加中:</span>
+            <span id="hostPeerCount" class="font-mono-tech text-cyan-300 text-sm font-black">0</span>
+            <span class="text-slate-400">人</span>
+          </div>
+          <button id="hostResetBtn" class="px-5 py-2 bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-black text-sm rounded-xl shadow-lg transition flex items-center gap-2">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span>次の問題へ (リセット)</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- 左側：参加案内・QRコード -->
+      <div class="lg:col-span-4 bg-slate-900/80 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col items-center text-center shadow-xl">
+        <h2 class="text-xs font-mono-tech font-bold text-indigo-400 tracking-wider mb-2">SCAN TO JOIN</h2>
+        <p class="text-sm font-extrabold text-slate-200 mb-4">タブレットでQRを読み込んで参加！</p>
+        
+        <!-- QRコード描画エリア -->
+        <div id="qrcodeBox" class="p-3 bg-white rounded-2xl shadow-lg mb-4 flex items-center justify-center min-h-[190px] min-w-[190px]">
+          <div class="text-slate-400 text-xs animate-pulse">ルーム生成中...</div>
+        </div>
+
+        <div class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs flex flex-col gap-1.5">
+          <div class="flex justify-between items-center text-slate-400">
+            <span>ルームID:</span>
+            <strong id="roomCodeDisplay" class="font-mono-tech text-amber-400 text-sm">----</strong>
+          </div>
+          <button id="copyUrlBtn" class="mt-1 w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>参加URLをコピー</span>
+          </button>
+        </div>
+
+        <div class="mt-4 text-[11px] text-slate-500 text-left w-full space-y-1">
+          <p>💡 <strong>先生用ヒント:</strong></p>
+          <p>・キーボードの「Space」キーでも次の問題へリセットできます。</p>
+          <p>・名前のかわりに「1班」「赤組」などで参加させるのもオススメです。</p>
+        </div>
+      </div>
+
+      <!-- 右側：早押しランキング発表エリア -->
+      <div class="lg:col-span-8 flex flex-col gap-4">
+        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl min-h-[460px] flex flex-col">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+            <h3 class="text-base font-black text-white flex items-center gap-2">
+              <i data-lucide="trophy" class="w-5 h-5 text-amber-400"></i>
+              <span>早押し順位</span>
+            </h3>
+            <span id="statusIndicator" class="text-xs font-mono-tech px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              WAITING FOR PUSH
+            </span>
+          </div>
+
+          <!-- 早押し結果一覧 -->
+          <div id="buzzerResultList" class="flex-1 flex flex-col justify-start gap-3">
+            <div id="emptyGuide" class="my-auto text-center text-slate-500 py-12">
+              <span class="text-4xl block mb-2">🛎️</span>
+              <p class="font-bold text-sm">問題を出したら「スタート」！</p>
+              <p class="text-xs text-slate-600 mt-1">ボタンが押されると、ここにミリ秒単位でリアルタイム表示されます</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. 児童用クライアント画面 (スマホ / タブレット) -->
+  <!-- ========================================== -->
+  <div id="clientApp" class="hidden flex-1 flex flex-col max-w-md w-full mx-auto p-4 justify-between">
+    
+    <!-- 参加前：名前登録フォーム -->
+    <div id="clientJoinBox" class="my-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-center space-y-5">
+      <div class="text-4xl">🚨</div>
+      <div>
+        <h2 class="text-xl font-black text-white">早押しクイズに参加</h2>
+        <p class="text-xs text-slate-400 mt-1">なまえ または 班の名前を入力してね</p>
+      </div>
+
+      <div class="space-y-3">
+        <input id="playerNameInput" type="text" maxlength="12" placeholder="例: たろう / 1はん" class="w-full text-center text-lg font-black p-3.5 bg-slate-950 border-2 border-indigo-500/50 rounded-2xl focus:border-indigo-400 focus:outline-none text-white tracking-wider">
+        <button id="joinGameBtn" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-95 text-white font-black text-lg rounded-2xl shadow-lg transition">
+          決定してスタート！
+        </button>
+      </div>
+      <p id="clientConnStatus" class="text-xs text-amber-400 font-bold font-mono-tech"></p>
+    </div>
+
+    <!-- 参加後：特大早押しボタン画面 -->
+    <div id="clientBuzzerBox" class="hidden flex-1 flex flex-col justify-between py-6">
+      
+      <!-- 上部ステータス -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <span id="playerDisplayName" class="font-black text-white text-sm">なまえ</span>
+        </div>
+        <span id="clientStatusBadge" class="font-mono-tech text-[11px] font-bold text-cyan-400 bg-cyan-950/80 border border-cyan-800 px-2 py-0.5 rounded-full">READY</span>
+      </div>
+
+      <!-- 中央：特大プッシュボタン -->
+      <div class="my-auto flex flex-col items-center justify-center">
+        <button id="mainBuzzerBtn" class="buzzer-btn w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gradient-to-b from-rose-500 via-rose-600 to-rose-700 flex flex-col items-center justify-center gap-2 border-4 border-rose-400 text-white font-black">
+          <span class="text-6xl sm:text-7xl drop-shadow-md">PUSH!</span>
+          <span class="text-xs sm:text-sm tracking-widest text-rose-200">はやくおせ！</span>
+        </button>
+      </div>
+
+      <!-- 下部メッセージ -->
+      <div class="text-center min-h-[48px] flex items-center justify-center">
+        <div id="clientFeedbackText" class="text-base font-black text-slate-300">
+          先生の問題をよく聞いてね！
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 効果音エンジン (Web Audio API) -->
+  <script>
+    class SoundFx {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      playBuzzer() {
+        this.init();
+        // 第1位のピンポン音
+        const now = this.ctx.currentTime;
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(659.25, now); // ミ
+        gain1.gain.setValueAtTime(0.2, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc1.connect(gain1);
+        gain1.connect(this.ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.35);
+
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(880.00, now + 0.15); // ラ
+        gain2.gain.setValueAtTime(0.25, now + 0.15);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+        osc2.connect(gain2);
+        gain2.connect(this.ctx.destination);
+        osc2.start(now + 0.15);
+        osc2.stop(now + 0.7);
+      }
+      playReset() {
+        this.init();
+        // リセット音（ピピッ）
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      }
+    }
+    const sound = new SoundFx();
+  </script>
+
+  <!-- コアロジック (PeerJS P2Pネットワーク) -->
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetRoomId = urlParams.get('room');
+
+    // モード判定: URLに room パラメータがあれば児童画面、なければ先生画面
+    if (targetRoomId) {
+      initClientMode(targetRoomId);
+    } else {
+      initHostMode();
+    }
+
+    // ==========================================
+    // 先生（ホスト）の処理
+    // ==========================================
+    function initHostMode() {
+      document.getElementById('hostApp').classList.remove('hidden');
+      lucide.createIcons();
+
+      // ユニークな4桁英数字のルームIDを生成
+      const roomId = 'sb-' + Math.random().toString(36).substring(2, 6);
+      document.getElementById('roomCodeDisplay').textContent = roomId;
+
+      // 児童用URLとQRコードの生成
+      const joinUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+      new QRCode(document.getElementById('qrcodeBox'), {
+        text: joinUrl,
+        width: 170,
+        height: 170,
+        colorDark: '#0f172a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      document.getElementById('copyUrlBtn').onclick = () => {
+        navigator.clipboard.writeText(joinUrl);
+        alert('参加用URLをコピーしました！');
+      };
+
+      // PeerJS ホスト接続開始
+      const peer = new Peer(roomId);
+      const connections = new Map();
+      let buzzRankList = [];
+      let questionStartTime = Date.now();
+      let isAcceptingBuzz = true;
+
+      peer.on('open', (id) => {
+        console.log('ホスト起動完了 RoomID:', id);
+      });
+
+      peer.on('connection', (conn) => {
+        conn.on('open', () => {
+          connections.set(conn.peer, conn);
+          updateHostPeerCount(connections.size);
+
+          // 参加者へ現在の状態を送信
+          conn.send({ type: 'STATUS', isAccepting: isAcceptingBuzz });
+        });
+
+        conn.on('data', (data) => {
+          if (data.type === 'BUZZ') {
+            handleStudentBuzz(data, conn);
+          }
+        });
+
+        conn.on('close', () => {
+          connections.delete(conn.peer);
+          updateHostPeerCount(connections.size);
+        });
+      });
+
+      function updateHostPeerCount(count) {
+        document.getElementById('hostPeerCount').textContent = count;
+      }
+
+      function handleStudentBuzz(data, conn) {
+        if (!isAcceptingBuzz) return;
+
+        // 既に押している人は除外
+        if (buzzRankList.some(item => item.peerId === conn.peer)) return;
+
+        const buzzTime = ((Date.now() - questionStartTime) / 1000).toFixed(2);
+        const rank = buzzRankList.length + 1;
+        
+        buzzRankList.push({
+          rank,
+          name: data.name,
+          time: buzzTime,
+          peerId: conn.peer
+        });
+
+        if (rank === 1) {
+          sound.playBuzzer(); // 1位のピンポン音
+        }
+
+        // 押した本人に順位を通知
+        conn.send({ type: 'BUZZ_RESULT', rank, time: buzzTime });
+
+        renderHostRanking(buzzRankList);
+      }
+
+      function renderHostRanking(list) {
+        const container = document.getElementById('buzzerResultList');
+        if (list.length === 1) {
+          container.innerHTML = ''; // 案内を消去
+        }
+
+        const latest = list[list.length - 1];
+        const card = document.createElement('div');
+        
+        if (latest.rank === 1) {
+          // 1位は特大ゴールド演出
+          card.className = 'rank-card bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border-2 border-amber-400 p-4 sm:p-5 rounded-2xl flex items-center justify-between shadow-lg';
+          card.innerHTML = `
+            <div class="flex items-center gap-3 sm:gap-4">
+              <span class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-400 text-slate-950 font-black text-xl sm:text-2xl flex items-center justify-center shadow-md">1</span>
+              <div>
+                <div class="text-xs font-mono-tech text-amber-300 font-bold uppercase">1st Place (First!)</div>
+                <div class="text-xl sm:text-3xl font-black text-white">${latest.name}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-mono-tech text-slate-400">TIME</span>
+              <div class="text-lg sm:text-2xl font-mono-tech font-black text-amber-300">+${latest.time}s</div>
+            </div>
+          `;
+        } else {
+          // 2位以降
+          card.className = 'rank-card bg-slate-800/60 border border-slate-700/80 p-3 sm:p-4 rounded-xl flex items-center justify-between';
+          card.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-slate-700 text-slate-200 font-black text-sm flex items-center justify-center">${latest.rank}</span>
+              <div class="text-base sm:text-xl font-bold text-slate-200">${latest.name}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm sm:text-base font-mono-tech font-bold text-slate-400">+${latest.time}s</div>
+            </div>
+          `;
+        }
+
+        container.appendChild(card);
+      }
+
+      function resetForNextQuestion() {
+        sound.playReset();
+        buzzRankList = [];
+        questionStartTime = Date.now();
+        isAcceptingBuzz = true;
+
+        const container = document.getElementById('buzzerResultList');
+        container.innerHTML = `
+          <div id="emptyGuide" class="my-auto text-center text-slate-500 py-12">
+            <span class="text-4xl block mb-2">🛎️</span>
+            <p class="font-bold text-sm">問題を出したら「スタート」！</p>
+            <p class="text-xs text-slate-600 mt-1">ボタンが押されると、ここにミリ秒単位でリアルタイム表示されます</p>
+          </div>
+        `;
+
+        // 全員へリセット信号を送る
+        connections.forEach(conn => {
+          conn.send({ type: 'RESET' });
+        });
+      }
+
+      document.getElementById('hostResetBtn').onclick = resetForNextQuestion;
+      
+      // スペースキーで一発リセット
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          resetForNextQuestion();
+        }
+      });
+    }
+
+    // ==========================================
+    // 児童（クライアント）の処理
+    // ==========================================
+    function initClientMode(roomId) {
+      document.getElementById('clientApp').classList.remove('hidden');
+      lucide.createIcons();
+
+      const joinBox = document.getElementById('clientJoinBox');
+      const buzzerBox = document.getElementById('clientBuzzerBox');
+      const connStatus = document.getElementById('clientConnStatus');
+      const nameInput = document.getElementById('playerNameInput');
+      const mainBtn = document.getElementById('mainBuzzerBtn');
+      const feedbackText = document.getElementById('clientFeedbackText');
+      const statusBadge = document.getElementById('clientStatusBadge');
+
+      // 前回の名前があれば自動入力
+      const savedName = localStorage.getItem('sb_buzzer_player_name');
+      if (savedName) nameInput.value = savedName;
+
+      connStatus.textContent = '先生の黒板に接続中...';
+
+      const peer = new Peer();
+      let conn = null;
+      let myName = '';
+      let hasPushed = false;
+
+      peer.on('open', () => {
+        conn = peer.connect(roomId);
+
+        conn.on('open', () => {
+          connStatus.textContent = '✅ 黒板に接続できました！';
+          connStatus.classList.replace('text-amber-400', 'text-emerald-400');
+        });
+
+        conn.on('data', (data) => {
+          if (data.type === 'RESET') {
+            // 次の問題へリセットされた
+            hasPushed = false;
+            mainBtn.disabled = false;
+            mainBtn.classList.remove('pressed');
+            feedbackText.textContent = '問題を聞いてボタンを押してね！';
+            feedbackText.className = 'text-base font-black text-slate-300';
+            statusBadge.textContent = 'READY';
+            statusBadge.className = 'font-mono-tech text-[11px] font-bold text-cyan-400 bg-cyan-950/80 border border-cyan-800 px-2 py-0.5 rounded-full';
+          } else if (data.type === 'BUZZ_RESULT') {
+            // 自分の順位が返ってきた
+            if (data.rank === 1) {
+              feedbackText.innerHTML = `🎉 <strong>1番目に押しました！！</strong> (${data.time}秒)`;
+              feedbackText.className = 'text-lg font-black text-amber-400 animate-bounce';
+              statusBadge.textContent = '1ST PLACE!';
+              statusBadge.className = 'font-mono-tech text-[11px] font-bold text-amber-400 bg-amber-950 border border-amber-800 px-2 py-0.5 rounded-full';
+            } else {
+              feedbackText.innerHTML = `👏 <strong>${data.rank}番目</strong> に押しました (${data.time}秒)`;
+              feedbackText.className = 'text-base font-black text-slate-300';
+              statusBadge.textContent = `${data.rank}TH PLACE`;
+            }
+          }
+        });
+
+        conn.on('close', () => {
+          alert('先生との接続が切れました。ページを再読み込みしてください。');
+        });
+      });
+
+      peer.on('error', (err) => {
+        connStatus.textContent = '❌ 接続エラー。ルームIDを確認してください';
+        console.error(err);
+      });
+
+      // 参加ボタン
+      document.getElementById('joinGameBtn').onclick = () => {
+        const name = nameInput.value.trim();
+        if (!name) {
+          alert('なまえを入力してください！');
+          return;
+        }
+        myName = name;
+        localStorage.setItem('sb_buzzer_player_name', name);
+        document.getElementById('playerDisplayName').textContent = myName;
+
+        joinBox.classList.add('hidden');
+        buzzerBox.classList.remove('hidden');
+      };
+
+      // 早押しボタンを押した時
+      const handleBuzz = (e) => {
+        e.preventDefault();
+        if (hasPushed || !conn || !conn.open) return;
+
+        hasPushed = true;
+        mainBtn.disabled = true;
+        mainBtn.classList.add('pressed');
+
+        // スマホのバイブレーションを鳴らす
+        if (navigator.vibrate) {
+          navigator.vibrate(100);
+        }
+
+        feedbackText.textContent = '判定中...';
+        statusBadge.textContent = 'PUSHED';
+
+        conn.send({ type: 'BUZZ', name: myName });
+      };
+
+      mainBtn.addEventListener('touchstart', handleBuzz, { passive: false });
+      mainBtn.addEventListener('click', handleBuzz);
+    }
+  </script>
+</body>
+</html>
