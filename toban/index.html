@@ -215,7 +215,12 @@
       data: {
         lunch: {
           duties: JSON.parse(JSON.stringify(DEFAULT_PRESETS.lunch.duties)),
-          roster: Array.from({ length: 24 }, (_, i) => `${i + 1}番`), weekOffset: 0, }, clean: { duties: JSON.parse(JSON.stringify(DEFAULT_PRESETS.clean.duties)), roster: Array.from({ length: 24 }, (_, i) => `${i + 1}番`),
+          roster: Array.from({ length: 24 }, (_, i) => `${i + 1}番`),
+          weekOffset: 0,
+        },
+        clean: {
+          duties: JSON.parse(JSON.stringify(DEFAULT_PRESETS.clean.duties)),
+          roster: Array.from({ length: 24 }, (_, i) => `${i + 1}番`),
           weekOffset: 0,
         }
       }
@@ -254,7 +259,8 @@
       document.getElementById('boardSubtitle').textContent = meta.subtitle;
       
       const weekNum = (active.weekOffset % 52) + 1;
-      document.getElementById('currentWeekDisplay').textContent = `第 ${weekNum} 週目`; document.getElementById('boardWeekTag').textContent = `Week ${weekNum}`;
+      document.getElementById('currentWeekDisplay').textContent = `第 ${weekNum} 週目`;
+      document.getElementById('boardWeekTag').textContent = `Week ${weekNum}`;
 
       const container = document.getElementById('rosterCardsContainer');
       container.innerHTML = '';
@@ -292,3 +298,167 @@
                 <span class="text-xl sm:text-2xl">${duty.icon || '📌'}</span>
                 <h3 class="font-black text-slate-800 text-sm sm:text-base">${duty.name}</h3>
               </div>
+              <span class="text-[11px] font-bold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full">${duty.count}名</span>
+            </div>
+            
+            <div class="flex flex-col gap-2">
+              ${assigned.map(name => `
+                <div class="py-2 px-3 bg-slate-50 border border-slate-200/80 rounded-xl text-center font-extrabold text-sm sm:text-base text-slate-800 tracking-wide">
+                  ${name}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // 設定エリアの入力欄にも反映
+      document.getElementById('rosterInput').value = (active.roster || []).join('\n');
+      document.getElementById('rosterCountBadge').textContent = `${(active.roster || []).length}名`;
+      renderDutiesEditor();
+    }
+
+    // 設定パネル内の当番編集リストを描画
+    function renderDutiesEditor() {
+      const active = getActiveData();
+      const list = document.getElementById('dutiesEditorList');
+      list.innerHTML = '';
+
+      active.duties.forEach((duty, idx) => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200';
+        item.innerHTML = `
+          <input type="text" value="${duty.icon}" class="w-10 text-center text-sm p-1.5 bg-white border border-slate-300 rounded-lg duty-icon-input">
+          <input type="text" value="${duty.name}" class="flex-1 text-xs font-bold p-1.5 bg-white border border-slate-300 rounded-lg duty-name-input">
+          <div class="flex items-center gap-1 text-xs text-slate-500">
+            <span>人数:</span>
+            <input type="number" min="1" max="10" value="${duty.count}" class="w-12 text-center p-1.5 bg-white border border-slate-300 rounded-lg font-bold duty-count-input">
+          </div>
+          <button class="p-1 text-slate-400 hover:text-rose-500 delete-duty-btn"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        `;
+
+        item.querySelector('.duty-icon-input').onchange = (e) => duty.icon = e.target.value.trim() || '📌';
+        item.querySelector('.duty-name-input').onchange = (e) => duty.name = e.target.value.trim();
+        item.querySelector('.duty-count-input').onchange = (e) => duty.count = parseInt(e.target.value) || 1;
+        item.querySelector('.delete-duty-btn').onclick = () => {
+          active.duties.splice(idx, 1);
+          renderDutiesEditor();
+        };
+
+        list.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    // 席替えメーカーからの名簿インポート
+    function importFromSekigae() {
+      const sekigaeRaw = localStorage.getItem('sekigae_app_state');
+      if (!sekigaeRaw) {
+        alert('席替えメーカーの保存データが見つかりませんでした。');
+        return;
+      }
+      try {
+        const sekigae = JSON.parse(sekigaeRaw);
+        if (sekigae.roster && sekigae.roster.length > 0) {
+          const active = getActiveData();
+          active.roster = sekigae.roster;
+          saveStorage();
+          renderBoard();
+          alert(`席替えメーカーから名簿（${sekigae.roster.length}名）を読み込みました！`);
+        } else {
+          alert('席替えメーカーに登録された名簿が空でした。');
+        }
+      } catch (e) {
+        alert('名簿の読み込みに失敗しました。');
+      }
+    }
+
+    function setupEventListeners() {
+      // 給食・掃除タブ切り替え
+      document.getElementById('typeLunchBtn').onclick = () => {
+        state.currentType = 'lunch';
+        document.getElementById('typeLunchBtn').className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1.5 bg-white text-indigo-600 shadow-xs';
+        document.getElementById('typeCleanBtn').className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+        renderBoard();
+      };
+
+      document.getElementById('typeCleanBtn').onclick = () => {
+        state.currentType = 'clean';
+        document.getElementById('typeCleanBtn').className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1.5 bg-white text-indigo-600 shadow-xs';
+        document.getElementById('typeLunchBtn').className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+        renderBoard();
+      };
+
+      // 週送り
+      document.getElementById('nextWeekBtn').onclick = () => {
+        const active = getActiveData();
+        active.weekOffset++;
+        saveStorage();
+        renderBoard();
+      };
+
+      document.getElementById('prevWeekBtn').onclick = () => {
+        const active = getActiveData();
+        if (active.weekOffset > 0) {
+          active.weekOffset--;
+          saveStorage();
+          renderBoard();
+        }
+      };
+
+      // 設定パネル開閉
+      const settingsPanel = document.getElementById('settingsPanel');
+      const settingsBtnText = document.getElementById('settingsBtnText');
+      document.getElementById('toggleSettingsBtn').onclick = () => {
+        const isHidden = settingsPanel.classList.toggle('hidden');
+        settingsBtnText.textContent = isHidden ? '当番・名簿を設定する' : '設定を閉じる';
+      };
+
+      // 席替えインポート
+      document.getElementById('importSekigaeBtn').onclick = importFromSekigae;
+
+      // プリセット初期化
+      document.getElementById('resetPresetBtn').onclick = () => {
+        if (confirm(`${state.currentType === 'lunch' ? '給食' : '掃除'}当番の設定を初期状態に戻しますか？`)) {
+          const active = getActiveData();
+          active.duties = JSON.parse(JSON.stringify(DEFAULT_PRESETS[state.currentType].duties));
+          saveStorage();
+          renderBoard();
+        }
+      };
+
+      // 場所追加
+      document.getElementById('addDutyBtn').onclick = () => {
+        const active = getActiveData();
+        active.duties.push({ name: '新しい担当場所', count: 2, icon: '📌' });
+        renderDutiesEditor();
+      };
+
+      // 設定保存
+      document.getElementById('saveSettingsBtn').onclick = () => {
+        const active = getActiveData();
+        const rosterText = document.getElementById('rosterInput').value;
+        active.roster = rosterText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+        saveStorage();
+        renderBoard();
+        settingsPanel.classList.add('hidden');
+        settingsBtnText.textContent = '当番・名簿を設定する';
+      };
+
+      // 印刷
+      document.getElementById('printBtn').onclick = () => {
+        document.getElementById('printDate').textContent = new Date().toLocaleDateString('ja-JP');
+        window.print();
+      };
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStorage();
+      setupEventListeners();
+      renderBoard();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
