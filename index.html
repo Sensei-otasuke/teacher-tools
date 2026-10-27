@@ -9,244 +9,291 @@
 
   <!-- 検索エンジン向けSEO設定 -->
   <title>センセイボックス (SenseiBox) | 授業・学級経営をサポートする先生のためのWebツール</title>
-  <meta name="description" content="センセイボックス（SenseiBox）は、小・中学校・高校の先生をサポートする無料の教室支援Webツール群です。個人情報を外部送信しない完全安心の「スマート席替えメーカー」や、電子黒板投影用の「大型タイマー」を搭載。登録不要ですぐに使えます。">
-  <meta name="keywords" content="センセイボックス, SenseiBox, 席替え ルーレット, 授業用タイマー, 教員 便利ツール, 小学校 席替え, 電子黒板, ICT教育">
+  <meta name="description" content="センセイボックス（SenseiBox）は、小・中学校の先生のための無料教室支援Webツール集です。個人情報を外部送信しない完全安心の「スマート席替えメーカー」「早押しクイズ」「当番表」「教室サウンドパッド」「授業用タイマー」などを搭載。登録不要ですぐに使えます。">
+  <meta name="keywords" content="センセイボックス, SenseiBox, 席替え ルーレット, 授業用タイマー, 早押しクイズ, 当番表, 教室 効果音, 教員 便利ツール, 小学校 席替え, 電子黒板, ICT教育">
   <meta name="robots" content="index, follow">
 
-  <!-- OGP（SNS・LINEシェア用） -->
+  <!-- OGP（SNS・LINE・Instagramシェア用） -->
   <meta property="og:title" content="センセイボックス (SenseiBox) | 授業・学級経営Webツール">
-  <meta property="og:description" content="個人情報の外部送信ゼロ。先生の教室ワークを支えるスマートツールボックス。">
+  <meta property="og:description" content="個人情報の外部送信ゼロ・登録不要。席替え・早押しクイズ・当番表など、先生の「ちょっと助かる」が揃うスマートツールボックス。">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sensei-otasuke.github.io/teacher-tools/">
+  <meta property="og:image" content="https://sensei-otasuke.github.io/teacher-tools/logo.png">
   <meta property="og:site_name" content="センセイボックス">
 
-  <!-- Tailwind CSS & Google Fonts & Lucide Icons -->
+  <!-- Twitter / X カード -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="センセイボックス (SenseiBox)">
+  <meta name="twitter:description" content="登録不要・完全無料の先生向け教室Webツール集。">
+  <meta name="twitter:image" content="https://sensei-otasuke.github.io/teacher-tools/logo.png">
+
+  <!-- ファビコン（タブのアイコン） -->
+  <link rel="icon" href="./logo.png" type="image/png">
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
     body { font-family: 'M PLUS Rounded 1c', sans-serif; }
     .font-mono-tech { font-family: 'Chivo Mono', monospace; }
-    /* ロボ・グリッド背景パターン */
-    .tech-bg {
-      background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px);
-      background-size: 24px 24px;
+    
+    /* アプリカードのホバーエフェクト */
+    .app-card {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .app-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased tech-bg selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
   <!-- ヘッダー -->
-  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 shadow-lg">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <!-- ロボットロゴアイコン -->
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-0.5 shadow-md shadow-indigo-500/20 flex items-center justify-center">
-          <div class="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center text-xl">
-            🤖
-          </div>
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      
+      <!-- ロゴ＆サービス名 -->
+      <a href="./" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-2xl overflow-hidden border border-slate-200 bg-white p-0.5 shadow-xs group-hover:scale-105 transition-transform flex items-center justify-center">
+          <img src="./logo.png" onerror="this.onerror=null; this.src='./logo.jpg';" alt="センセイボックス ロゴ" class="w-full h-full object-cover rounded-xl">
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-xl sm:text-2xl font-black text-white tracking-wider flex items-center gap-1.5">
-              <span>センセイボックス</span>
-              <span class="text-xs font-mono-tech font-bold text-cyan-400 bg-cyan-950/80 border border-cyan-800/80 px-2 py-0.5 rounded-full">SenseiBox v1.0</span>
-            </h1>
+          <div class="flex items-center gap-1.5">
+            <span class="text-lg font-black text-slate-900 tracking-tight">センセイボックス</span>
+            <span class="text-[10px] font-mono-tech font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.2 rounded-md">SenseiBox</span>
           </div>
-          <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">授業と学級経営をスムーズにする先生のデジタルツール</p>
+          <p class="text-[10px] text-slate-400 font-bold hidden sm:block">先生の「ちょっと助かる」が揃う教室アプリ集</p>
         </div>
+      </a>
+
+      <!-- 公式Instagramボタン ＆ セキュリティバッジ -->
+      <div class="flex items-center gap-2.5">
+        <span class="hidden md:inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>登録不要・サーバー送信ゼロ</span>
+        </span>
+
+        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 hover:opacity-90 active:scale-95 text-white font-black text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+          <i data-lucide="instagram" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">公式リール更新中</span>
+          <span class="sm:hidden">Instagram</span>
+        </a>
       </div>
 
-      <!-- システムステータス（セキュリティ表示） -->
-      <div class="flex items-center gap-2 self-start sm:self-auto">
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800/90 border border-slate-700/80 rounded-xl text-xs font-bold text-slate-300">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-          <span>外部データ送信ゼロ・安心設計</span>
-        </div>
-      </div>
     </div>
   </header>
 
-  <!-- メインコンテンツ -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8 sm:py-10 space-y-10">
+  <!-- メインエリア -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8 sm:py-12 flex flex-col gap-10">
 
-    <!-- ツール一覧セクション -->
-    <section class="space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
-          <i data-lucide="cpu" class="w-5 h-5 text-indigo-400"></i>
-          <span>稼働中モジュール</span>
-        </h2>
-        <span class="text-xs font-mono-tech text-cyan-400 font-bold bg-cyan-950/60 border border-cyan-800/50 px-2.5 py-1 rounded-lg">4 APPS ONLINE</span>
+    <!-- ヒーローセクション -->
+    <div class="text-center max-w-2xl mx-auto space-y-3">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full shadow-2xs text-xs font-bold text-slate-600">
+        <span class="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+        <span>新ツール2種を追加！全6アプリ公開中</span>
       </div>
+      <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+        教室の「困った」を、<br class="sm:hidden">秒で解決する道具箱。
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
+        アカウント登録もインストールも不要。ブラウザを開くだけで、<br class="hidden sm:inline">
+        電子黒板やタブレットですぐに使える先生のための特化ツール集です。
+      </p>
+    </div>
 
-      <div class="grid-cols-1 md:grid-cols-2 gap-5">
-        
-        <!-- 席替えルーレットカード -->
-        <a href="./sekigae/" target="_blank" rel="noopener noreferrer" class="group bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500 rounded-2xl p-6 shadow-md hover:shadow-indigo-500/10 transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-indigo-950/80 border border-indigo-700/50 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                🪑
-              </div>
-              <span class="text-xs font-bold text-indigo-400 bg-indigo-950 border border-indigo-800 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-500 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                <span>モジュール起動</span>
-                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-              </span>
-            </div>
-            <h3 class="text-lg font-black text-white group-hover:text-indigo-300 transition mb-2">スマート席替えメーカー</h3>
-            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
-              先生用の事前配置・固定席設定と、児童に見せる抽選スロット演出（カモフラージュ機能）を完全分離。Excel出力（.xlsx）や印刷にも対応しています。
-            </p>
-          </div>
-          <div class="pt-4 border-t border-slate-800/80 flex flex-wrap gap-2 text-[11px] font-bold">
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">児童用スロット演出</span>
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">Excel表出力</span>
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">視力配慮席ロック</span>
-          </div>
-        </a>
+    <!-- アプリ一覧グリッド（全6ツール） -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
 
-        <!-- 授業用大型タイマーカード -->
-        <a href="./timer/" target="_blank" rel="noopener noreferrer" class="group bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500 rounded-2xl p-6 shadow-md hover:shadow-cyan-500/10 transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-700/50 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                ⏱️
-              </div>
-              <span class="text-xs font-bold text-cyan-400 bg-cyan-950 border border-cyan-800 group-hover:bg-cyan-500 group-hover:text-slate-950 group-hover:border-cyan-400 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                <span>モジュール起動</span>
-                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-              </span>
+      <!-- 1: 席替えメーカー -->
+      <a href="./sekigae/" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+              🪑
             </div>
-            <h3 class="text-lg font-black text-white group-hover:text-cyan-300 transition mb-2">授業用大型タイマー</h3>
-            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
-              教室の一番後ろからでもハッキリ見える特大デジタル表示と円形プログレスリング。スクロールピッカー、全画面投影、耳に優しいオルゴール和音チャイムを搭載。
-            </p>
+            <span class="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2.5 py-0.5 rounded-full">人気 No.1</span>
           </div>
-          <div class="pt-4 border-t border-slate-800/80 flex flex-wrap gap-2 text-[11px] font-bold">
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">極大円形ゲージ</span>
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">優しい和音チャイム</span>
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">全画面投影</span>
-          </div>
-        </a>
-        <!-- 漢字配当チェッカーカード -->
-        <a href="./kanji/" target="_blank" rel="noopener noreferrer" class="group bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-amber-500 rounded-2xl p-6 shadow-md hover:shadow-amber-500/10 transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-amber-950/80 border border-amber-700/50 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                🔍
-              </div>
-              <span class="text-xs font-bold text-amber-400 bg-amber-950 border border-amber-800 group-hover:bg-amber-500 group-hover:text-slate-950 group-hover:border-amber-400 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                <span>モジュール起動</span>
-                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-              </span>
-            </div>
-            <h3 class="text-lg font-black text-white group-hover:text-amber-300 transition mb-2">漢字配当チェッカー</h3>
-            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
-              テスト問題やおたよりの文章を貼るだけ。受け持ち学年に合わせた「未習漢字（まだ習っていない漢字）」の自動検出、難易度分析、ふりがな用コピーに対応。
-            </p>
-          </div>
-          <div class="pt-4 border-t border-slate-800/80 flex flex-wrap gap-2 text-[11px] font-bold">
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">小1〜小6全1026字</span>
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">未習漢字ハイライト</span>
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">（ ）付与コピー</span>
-          </div>
-        </a>
-<!-- 教室サウンドカード -->
-        <a href="./sound/" target="_blank" rel="noopener noreferrer" class="group bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500 rounded-2xl p-6 shadow-md hover:shadow-emerald-500/10 transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-emerald-950/80 border border-emerald-700/50 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                🔊
-              </div>
-              <span class="text-xs font-bold text-emerald-400 bg-emerald-950 border border-emerald-800 group-hover:bg-emerald-500 group-hover:text-slate-950 group-hover:border-emerald-400 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                <span>モジュール起動</span>
-                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-              </span>
-            </div>
-            <h3 class="text-lg font-black text-white group-hover:text-emerald-300 transition mb-2">教室サウンドパッド</h3>
-            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
-              授業やクイズが盛り上がる10種の効果音（ピンポン・出題デデン・ドラムロール・レベルアップ・ホイッスル等）をワンタップで即再生。
-            </p>
-          </div>
-          <div class="pt-4 border-t border-slate-800/80 flex flex-wrap gap-2 text-[11px] font-bold">
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">10種の効果音</span>
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">遅延ゼロ即再生</span>
-            <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/60">数字キー操作対応</span>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <!-- 学校現場での安心・安全性仕様 -->
-    <section class="bg-slate-900/60 rounded-2xl border border-slate-800 p-5 sm:p-6 space-y-3">
-      <h2 class="text-sm sm:text-base font-black text-white flex items-center gap-2">
-        <i data-lucide="lock" class="w-4 h-4 text-cyan-400"></i>
-        <span>学校現場・校内ネットワークで安全に使える仕様</span>
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-400 leading-relaxed pt-1">
-        <div class="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
-          <strong class="block text-slate-200 font-bold mb-1 flex items-center gap-1.5">
-            <i data-lucide="database-zap" class="w-3.5 h-3.5 text-indigo-400"></i>
-            <span>個人情報の外部送信ゼロ</span>
-          </strong>
-          児童生徒の氏名等のデータはすべてブラウザ内部のメモリでのみ処理されます。外部サーバーに送信・蓄積されることは一切ありません。
+          <h2 class="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors">スマート席替えメーカー</h2>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
+            配慮席の事前固定、スロット演出、Excel出力・印刷対応。子どもたちが大盛り上がりする席替え決定版。
+          </p>
         </div>
-        <div class="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
-          <strong class="block text-slate-200 font-bold mb-1 flex items-center gap-1.5">
-            <i data-lucide="user-x" class="w-3.5 h-3.5 text-cyan-400"></i>
-            <span>アカウント・登録不要</span>
-          </strong>
-          ログインやメールアドレスの入力は一切不要。教室の電子黒板や職員室の端末でブックマークを開くだけで即座に作動します。
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
+          <span>アプリを開く</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
         </div>
-        <div class="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
-          <strong class="block text-slate-200 font-bold mb-1 flex items-center gap-1.5">
-            <i data-lucide="monitor-smartphone" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span>あらゆる端末で超高速動作</span>
-          </strong>
-          Windows PC、Mac、Chromebook、iPadなど、学校にあるどんな端末の標準ブラウザでもストレスなく超軽量に作動します。
-        </div>
-      </div>
-    </section>
+      </a>
 
-    <!-- ご意見・機能リクエスト募集セクション -->
-    <section class="bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950/40 rounded-2xl border border-slate-800 hover:border-slate-700 p-6 sm:p-8 text-center space-y-4 transition">
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-950 border border-indigo-700/60 text-indigo-400 mb-1">
-        <i data-lucide="message-square-plus" class="w-6 h-6"></i>
+      <!-- 2: 早押しクイズツール（NEW） -->
+      <a href="./quiz/" class="app-card bg-white rounded-3xl border-2 border-amber-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-amber-400 text-slate-950 font-black text-[10px] px-3 py-1 rounded-bl-xl tracking-wider uppercase">
+          NEW RELEASE
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+              🚨
+            </div>
+            <span class="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full mr-12">端末連携</span>
+          </div>
+          <h2 class="text-lg font-black text-slate-900 group-hover:text-amber-600 transition-colors">早押しクイズツール</h2>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
+            黒板のQRコードをタブレットで読むだけ！誰が最初に押したかをミリ秒単位で判定・ランキング表示。
+          </p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
+          <span>アプリを開く</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </a>
+
+      <!-- 3: 当番ローテーション表（NEW） -->
+      <a href="./toban/" class="app-card bg-white rounded-3xl border-2 border-emerald-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-emerald-500 text-white font-black text-[10px] px-3 py-1 rounded-bl-xl tracking-wider uppercase">
+          NEW RELEASE
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+              🍱
+            </div>
+            <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full mr-12">学級経営</span>
+          </div>
+          <h2 class="text-lg font-black text-slate-900 group-hover:text-emerald-600 transition-colors">当番ローテーション表</h2>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
+            給食・掃除当番をワンクリックで翌週へスライド！席替え名簿の引継ぎやA4印刷・電子黒板投影に対応。
+          </p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
+          <span>アプリを開く</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </a>
+
+      <!-- 4: 教室サウンドパッド -->
+      <a href="./sound/" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+              🔊
+            </div>
+            <span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200/60 px-2.5 py-0.5 rounded-full">高音質MP3</span>
+          </div>
+          <h2 class="text-lg font-black text-slate-900 group-hover:text-rose-600 transition-colors">教室サウンドパッド</h2>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
+            テレビ番組仕様のピンポン・ブブー・ドラムロールなど10種。キーボードの1〜0で即鳴らせる演出ツール。
+          </p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600">
+          <span>アプリを開く</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </a>
+
+      <!-- 5: 授業用大型タイマー -->
+      <a href="./timer/" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+              ⏱️
+            </div>
+            <span class="text-[11px] font-bold text-sky-700 bg-sky-50 border border-sky-200/60 px-2.5 py-0.5 rounded-full">教室投影</span>
+          </div>
+          <h2 class="text-lg font-black text-slate-900 group-hover:text-sky-600 transition-colors">授業用大型タイマー</h2>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
+            後ろの席からでも一目で時間がわかる特大フォント。集中できるカウントダウンと心地よいチャイム音。
+          </p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600">
+          <span>アプリを開く</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </a>
+
+      <!-- 6: 漢字配当チェッカー -->
+      <a href="./kanji/" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+              📖
+            </div>
+            <span class="text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200/60 px-2.5 py-0.5 rounded-full">教材作成</span>
+          </div>
+          <h2 class="text-lg font-black text-slate-900 group-hover:text-teal-600 transition-colors">漢字配当チェッカー</h2>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
+            プリントやテストの文章を貼るだけ。選択した学年で「まだ習っていない漢字」を瞬時にハイライト。
+          </p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-600">
+          <span>アプリを開く</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- 安心・安全へのこだわりバナー -->
+    <div class="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-black text-slate-800 text-sm">個人情報をサーバー送信ゼロ</h3>
+          <p class="text-xs text-slate-500 mt-1 leading-relaxed">児童名簿や入力データはすべて先生のお手元（ブラウザ内）だけで安全に処理されます。</p>
+        </div>
       </div>
-      <div>
-        <h2 class="text-lg sm:text-xl font-black text-white">ご意見・新機能リクエスト受付</h2>
-        <p class="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-lg mx-auto leading-relaxed">
-          「席替えにこんな機能を追加してほしい」「授業で使えるこんなツールを作ってほしい」など、現場の先生方からのアイデアを募集中です。
-        </p>
+
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+          <i data-lucide="user-x" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-black text-slate-800 text-sm">面倒なアカウント登録なし</h3>
+          <p class="text-xs text-slate-500 mt-1 leading-relaxed">メールアドレスやパスワードの設定は一切不要。思い立った瞬間にすぐ授業で使えます。</p>
+        </div>
       </div>
-      <div class="pt-1">
-        <a id="feedbackBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSc0v7ffyC5-MdUMMjDgePcAyjEmaWyTHXZWxXZcMLvd1HqZMA/viewform?usp=dialog/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-indigo-600/20 transition">
-          <i data-lucide="send" class="w-4 h-4"></i>
-          <span>リクエスト・感想を送る（Googleフォーム）</span>
-        </a>
-        <p class="text-[11px] text-slate-500 mt-2">※匿名で簡単に送信いただけます</p>
+
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-black text-slate-800 text-sm">現場の先生が作った実用ツール</h3>
+          <p class="text-xs text-slate-500 mt-1 leading-relaxed">「教室のこんな機能が欲しかった」を形に。授業のテンポと業務効率化を徹底サポート。</p>
+        </div>
       </div>
-    </section>
+    </div>
 
   </main>
 
   <!-- フッター -->
-  <footer class="mt-auto py-6 px-4 border-t border-slate-850 bg-slate-900/60 text-center text-xs text-slate-500">
-    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-      <p class="font-mono-tech">センセイボックス (SenseiBox) &copy; 2026 | ALL TOOLS FREE & SECURE</p>
-      <div class="flex items-center gap-4 text-slate-400">
-        <a href="./sekigae/" class="hover:text-cyan-400 transition">席替えメーカー</a>
-        <a href="./timer/" class="hover:text-cyan-400 transition">授業用タイマー</a>
+  <footer class="mt-auto py-8 px-4 border-t border-slate-200 bg-white text-center text-xs text-slate-400">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg overflow-hidden border border-slate-200 bg-white">
+          <img src="./logo.png" onerror="this.onerror=null; this.src='./logo.jpg';" alt="ロゴ" class="w-full h-full object-cover">
+        </div>
+        <span class="font-bold text-slate-700">センセイボックス (SenseiBox)</span>
+        <span class="font-mono-tech text-[11px]">&copy; 2026</span>
       </div>
+      <p class="text-slate-400 text-[11px]">
+        学校教育現場での利用を応援する完全無料・教員支援プロジェクト
+      </p>
     </div>
   </footer>
 
   <script>
-    lucide.createIcons();
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
   </script>
 </body>
 </html>
