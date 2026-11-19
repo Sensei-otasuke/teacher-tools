@@ -7,15 +7,18 @@
   <!-- Google Search Console 所有権確認タグ -->
   <meta name="google-site-verification" content="srsAyNcZ5tESYeG_jbmVL-l-hGoYNPTbrPBLM5AMXsI" />
 
+  <!-- URL正規化タグ（SNS経由のパラメータによる評価分散を防止） -->
+  <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/" />
+
   <!-- 検索エンジン向けSEO設定 -->
   <title>センセイボックス (SenseiBox) | 授業・学級経営をサポートする先生のためのWebツール</title>
-  <meta name="description" content="センセイボックス（SenseiBox）は、小・中学校の先生のための無料教室支援Webツール集です。個人情報を外部送信しない完全安心の「スマート席替えメーカー」「早押しクイズ」「当番表」「教室サウンドパッド」「授業用タイマー」などを搭載。登録不要ですぐに使えます。">
-  <meta name="keywords" content="センセイボックス, SenseiBox, 席替え ルーレット, 授業用タイマー, 早押しクイズ, 当番表, 教室 効果音, 教員 便利ツール, 小学校 席替え, 電子黒板, ICT教育">
+  <meta name="description" content="センセイボックス（SenseiBox）は、小・中学校の先生のための無料教室支援Webツール集です。個人情報を外部送信しない完全安心の「スマート席替えメーカー」「早押しクイズ」「当番表」「一括ルビ振りメーカー」「スマートくじ引きメーカー」「教室サウンドパッド」「授業用タイマー」「漢字配当チェッカー」を搭載。登録不要ですぐに使えます。">
+  <meta name="keywords" content="センセイボックス, SenseiBox, 席替え ルーレット, 授業用タイマー, 早押しクイズ, 当番表, ルビ振り 一括, Word ルビ, くじ引き アプリ, 教室 効果音, 教員 便利ツール, 小学校 席替え, 電子黒板, ICT教育">
   <meta name="robots" content="index, follow">
 
   <!-- OGP（SNS・LINE・Instagramシェア用） -->
   <meta property="og:title" content="センセイボックス (SenseiBox) | 授業・学級経営Webツール">
-  <meta property="og:description" content="個人情報の外部送信ゼロ・登録不要。席替え・早押しクイズ・当番表など、先生の「ちょっと助かる」が揃うスマートツールボックス。">
+  <meta property="og:description" content="個人情報の外部送信ゼロ・登録不要。席替え・早押しクイズ・当番表・一括ルビ振り・くじ引きなど、先生の「ちょっと助かる」が揃うスマートツールボックス。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://sensei-otasuke.github.io/teacher-tools/">
   <meta property="og:image" content="https://sensei-otasuke.github.io/teacher-tools/logo.png">
@@ -26,6 +29,25 @@
   <meta name="twitter:title" content="センセイボックス (SenseiBox)">
   <meta name="twitter:description" content="登録不要・完全無料の先生向け教室Webツール集。">
   <meta name="twitter:image" content="https://sensei-otasuke.github.io/teacher-tools/logo.png">
+
+  <!-- 構造化データ（Google検索エンジンにWebアプリ群として正確に認識させる） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "センセイボックス (SenseiBox)",
+    "alternateName": "SenseiBox",
+    "url": "https://sensei-otasuke.github.io/teacher-tools/",
+    "description": "小・中学校の先生のための無料教室支援Webツール集。個人情報を外部送信しない完全安心設計で、席替え、早押しクイズ、当番表、一括ルビ振り、くじ引き、タイマー、サウンドパッド、漢字配当チェッカーを搭載。",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "JPY"
+    }
+  }
+  </script>
 
   <!-- ファビコン（タブのアイコン） -->
   <link rel="icon" href="./logo.png" type="image/png">
@@ -97,7 +119,7 @@
     <div class="text-center max-w-3xl mx-auto space-y-3">
       <div class="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full shadow-2xs text-xs font-bold text-slate-600">
         <span class="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
-        <span>新ツール2種を追加！全6アプリ公開中</span>
+        <span>新ツール2種を追加！全8アプリ公開中</span>
       </div>
       <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-snug">
         <span class="inline-block">教室の「困った」を、</span><span class="inline-block">秒で解決する道具箱。</span>
@@ -108,7 +130,7 @@
       </p>
     </div>
 
-    <!-- アプリ一覧グリッド（全6ツール：すべて別タブで開く設定） -->
+    <!-- アプリ一覧グリッド（全8ツール：すべて別タブで開く設定） -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
 
       <!-- 1: 席替えメーカー -->
@@ -131,21 +153,68 @@
         </div>
       </a>
 
-      <!-- 2: 早押しクイズツール（NEW） -->
-      <a href="./quiz/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border-2 border-amber-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
-        <div class="absolute top-0 right-0 bg-amber-400 text-slate-950 font-black text-[10px] px-3 py-1 rounded-bl-xl tracking-wider uppercase">
+      <!-- 2: 一括ルビ振りメーカー（NEW） -->
+      <a href="./ruby/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border-2 border-violet-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-violet-600 text-white font-black text-[10px] px-3 py-1 rounded-bl-xl tracking-wider uppercase">
           NEW RELEASE
         </div>
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+              🔤
+            </div>
+            <span class="text-[11px] font-bold text-violet-800 bg-violet-50 border border-violet-200 px-2.5 py-0.5 rounded-full mr-12">Word対応</span>
+          </div>
+          <h2 class="text-lg font-black text-slate-900 group-hover:text-violet-600 transition-colors">一括ルビ振りメーカー</h2>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
+            Wordファイルや文章を貼るだけで一気にふりがな変換！未習漢字だけのルビ振りや、ルビ付きのままWordへ貼付可能。
+          </p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-violet-700">
+          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
+          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </a>
+
+      <!-- 3: スマートくじ引きメーカー（NEW） -->
+      <a href="./kuji/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border-2 border-orange-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-orange-500 text-white font-black text-[10px] px-3 py-1 rounded-bl-xl tracking-wider uppercase">
+          NEW RELEASE
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+              🎯
+            </div>
+            <span class="text-[11px] font-bold text-orange-800 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-full mr-12">抽選・順番決め</span>
+          </div>
+          <h2 class="text-lg font-black text-slate-900 group-hover:text-orange-600 transition-colors">スマートくじ引きメーカー</h2>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
+            数字や名前をセットしてドラムロール抽選！発表順決め（重複なし）からお楽しみ会まで大活躍。
+          </p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-orange-700">
+          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
+          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </a>
+
+      <!-- 4: 早押しクイズツール -->
+      <a href="./quiz/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
         <div>
           <div class="flex items-center justify-between mb-4">
             <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
               🚨
             </div>
-            <span class="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full mr-12">端末連携</span>
+            <span class="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">端末連携</span>
           </div>
           <h2 class="text-lg font-black text-slate-900 group-hover:text-amber-600 transition-colors">早押しクイズツール</h2>
           <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
             黒板のQRコードをタブレットで読むだけ！誰が最初に押したかをミリ秒単位で判定・ランキング表示。
+          </p>
+          <p class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200/80 rounded-lg px-2.5 py-1.5 mt-2.5 font-bold flex items-start gap-1">
+            <i data-lucide="info" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600"></i>
+            <span>※学校で使う際は、黒板側も予備の児童端末で起動してください</span>
           </p>
         </div>
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
@@ -154,17 +223,14 @@
         </div>
       </a>
 
-      <!-- 3: 当番ローテーション表（NEW） -->
-      <a href="./toban/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border-2 border-emerald-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
-        <div class="absolute top-0 right-0 bg-emerald-500 text-white font-black text-[10px] px-3 py-1 rounded-bl-xl tracking-wider uppercase">
-          NEW RELEASE
-        </div>
+      <!-- 5: 当番ローテーション表 -->
+      <a href="./toban/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
         <div>
           <div class="flex items-center justify-between mb-4">
             <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
               🍱
             </div>
-            <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full mr-12">学級経営</span>
+            <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">学級経営</span>
           </div>
           <h2 class="text-lg font-black text-slate-900 group-hover:text-emerald-600 transition-colors">当番ローテーション表</h2>
           <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
@@ -177,7 +243,7 @@
         </div>
       </a>
 
-      <!-- 4: 教室サウンドパッド -->
+      <!-- 6: 教室サウンドパッド -->
       <a href="./sound/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
         <div>
           <div class="flex items-center justify-between mb-4">
@@ -197,7 +263,7 @@
         </div>
       </a>
 
-      <!-- 5: 授業用大型タイマー -->
+      <!-- 7: 授業用大型タイマー -->
       <a href="./timer/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
         <div>
           <div class="flex items-center justify-between mb-4">
@@ -217,7 +283,7 @@
         </div>
       </a>
 
-      <!-- 6: 漢字配当チェッカー -->
+      <!-- 8: 漢字配当チェッカー -->
       <a href="./kanji/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
         <div>
           <div class="flex items-center justify-between mb-4">
@@ -293,7 +359,7 @@
           <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
           <span>公式Instagram</span>
         </a>
-        <span>教育現場を応援する教員支援プロジェクト</span>
+        <span>学校教育現場を応援する教員支援プロジェクト</span>
       </div>
     </div>
   </footer>
