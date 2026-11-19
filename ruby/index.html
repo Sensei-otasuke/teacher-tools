@@ -17,8 +17,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Mammoth.js (.docx ブラウザ内解析) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
-  <!-- Kuromoji.js (日本語形態素解析・ふりがな生成) -->
-  <script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
 
   <style>
     body { font-family: 'M PLUS Rounded 1c', sans-serif; }
@@ -127,7 +125,7 @@
   <!-- 辞書ロード状態バー -->
   <div id="dictStatusBanner" class="bg-indigo-600 text-white text-xs font-bold py-2 px-4 text-center flex items-center justify-center gap-2">
     <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-    <span id="dictStatusText">日本語ふりがな辞書を読み込んでいます（初回のみ数秒かかります）...</span>
+    <span id="dictStatusText">裏方で日本語ふりがな辞書を準備中です（画面操作はそのまま可能です）...</span>
   </div>
 
   <!-- メインエリア -->
@@ -199,8 +197,8 @@
 
         <!-- 実行ボタン -->
         <button id="convertBtn" disabled class="w-full py-3.5 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed active:scale-98 text-white font-black text-sm sm:text-base rounded-2xl shadow-md transition flex items-center justify-center gap-2">
-          <i data-lucide="sparkles" class="w-5 h-5"></i>
-          <span>一気にルビを振る！</span>
+          <i data-lucide="sparkles" class="w-5 h-5" id="convertBtnIcon"></i>
+          <span id="convertBtnText">辞書準備中...</span>
         </button>
       </div>
 
@@ -296,27 +294,96 @@
     }
 
     // ==========================================
-    // 2. Kuromoji 形態素解析エンジンの初期化
+    // 2. インライン Web Worker（裏方スレッド）の構築
+    //    ※ 辞書の解凍・構築・形態素解析をすべて裏側で実行し
+    //       メイン画面のフリーズ（「応答しません」警告）を完全に防ぐ
     // ==========================================
-    let tokenizer = null;
+    const workerCode = `
+      importScripts("https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js");
+
+      let tokenizer = null;
+
+      kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" }).build(function(err, builtTokenizer) {
+        if (err) {
+          self.postMessage({ type: "error", message: err.message || "辞書の読み込みに失敗しました" });
+          return;
+        }
+        tokenizer = builtTokenizer;
+        self.postMessage({ type: "ready" });
+      });
+
+      self.onmessage = function(e) {
+        const msg = e.data;
+        if (msg.type === "tokenize") {
+          if (!tokenizer) {
+            self.postMessage({ type: "error", message: "辞書がまだ準備中です" });
+            return;
+          }
+          const lines = msg.text.split("\\n");
+          const tokenizedLines = lines.map(function(line) {
+            return tokenizer.tokenize(line).map(function(t) {
+              return {
+                surface_form: t.surface_form,
+                reading: t.reading || ""
+              };
+            });
+          });
+          self.postMessage({
+            type: "tokenized",
+            tokenizedLines: tokenizedLines,
+            requestId: msg.requestId
+          });
+        }
+      };
+    `;
+
+    const workerBlob = new Blob([workerCode], { type: "application/javascript" });
+    const workerUrl = URL.createObjectURL(workerBlob);
+    const rubyWorker = new Worker(workerUrl);
+
+    let isWorkerReady = false;
+    let pendingAutoConvert = false;
+    let latestRequestId = 0;
+
     const dictBanner = document.getElementById('dictStatusBanner');
     const dictText = document.getElementById('dictStatusText');
     const convertBtn = document.getElementById('convertBtn');
+    const convertBtnText = document.getElementById('convertBtnText');
 
-    kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" }).build((err, builtTokenizer) => {
-      if (err) {
-        dictBanner.className = "bg-rose-600 text-white text-xs font-bold py-2 px-4 text-center";
-        dictText.textContent = "辞書の読み込みに失敗しました。ページを再読み込みしてください。";
-        return;
+    rubyWorker.onmessage = function(e) {
+      const data = e.data;
+
+      if (data.type === "ready") {
+        isWorkerReady = true;
+        dictBanner.className = "bg-emerald-600 text-white text-xs font-bold py-1.5 px-4 text-center transition-all";
+        dictText.textContent = "✅ 準備完了！いつでもルビ変換できます";
+        convertBtn.disabled = false;
+        convertBtnText.textContent = "一気にルビを振る！";
+
+        setTimeout(() => {
+          dictBanner.classList.add('hidden');
+        }, 2500);
+
+        if (pendingAutoConvert) {
+          pendingAutoConvert = false;
+          requestTokenize();
+        }
       }
-      tokenizer = builtTokenizer;
-      dictBanner.className = "bg-emerald-600 text-white text-xs font-bold py-1.5 px-4 text-center transition-all";
-      dictText.textContent = "✅ 準備完了！いつでもルビ変換できます";
-      convertBtn.disabled = false;
-      setTimeout(() => {
-        dictBanner.classList.add('hidden');
-      }, 2500);
-    });
+      else if (data.type === "tokenized") {
+        if (data.requestId !== latestRequestId) return;
+        buildRubySegments(data.tokenizedLines);
+        convertBtn.disabled = false;
+        convertBtnText.textContent = "一気にルビを振る！";
+        showToast('ルビを一括変換しました！');
+      }
+      else if (data.type === "error") {
+        dictBanner.className = "bg-rose-600 text-white text-xs font-bold py-2 px-4 text-center";
+        dictBanner.classList.remove('hidden');
+        dictText.textContent = data.message + "（ページを再読み込みしてください）";
+        convertBtn.disabled = false;
+        convertBtnText.textContent = "一気にルビを振る！";
+      }
+    };
 
     // ==========================================
     // 3. 文字判定 ＆ ルビ割り当てロジック
@@ -364,23 +431,38 @@
 
     let renderedSegments = [];
 
-    function convertTextToRuby() {
-      if (!tokenizer) return;
+    function requestTokenize() {
       const rawText = document.getElementById('sourceText').value;
       if (!rawText.trim()) {
         showToast('文章を入力してください');
         return;
       }
 
+      if (!isWorkerReady) {
+        pendingAutoConvert = true;
+        showToast('辞書の準備が終わるまで数秒お待ちください...');
+        return;
+      }
+
+      latestRequestId++;
+      convertBtn.disabled = true;
+      convertBtnText.textContent = "変換中...";
+
+      rubyWorker.postMessage({
+        type: "tokenize",
+        text: rawText,
+        requestId: latestRequestId
+      });
+    }
+
+    function buildRubySegments(tokenizedLines) {
       const maxGrade = parseInt(document.getElementById('gradeFilter').value, 10);
       const learnedSet = maxGrade > 0 ? getLearnedKanjiSet(maxGrade) : null;
       const katakanaMode = document.getElementById('katakanaOption').value;
 
-      const lines = rawText.split('\n');
       renderedSegments = [];
 
-      lines.forEach((line, lineIdx) => {
-        const tokens = tokenizer.tokenize(line);
+      tokenizedLines.forEach((tokens, lineIdx) => {
         tokens.forEach(token => {
           const surface = token.surface_form;
           const reading = token.reading;
@@ -408,13 +490,12 @@
           }
         });
 
-        if (lineIdx < lines.length - 1) {
+        if (lineIdx < tokenizedLines.length - 1) {
           renderedSegments.push({ text: '\n', ruby: null });
         }
       });
 
       renderPreview();
-      showToast('ルビを一括変換しました！');
     }
 
     function renderPreview() {
@@ -493,9 +574,7 @@
           .then(result => {
             document.getElementById('sourceText').value = result.value.trim();
             fileNameLabel.textContent = `✅ 読込完了: ${file.name}`;
-            if (tokenizer) {
-              convertTextToRuby();
-            }
+            requestTokenize();
           })
           .catch(err => {
             console.error(err);
@@ -619,12 +698,12 @@
       window.print();
     };
 
-    convertBtn.onclick = convertTextToRuby;
+    convertBtn.onclick = requestTokenize;
 
     document.getElementById('sampleTextBtn').onclick = () => {
       document.getElementById('sourceText').value =
         "明日の遠足では、地域の歴史博物館を見学します。\n集合時刻は午前八時三十分ですので、遅れないように登校してください。\n雨天の場合は体育館でオリエンテーションを実施します。";
-      if (tokenizer) convertTextToRuby();
+      requestTokenize();
     };
 
     document.getElementById('clearTextBtn').onclick = () => {
