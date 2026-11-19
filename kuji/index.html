@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>スマートくじ引きメーカー | センセイボックス</title>
+  <meta name="description" content="教室の発表順決め・班決め・お楽しみ会を盛り上げる無料くじ引きアプリ。出席番号の一括生成、重複なしモード、ドラムロール＆シンバル演出に対応。">
+  <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/kuji/" />
+  <link rel="icon" href="../logo.png" type="image/png">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti (紙吹雪演出) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
+    .tech-bg {
+      background-image: radial-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    @keyframes winnerPop {
+      0% { transform: scale(0.6); opacity: 0; }
+      70% { transform: scale(1.08); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .winner-pop {
+      animation: winnerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes rollingPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+    .rolling-active {
+      animation: rollingPulse 0.15s infinite;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-orange-500 selection:text-white">
+
+  <!-- ヘッダー -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a href="../" class="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition" title="ポータルへ戻る">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-orange-100 border border-orange-200 flex items-center justify-center text-xl">
+            🎯
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <span>スマートくじ引きメーカー</span>
+              <span class="hidden sm:inline text-[10px] font-mono-tech font-bold bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-full">ドラムロール演出付</span>
+            </h1>
+            <p class="text-[10px] text-slate-400 font-bold hidden sm:block">発表順・班決め・お楽しみ会を盛り上げる抽選ツール</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側コントロール（効果音ON/OFF・全画面） -->
+      <div class="flex items-center gap-2">
+        <button id="soundToggleBtn" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center gap-1.5">
+          <i data-lucide="volume-2" class="w-4 h-4 text-orange-600" id="soundIcon"></i>
+          <span id="soundLabel">効果音 ON</span>
+        </button>
+
+        <button id="fullscreenBtn" class="p-2 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="全画面表示">
+          <i data-lucide="maximize" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインエリア -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 tech-bg">
+
+    <!-- 左カラム：くじの中身設定 (4カラム) -->
+    <div class="lg:col-span-4 flex flex-col gap-4">
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="list-plus" class="w-4 h-4 text-orange-500"></i>
+            <span>くじの項目リスト</span>
+          </h2>
+          <span id="remainingBadge" class="text-[11px] font-bold bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-0.5 rounded-full">
+            残り 30 件
+          </span>
+        </div>
+
+        <!-- 出席番号 一括作成ショートカット -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+            <span>1〜</span>
+            <input id="numCountInput" type="number" min="2" max="200" value="30" class="w-14 p-1 text-center font-mono-tech font-black bg-white border border-slate-300 rounded-lg text-slate-900 focus:border-orange-500 focus:outline-none">
+            <span>番まで</span>
+          </div>
+          <button id="generateNumBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold text-xs rounded-xl transition">
+            数字を一括作成
+          </button>
+        </div>
+
+        <!-- サンプルプリセット -->
+        <div class="flex flex-wrap gap-1.5">
+          <button data-preset="han" class="preset-chip text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-700 text-slate-600 transition">1〜6班</button>
+          <button data-preset="topic" class="preset-chip text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-700 text-slate-600 transition">スピーチお題</button>
+          <button data-preset="atari" class="preset-chip text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-700 text-slate-600 transition">あたり・はずれ</button>
+        </div>
+
+        <!-- テキスト入力エリア -->
+        <div class="relative">
+          <textarea id="itemsInput" rows="7" placeholder="1行に1つずつ、数字や名前・言葉を入力してください" class="w-full p-3 text-sm font-bold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-orange-500 focus:outline-none leading-relaxed resize-y select-text"></textarea>
+        </div>
+
+        <!-- 抽選ルール設定 -->
+        <div class="space-y-2.5 pt-1 border-t border-slate-100">
+          <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition">
+            <div>
+              <span class="text-xs font-black text-slate-800 block">一度出た項目を除外する</span>
+              <span class="text-[10px] text-slate-400 font-bold">発表順決め・全員当てる時はON</span>
+            </div>
+            <input id="noRepeatCheck" type="checkbox" checked class="w-5 h-5 accent-orange-500 rounded cursor-pointer">
+          </label>
+
+          <div class="flex items-center justify-between p-2">
+            <div>
+              <span class="text-xs font-black text-slate-800 block">停止のタイミング</span>
+              <span class="text-[10px] text-slate-400 font-bold">自動停止（約2.5秒）か手動ストップ</span>
+            </div>
+            <select id="stopModeSelect" class="p-1.5 text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl focus:outline-none">
+              <option value="auto" selected>自動で止まる</option>
+              <option value="manual">ボタンで止める</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 中央カラム：巨大抽選ステージ (5カラム) -->
+    <div class="lg:col-span-5 flex flex-col gap-4">
+      <div class="bg-white rounded-3xl border-2 border-orange-200/90 p-6 sm:p-8 shadow-sm flex-1 flex flex-col items-center justify-between min-h-[440px] relative overflow-hidden">
+        
+        <!-- 上部ラベル -->
+        <div id="stageStatusTag" class="px-3.5 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-xs tracking-wider">
+          READY TO DRAW
+        </div>
+
+        <!-- メイン表示ボックス -->
+        <div id="rouletteBox" class="my-auto w-full py-10 px-4 rounded-3xl bg-gradient-to-b from-slate-50 to-orange-50/40 border border-slate-200/80 flex flex-col items-center justify-center text-center min-h-[220px]">
+          <div id="rouletteDisplay" class="text-5xl sm:text-7xl font-black text-slate-900 tracking-tight break-all leading-tight">
+            ？
+          </div>
+          <p id="rouletteSubText" class="text-xs font-bold text-slate-400 mt-3">
+            ボタンを押して抽選スタート！
+          </p>
+        </div>
+
+        <!-- 抽選アクションボタン -->
+        <div class="w-full space-y-2.5 pt-4">
+          <button id="drawBtn" class="w-full py-4 sm:py-5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-98 text-white font-black text-xl sm:text-2xl rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5">
+            <i data-lucide="sparkles" class="w-6 h-6" id="drawBtnIcon"></i>
+            <span id="drawBtnText">くじを引く！</span>
+          </button>
+
+          <p class="text-center text-[11px] font-bold text-slate-400 font-mono-tech">
+            [Space] キーでも操作できます
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右カラム：当選履歴 (3カラム) -->
+    <div class="lg:col-span-3 flex flex-col gap-4">
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between min-h-[440px]">
+        <div>
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+            <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
+              <span>当選履歴</span>
+            </h2>
+            <button id="resetHistoryBtn" class="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition flex items-center gap-1">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+              <span>リセット</span>
+            </button>
+          </div>
+
+          <div id="historyList" class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+            <div id="historyEmpty" class="text-center text-slate-400 py-16 text-xs font-bold">
+              まだ抽選されていません
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ==========================================
+    // 1. サウンドエンジン（../sound/ 優先 + Web Audio ドラムロール＆シンバル合成）
+    // ==========================================
+    class LotteryAudio {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+        this.rollInterval = null;
+        this.drumAudio = null;
+        this.cymbalAudio = null;
+
+        this.tryLoadExternalAudio();
+      }
+
+      tryLoadExternalAudio() {
+        const drumPaths = ['../sound/drumroll.mp3', '../sound/drum.mp3'];
+        const cymbalPaths = ['../sound/cymbal.mp3', '../sound/jan.mp3', '../sound/roll_end.mp3'];
+
+        drumPaths.forEach(src => {
+          const a = new Audio(src);
+          a.loop = true;
+          a.addEventListener('canplaythrough', () => {
+            if (!this.drumAudio) this.drumAudio = a;
+          }, { once: true });
+        });
+
+        cymbalPaths.forEach(src => {
+          const a = new Audio(src);
+          a.addEventListener('canplaythrough', () => {
+            if (!this.cymbalAudio) this.cymbalAudio = a;
+          }, { once: true });
+        });
+      }
+
+      unlock() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      startDrumRoll() {
+        if (!this.enabled) return;
+        this.unlock();
+        this.stopDrumRoll();
+
+        if (this.drumAudio) {
+          this.drumAudio.currentTime = 0;
+          this.drumAudio.play().catch(() => {});
+          return;
+        }
+
+        this.rollInterval = setInterval(() => {
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const bufferSize = this.ctx.sampleRate * 0.045;
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+          }
+
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 950 + Math.random() * 250;
+          filter.Q.value = 1.2;
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.045);
+
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          noise.start(now);
+        }, 42);
+      }
+
+      stopDrumRoll() {
+        if (this.drumAudio) {
+          this.drumAudio.pause();
+          this.drumAudio.currentTime = 0;
+        }
+        if (this.rollInterval) {
+          clearInterval(this.rollInterval);
+          this.rollInterval = null;
+        }
+      }
+
+      playCymbal() {
+        this.stopDrumRoll();
+        if (!this.enabled) return;
+        this.unlock();
+
+        if (this.cymbalAudio) {
+          this.cymbalAudio.currentTime = 0;
+          this.cymbalAudio.play().catch(() => {});
+          return;
+        }
+
+        const now = this.ctx.currentTime;
+        const duration = 1.6;
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.45));
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const highpass = this.ctx.createBiquadFilter();
+        highpass.type = 'highpass';
+        highpass.frequency.value = 3200;
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        noise.connect(highpass);
+        highpass.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+
+        [523.25, 659.25, 783.99, 1046.50].forEach(freq => {
+          const osc = this.ctx.createOscillator();
+          const oGain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now);
+          oGain.gain.setValueAtTime(0.1, now);
+          oGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+          osc.connect(oGain);
+          oGain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.9);
+        });
+      }
+    }
+
+    const audio = new LotteryAudio();
+
+    // ==========================================
+    // 2. くじ引きロジック ＆ 状態管理
+    // ==========================================
+    const itemsInput = document.getElementById('itemsInput');
+    const noRepeatCheck = document.getElementById('noRepeatCheck');
+    const stopModeSelect = document.getElementById('stopModeSelect');
+    const remainingBadge = document.getElementById('remainingBadge');
+    const rouletteDisplay = document.getElementById('rouletteDisplay');
+    const rouletteSubText = document.getElementById('rouletteSubText');
+    const stageStatusTag = document.getElementById('stageStatusTag');
+    const drawBtn = document.getElementById('drawBtn');
+    const drawBtnText = document.getElementById('drawBtnText');
+    const historyList = document.getElementById('historyList');
+    const historyEmpty = document.getElementById('historyEmpty');
+
+    let drawnHistory = [];
+    let isRolling = false;
+    let rollTimer = null;
+    let autoStopTimeout = null;
+
+    function setNumberItems(count) {
+      const arr = [];
+      for (let i = 1; i <= count; i++) arr.push(String(i));
+      itemsInput.value = arr.join('\n');
+      resetHistory();
+    }
+
+    function getAvailableCandidates() {
+      const allItems = itemsInput.value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+      if (!noRepeatCheck.checked) {
+        return allItems;
+      }
+
+      const usedCounts = {};
+      drawnHistory.forEach(item => {
+        usedCounts[item] = (usedCounts[item] || 0) + 1;
+      });
+
+      const available = [];
+      allItems.forEach(item => {
+        if (usedCounts[item] > 0) {
+          usedCounts[item]--;
+        } else {
+          available.push(item);
+        }
+      });
+      return available;
+    }
+
+    function updateRemainingCount() {
+      const candidates = getAvailableCandidates();
+      remainingBadge.textContent = `残り ${candidates.length} 件`;
+    }
+
+    function startLottery() {
+      const candidates = getAvailableCandidates();
+      if (candidates.length === 0) {
+        alert('抽選できる項目が残っていません！\n「リセット」を押すか、項目を追加してください。');
+        return;
+      }
+
+      isRolling = true;
+      audio.startDrumRoll();
+
+      stageStatusTag.textContent = 'DRAWING...';
+      stageStatusTag.className = 'px-3.5 py-1 rounded-full bg-orange-100 text-orange-700 font-black text-xs tracking-wider animate-pulse';
+      rouletteDisplay.classList.remove('winner-pop', 'text-orange-600');
+      rouletteDisplay.classList.add('rolling-active', 'text-slate-800');
+      rouletteSubText.textContent = 'ドキドキ…';
+
+      if (stopModeSelect.value === 'manual') {
+        drawBtnText.textContent = 'ストップ！';
+        drawBtn.className = 'w-full py-4 sm:py-5 bg-rose-600 hover:bg-rose-700 active:scale-98 text-white font-black text-xl sm:text-2xl rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5';
+      } else {
+        drawBtnText.textContent = '抽選中...';
+        drawBtn.disabled = true;
+        drawBtn.classList.add('opacity-80');
+      }
+
+      const maxLen = Math.max(...candidates.map(c => c.length));
+      if (maxLen >= 8) {
+        rouletteDisplay.className = 'text-3xl sm:text-5xl font-black text-slate-800 tracking-tight break-all leading-tight rolling-active';
+      } else {
+        rouletteDisplay.className = 'text-5xl sm:text-7xl font-black text-slate-800 tracking-tight break-all leading-tight rolling-active';
+      }
+
+      rollTimer = setInterval(() => {
+        const randItem = candidates[Math.floor(Math.random() * candidates.length)];
+        rouletteDisplay.textContent = randItem;
+      }, 55);
+
+      if (stopModeSelect.value === 'auto') {
+        autoStopTimeout = setTimeout(() => {
+          stopLottery();
+        }, 2400);
+      }
+    }
+
+    function stopLottery() {
+      if (!isRolling) return;
+      isRolling = false;
+      clearInterval(rollTimer);
+      clearTimeout(autoStopTimeout);
+
+      const candidates = getAvailableCandidates();
+      const winner = candidates[Math.floor(Math.random() * candidates.length)];
+
+      audio.playCymbal();
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 75,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+
+      rouletteDisplay.classList.remove('rolling-active', 'text-slate-800');
+      rouletteDisplay.textContent = winner;
+      void rouletteDisplay.offsetWidth;
+      rouletteDisplay.classList.add('winner-pop', 'text-orange-600');
+
+      stageStatusTag.textContent = 'WINNER!';
+      stageStatusTag.className = 'px-3.5 py-1 rounded-full bg-amber-400 text-slate-950 font-black text-xs tracking-wider';
+      rouletteSubText.textContent = `${drawnHistory.length + 1}番目の当選！`;
+
+      drawBtn.disabled = false;
+      drawBtn.className = 'w-full py-4 sm:py-5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-98 text-white font-black text-xl sm:text-2xl rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5';
+      drawBtnText.textContent = '次のくじを引く！';
+
+      drawnHistory.push(winner);
+      addHistoryCard(drawnHistory.length, winner);
+      updateRemainingCount();
+    }
+
+    function addHistoryCard(order, text) {
+      historyEmpty.classList.add('hidden');
+      const card = document.createElement('div');
+      card.className = 'flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 winner-pop';
+      card.innerHTML = `
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-6 h-6 rounded-lg bg-orange-500 text-white font-mono-tech font-black text-xs flex items-center justify-center shrink-0">${order}</span>
+          <span class="text-sm font-black text-slate-800 truncate">${escapeHtml(text)}</span>
+        </div>
+      `;
+      historyList.prepend(card);
+    }
+
+    function resetHistory() {
+      if (isRolling) {
+        isRolling = false;
+        clearInterval(rollTimer);
+        clearTimeout(autoStopTimeout);
+        audio.stopDrumRoll();
+      }
+      drawnHistory = [];
+      historyList.innerHTML = '';
+      historyList.appendChild(historyEmpty);
+      historyEmpty.classList.remove('hidden');
+
+      rouletteDisplay.className = 'text-5xl sm:text-7xl font-black text-slate-900 tracking-tight break-all leading-tight';
+      rouletteDisplay.textContent = '？';
+      stageStatusTag.textContent = 'READY TO DRAW';
+      stageStatusTag.className = 'px-3.5 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-xs tracking-wider';
+      rouletteSubText.textContent = 'ボタンを押して抽選スタート！';
+      drawBtn.disabled = false;
+      drawBtnText.textContent = 'くじを引く！';
+      drawBtn.className = 'w-full py-4 sm:py-5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-98 text-white font-black text-xl sm:text-2xl rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5';
+
+      updateRemainingCount();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // ==========================================
+    // 3. イベントリスナー設定
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      setNumberItems(30);
+      lucide.createIcons();
+
+      drawBtn.onclick = () => {
+        if (isRolling) {
+          if (stopModeSelect.value === 'manual') stopLottery();
+        } else {
+          startLottery();
+        }
+      };
+
+      window.addEventListener('keydown', (e) => {
+        if (document.activeElement === itemsInput || document.activeElement.tagName === 'INPUT') return;
+        if (e.code === 'Space') {
+          e.preventDefault();
+          if (isRolling) {
+            if (stopModeSelect.value === 'manual') stopLottery();
+          } else {
+            startLottery();
+          }
+        }
+      });
+
+      document.getElementById('generateNumBtn').onclick = () => {
+        const num = Math.max(2, Math.min(200, parseInt(document.getElementById('numCountInput').value, 10) || 30));
+        setNumberItems(num);
+      };
+
+      document.querySelectorAll('.preset-chip').forEach(btn => {
+        btn.onclick = () => {
+          const type = btn.dataset.preset;
+          if (type === 'han') {
+            itemsInput.value = '1班\n2班\n3班\n4班\n5班\n6班';
+          } else if (type === 'topic') {
+            itemsInput.value = '好きな食べ物\n休日の過ごし方\n最近うれしかったこと\nおすすめの遊び\n将来の夢\n好きな教科';
+          } else if (type === 'atari') {
+            itemsInput.value = '大あたり！\nあたり\nはずれ\nはずれ\nはずれ';
+          }
+          resetHistory();
+        };
+      });
+
+      itemsInput.addEventListener('input', updateRemainingCount);
+      noRepeatCheck.addEventListener('change', updateRemainingCount);
+
+      document.getElementById('resetHistoryBtn').onclick = resetHistory;
+
+      const soundBtn = document.getElementById('soundToggleBtn');
+      const soundLabel = document.getElementById('soundLabel');
+      const soundIcon = document.getElementById('soundIcon');
+      soundBtn.onclick = () => {
+        audio.enabled = !audio.enabled;
+        if (audio.enabled) {
+          soundLabel.textContent = '効果音 ON';
+          soundIcon.setAttribute('data-lucide', 'volume-2');
+          soundIcon.className = 'w-4 h-4 text-orange-600';
+        } else {
+          audio.stopDrumRoll();
+          soundLabel.textContent = '消音中';
+          soundIcon.setAttribute('data-lucide', 'volume-x');
+          soundIcon.className = 'w-4 h-4 text-slate-400';
+        }
+        lucide.createIcons();
+      };
+
+      document.getElementById('fullscreenBtn').onclick = () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      };
+    });
+  </script>
+</body>
+</html>
