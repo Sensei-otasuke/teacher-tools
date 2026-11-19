@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一括ルビ振りメーカー | センセイボックス</title>
+  <meta name="description" content="Wordファイル（.docx）や文章を貼り付けるだけで一気にふりがなを自動付与。学年別の未習漢字フィルタや、ルビ付きのままWordへ貼り付け・A4印刷に対応した先生向け無料Webツール。">
+  <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/ruby/" />
+  <link rel="icon" href="../logo.png" type="image/png">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Noto+Serif+JP:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Mammoth.js (.docx ブラウザ内解析) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <!-- Kuromoji.js (日本語形態素解析・ふりがな生成) -->
+  <script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
+
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; }
+    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
+    .font-mincho { font-family: 'Noto Serif JP', serif; }
+
+    /* ルビのスタイル調整 */
+    ruby {
+      ruby-align: center;
+    }
+    rt {
+      font-size: 0.52em;
+      font-weight: 700;
+      color: #4f46e5;
+      user-select: none;
+    }
+
+    /* クリック編集可能なルビ単語 */
+    .ruby-word {
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 0 1px;
+      transition: background-color 0.15s;
+    }
+    .ruby-word:hover {
+      background-color: #eef2ff;
+      outline: 1px dashed #6366f1;
+    }
+
+    /* 縦書きプレビュー用 */
+    .vertical-text {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      line-height: 2.3;
+      letter-spacing: 0.05em;
+    }
+    .horizontal-text {
+      writing-mode: horizontal-tb;
+      line-height: 2.2;
+    }
+
+    /* 印刷用スタイル（プレビュー枠の中身だけを綺麗にA4出力） */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printArea, #printArea * {
+        visibility: visible;
+      }
+      #printArea {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        padding: 15mm;
+        background: white !important;
+        color: black !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+      }
+      rt {
+        color: #1e293b !important;
+      }
+      .ruby-word:hover {
+        background-color: transparent !important;
+        outline: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- ヘッダー -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a href="../" class="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition" title="ポータルへ戻る">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center text-xl">
+            🔤
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <span>一括ルビ振りメーカー</span>
+              <span class="hidden sm:inline text-[10px] font-mono-tech font-bold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full">Word対応</span>
+            </h1>
+            <p class="text-[10px] text-slate-400 font-bold hidden sm:block">Wordファイルや文章に一瞬でふりがなを一括付与</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">サーバー送信ゼロ（ブラウザ内処理）</span>
+          <span class="sm:hidden">完全ローカル</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 辞書ロード状態バー -->
+  <div id="dictStatusBanner" class="bg-indigo-600 text-white text-xs font-bold py-2 px-4 text-center flex items-center justify-center gap-2">
+    <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+    <span id="dictStatusText">日本語ふりがな辞書を読み込んでいます（初回のみ数秒かかります）...</span>
+  </div>
+
+  <!-- メインエリア -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- 左カラム：入力 ＆ オプション設定 (5カラム) -->
+    <div class="lg:col-span-5 flex flex-col gap-4">
+      
+      <!-- 1. Wordアップロード ＆ テキスト入力カード -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-mono-tech">1</span>
+            <span>文章を入力 または Word読込</span>
+          </h2>
+          <button id="sampleTextBtn" class="text-[11px] font-bold text-violet-600 hover:text-violet-800 bg-violet-50 px-2.5 py-1 rounded-lg transition">
+            例文を入れる
+          </button>
+        </div>
+
+        <!-- Word (.docx) ドラッグ＆ドロップ枠 -->
+        <label id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-violet-500 hover:bg-violet-50/40 rounded-2xl p-4 text-center cursor-pointer transition flex flex-col items-center justify-center gap-1.5 group">
+          <input id="docxInput" type="file" accept=".docx" class="hidden">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
+          </div>
+          <p class="text-xs font-black text-slate-700">Wordファイル（.docx）を選択 または ドロップ</p>
+          <p id="fileNameLabel" class="text-[11px] text-slate-400 font-medium">※ファイル内のテキストを自動で抽出します</p>
+        </label>
+
+        <!-- テキストエリア -->
+        <div class="relative">
+          <textarea id="sourceText" rows="7" placeholder="ここにルビを振りたい文章を貼り付けてください。&#10;（Wordからコピーした文章もそのまま貼り付けできます）" class="w-full p-3.5 text-sm bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-violet-500 focus:outline-none leading-relaxed resize-y"></textarea>
+          <button id="clearTextBtn" class="absolute bottom-3 right-3 text-[11px] font-bold text-slate-400 hover:text-rose-500 bg-white/90 border border-slate-200 px-2 py-1 rounded-lg shadow-2xs transition">
+            クリア
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. ルビ振りルール設定 -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-4">
+        <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+          <span class="w-5 h-5 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-mono-tech">2</span>
+          <span>ルビを振る対象の設定</span>
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">対象学年フィルタ</label>
+            <select id="gradeFilter" class="w-full p-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
+              <option value="0" selected>すべての漢字にルビを振る（総ルビ）</option>
+              <option value="1">小1で未習の漢字のみ（小2以上）</option>
+              <option value="2">小2で未習の漢字のみ（小3以上）</option>
+              <option value="3">小3で未習の漢字のみ（小4以上）</option>
+              <option value="4">小4で未習の漢字のみ（小5以上）</option>
+              <option value="5">小5で未習の漢字のみ（小6以上）</option>
+              <option value="6">小6で未習の漢字のみ（中学生以上）</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">カタカナ語へのルビ</label>
+            <select id="katakanaOption" class="w-full p-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
+              <option value="none" selected>カタカナには振らない（標準）</option>
+              <option value="hiragana">カタカナにもひらがなルビを振る</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 実行ボタン -->
+        <button id="convertBtn" disabled class="w-full py-3.5 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed active:scale-98 text-white font-black text-sm sm:text-base rounded-2xl shadow-md transition flex items-center justify-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+          <span>一気にルビを振る！</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 右カラム：プレビュー ＆ Word貼付・印刷出力 (7カラム) -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between min-h-[520px]">
+        
+        <!-- 上部ツールバー -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm font-black text-slate-800">プレビュー結果</h2>
+            <span class="text-[11px] text-slate-400 font-bold hidden sm:inline">（文字クリックで読み修正）</span>
+          </div>
+
+          <!-- 書字方向・フォント切り替え -->
+          <div class="flex items-center gap-1.5">
+            <div class="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-bold">
+              <button id="dirHorizontalBtn" class="px-2.5 py-1 rounded-lg bg-white text-slate-900 shadow-2xs transition">横書き</button>
+              <button id="dirVerticalBtn" class="px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-900 transition">縦書き</button>
+            </div>
+
+            <button id="fontToggleBtn" class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition" title="書体切り替え">
+              明朝体
+            </button>
+          </div>
+        </div>
+
+        <!-- ルビ表示・印刷エリア -->
+        <div id="printArea" class="my-4 flex-1 p-5 sm:p-6 bg-slate-50/70 border border-slate-200/80 rounded-2xl overflow-auto max-h-[460px] horizontal-text text-lg sm:text-xl text-slate-900">
+          <div id="emptyPlaceholder" class="h-full flex flex-col items-center justify-center text-center text-slate-400 py-16">
+            <span class="text-4xl mb-2">📝</span>
+            <p class="text-sm font-bold text-slate-500">左側に文章を入力して「一気にルビを振る！」を押してください</p>
+            <p class="text-xs mt-1">変換後、そのままWordにルビ付きで貼り付けられます</p>
+          </div>
+          <div id="rubyOutput" class="hidden whitespace-pre-wrap break-words"></div>
+        </div>
+
+        <!-- 下部アクションボタン群（コピー・印刷） -->
+        <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <!-- Word用リッチHTMLコピー -->
+          <button id="copyWordBtn" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+            <span>Word用にコピー（ルビ付きのまま貼付）</span>
+          </button>
+
+          <!-- カッコ書きテキストコピー -->
+          <button id="copyParenBtn" class="py-3 px-4 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5" title="漢字（かんじ）の形式でコピー">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>カッコ書きコピー</span>
+          </button>
+
+          <!-- そのままA4印刷 -->
+          <button id="printBtn" class="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>印刷</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- トースト通知 -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl opacity-0 pointer-events-none transition-opacity duration-200 z-50 flex items-center gap-2">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastText">コピーしました！</span>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. 学年別配当漢字データ（小学校1〜6年・1026字）
+    // ==========================================
+    const GRADE_KANJI = {
+      1: "一右雨円王音下火花貝学気九休玉金空月犬見五口校左三山子四糸字耳七車手十出女小上森人水正生青夕石赤千川先早草足村大男竹中虫町天田土二日入年白八百文木本名目立力林六",
+      2: "引羽雲園遠何科夏家歌画回会海絵外角楽活間丸岩顔汽記帰弓牛魚京強教近兄形計元言原戸古午後語工公広交光考行高黄合谷国黒今才細作算止市矢姉思紙寺自時室社弱首秋週春書少場色食心新親図数西声星晴切雪船線前組走多太体台地池知茶昼長鳥朝直通弟店点電刀冬当東答頭同道読内南肉馬売買麦半番父風分聞米歩母方北毎妹万明鳴毛門夜野友用曜来里理話",
+      3: "悪安暗医委意育員院飲運泳駅央横屋温化荷界開階寒感漢館岸起期客究急級宮球去橋業曲局銀区苦具君係軽血決研県庫湖向幸港号根祭皿仕死使始指歯詩次事持式実写者主守取酒受州拾終習集住重暑助昭消商章勝乗植申身神真深進世整昔全相送想息速族他打対待代第題炭短談着注柱丁帳調追定庭笛鉄転都度投豆島湯登等動童農波配倍箱畑発反坂板皮悲美鼻筆氷表秒病品負部服福物平返勉放味命面問役薬由油有遊予羊洋葉陽様落流旅両緑礼列練路和",
+      4: "愛案以衣位茨印英栄塩岡億加果貨課芽改械害街各覚潟完官管関観願岐希季旗器機議求救給挙漁共協鏡競極熊訓軍郡群型景芸欠結建健験固功好香候康佐差菜最埼材崎昨札刷殺察参散産残氏司史士試辞失借種周祝順初松笑唱焼照賞臣信成省清静席積折節説浅戦選然争倉巣束側続卒孫帯隊達単置仲沖兆低底的典伝徒努灯働特得毒熱念敗梅博飯飛必票標不夫付府阜富副兵別辺変便包法望牧末満未民無約勇要養浴利陸良料量輪類令冷例歴連老労録",
+      5: "圧易移因永営衛益液演応往桜恩可仮価河過快解格確額刊幹慣眼基寄規技義逆久旧居許境均禁句群経潔件券険検限現減故個護効厚耕鉱構興講混査再災妻採際在財罪雑酸賛支志枝師資飼示似識質舎謝授収修衆祝述術準序招承証条状常情織職制性政勢精製税責績接設舌絶銭善祖素総造像増則測属率損退貸態団断築張提程適敵統銅導徳独任燃能破犯判版比肥非備俵評貧布婦富武復複仏編弁保墓報豊防貿暴務夢迷綿輸余預容略留領",
+      6: "胃異遺域宇映延沿我灰拡革閣割株干巻看簡危机揮貴疑吸供胸郷勤筋系敬警劇激穴絹権憲源厳己呼誤后孝皇紅降鋼刻穀骨困砂座済裁策冊蚕至私姿視詞誌磁射捨尺若樹収宗就衆従縦縮熟純処署諸除将傷障城蒸針仁垂推寸盛聖誠宣専泉洗染善奏窓創装層操蔵臓存尊宅担探誕段暖値宙忠著庁頂潮賃痛展討党糖届難乳認納脳派拝背肺俳班晩否批秘腹奮並陛閉片補暮宝訪亡忘棒枚幕密盟模訳郵優幼欲翌乱卵覧裏律臨朗論"
+    };
+
+    function getLearnedKanjiSet(maxGrade) {
+      const set = new Set();
+      for (let g = 1; g <= maxGrade; g++) {
+        for (const ch of GRADE_KANJI[g]) {
+          set.add(ch);
+        }
+      }
+      return set;
+    }
+
+    // ==========================================
+    // 2. Kuromoji 形態素解析エンジンの初期化
+    // ==========================================
+    let tokenizer = null;
+    const dictBanner = document.getElementById('dictStatusBanner');
+    const dictText = document.getElementById('dictStatusText');
+    const convertBtn = document.getElementById('convertBtn');
+
+    kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" }).build((err, builtTokenizer) => {
+      if (err) {
+        dictBanner.className = "bg-rose-600 text-white text-xs font-bold py-2 px-4 text-center";
+        dictText.textContent = "辞書の読み込みに失敗しました。ページを再読み込みしてください。";
+        return;
+      }
+      tokenizer = builtTokenizer;
+      dictBanner.className = "bg-emerald-600 text-white text-xs font-bold py-1.5 px-4 text-center transition-all";
+      dictText.textContent = "✅ 準備完了！いつでもルビ変換できます";
+      convertBtn.disabled = false;
+      setTimeout(() => {
+        dictBanner.classList.add('hidden');
+      }, 2500);
+    });
+
+    // ==========================================
+    // 3. 文字判定 ＆ ルビ割り当てロジック
+    // ==========================================
+    const kanjiRegex = /[\u4E00-\u9FFF\u3400-\u4DBF々ヶ]/;
+    const katakanaRegex = /^[\u30A1-\u30F6ー]+$/;
+
+    function katakanaToHiragana(str) {
+      return str.replace(/[\u30A1-\u30F6]/g, match => {
+        return String.fromCharCode(match.charCodeAt(0) - 0x60);
+      });
+    }
+
+    function splitKanjiAndOkurigana(surface, readingHira) {
+      if (!surface || !readingHira) return [{ text: surface, ruby: null }];
+
+      let surfEnd = surface.length;
+      let readEnd = readingHira.length;
+      while (surfEnd > 0 && readEnd > 0 && surface[surfEnd - 1] === readingHira[readEnd - 1] && !kanjiRegex.test(surface[surfEnd - 1])) {
+        surfEnd--;
+        readEnd--;
+      }
+
+      let surfStart = 0;
+      let readStart = 0;
+      while (surfStart < surfEnd && readStart < readEnd && surface[surfStart] === readingHira[readStart] && !kanjiRegex.test(surface[surfStart])) {
+        surfStart++;
+        readStart++;
+      }
+
+      const result = [];
+      if (surfStart > 0) {
+        result.push({ text: surface.slice(0, surfStart), ruby: null });
+      }
+      const coreText = surface.slice(surfStart, surfEnd);
+      const coreRuby = readingHira.slice(readStart, readEnd);
+      if (coreText) {
+        result.push({ text: coreText, ruby: coreRuby || null });
+      }
+      if (surfEnd < surface.length) {
+        result.push({ text: surface.slice(surfEnd), ruby: null });
+      }
+      return result;
+    }
+
+    let renderedSegments = [];
+
+    function convertTextToRuby() {
+      if (!tokenizer) return;
+      const rawText = document.getElementById('sourceText').value;
+      if (!rawText.trim()) {
+        showToast('文章を入力してください');
+        return;
+      }
+
+      const maxGrade = parseInt(document.getElementById('gradeFilter').value, 10);
+      const learnedSet = maxGrade > 0 ? getLearnedKanjiSet(maxGrade) : null;
+      const katakanaMode = document.getElementById('katakanaOption').value;
+
+      const lines = rawText.split('\n');
+      renderedSegments = [];
+
+      lines.forEach((line, lineIdx) => {
+        const tokens = tokenizer.tokenize(line);
+        tokens.forEach(token => {
+          const surface = token.surface_form;
+          const reading = token.reading;
+
+          if (kanjiRegex.test(surface) && reading) {
+            const hira = katakanaToHiragana(reading);
+            let shouldAddRuby = true;
+            if (learnedSet) {
+              const kanjiChars = [...surface].filter(c => kanjiRegex.test(c) && c !== '々' && c !== 'ヶ');
+              shouldAddRuby = kanjiChars.some(c => !learnedSet.has(c));
+            }
+
+            if (shouldAddRuby && surface !== hira) {
+              const parts = splitKanjiAndOkurigana(surface, hira);
+              parts.forEach(p => renderedSegments.push(p));
+            } else {
+              renderedSegments.push({ text: surface, ruby: null });
+            }
+          }
+          else if (katakanaMode === 'hiragana' && katakanaRegex.test(surface) && surface.length > 1) {
+            renderedSegments.push({ text: surface, ruby: katakanaToHiragana(surface) });
+          }
+          else {
+            renderedSegments.push({ text: surface, ruby: null });
+          }
+        });
+
+        if (lineIdx < lines.length - 1) {
+          renderedSegments.push({ text: '\n', ruby: null });
+        }
+      });
+
+      renderPreview();
+      showToast('ルビを一括変換しました！');
+    }
+
+    function renderPreview() {
+      const outputEl = document.getElementById('rubyOutput');
+      const placeholder = document.getElementById('emptyPlaceholder');
+
+      placeholder.classList.add('hidden');
+      outputEl.classList.remove('hidden');
+      outputEl.innerHTML = '';
+
+      renderedSegments.forEach((seg, idx) => {
+        if (seg.text === '\n') {
+          outputEl.appendChild(document.createElement('br'));
+          return;
+        }
+
+        if (seg.ruby) {
+          const rubyEl = document.createElement('ruby');
+          rubyEl.className = 'ruby-word';
+          rubyEl.title = 'クリックして読み方を修正・削除';
+          rubyEl.textContent = seg.text;
+
+          const rtEl = document.createElement('rt');
+          rtEl.textContent = seg.ruby;
+          rubyEl.appendChild(rtEl);
+
+          rubyEl.onclick = () => {
+            const newRuby = prompt(`「${seg.text}」のふりがなを修正（空欄にするとルビを削除します）:`, seg.ruby);
+            if (newRuby !== null) {
+              renderedSegments[idx].ruby = newRuby.trim() || null;
+              renderPreview();
+            }
+          };
+
+          outputEl.appendChild(rubyEl);
+        } else {
+          if (kanjiRegex.test(seg.text)) {
+            const span = document.createElement('span');
+            span.className = 'ruby-word';
+            span.title = 'クリックしてふりがなを追加';
+            span.textContent = seg.text;
+            span.onclick = () => {
+              const addRuby = prompt(`「${seg.text}」に付けるふりがなを入力してください:`, '');
+              if (addRuby && addRuby.trim()) {
+                renderedSegments[idx].ruby = addRuby.trim();
+                renderPreview();
+              }
+            };
+            outputEl.appendChild(span);
+          } else {
+            outputEl.appendChild(document.createTextNode(seg.text));
+          }
+        }
+      });
+    }
+
+    // ==========================================
+    // 4. Word (.docx) ファイル読み込み処理
+    // ==========================================
+    const docxInput = document.getElementById('docxInput');
+    const dropZone = document.getElementById('dropZone');
+    const fileNameLabel = document.getElementById('fileNameLabel');
+
+    function handleDocxFile(file) {
+      if (!file) return;
+      if (!file.name.endsWith('.docx')) {
+        alert('.docx 形式のWordファイルを選択してください。');
+        return;
+      }
+
+      fileNameLabel.textContent = `📄 読み込み中: ${file.name}`;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const arrayBuffer = event.target.result;
+        mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+          .then(result => {
+            document.getElementById('sourceText').value = result.value.trim();
+            fileNameLabel.textContent = `✅ 読込完了: ${file.name}`;
+            if (tokenizer) {
+              convertTextToRuby();
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            alert('Wordファイルの読み込みに失敗しました。');
+            fileNameLabel.textContent = '※ファイル内のテキストを自動で抽出します';
+          });
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    docxInput.onchange = (e) => handleDocxFile(e.target.files[0]);
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('border-violet-500', 'bg-violet-50');
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('border-violet-500', 'bg-violet-50');
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-violet-500', 'bg-violet-50');
+      if (e.dataTransfer.files.length > 0) {
+        handleDocxFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // ==========================================
+    // 5. Word貼付用リッチコピー ＆ カッコ書きコピー
+    // ==========================================
+    document.getElementById('copyWordBtn').onclick = async () => {
+      if (renderedSegments.length === 0) {
+        showToast('先にルビ変換を行ってください');
+        return;
+      }
+
+      let htmlParts = ['<div style="font-family: \'Yu Mincho\', \'MS Mincho\', serif; font-size: 12pt; line-height: 2.0;">'];
+      let plainParts = [];
+
+      renderedSegments.forEach(seg => {
+        if (seg.text === '\n') {
+          htmlParts.push('<br>');
+          plainParts.push('\n');
+        } else if (seg.ruby) {
+          htmlParts.push(`<ruby>${seg.text}<rt>${seg.ruby}</rt></ruby>`);
+          plainParts.push(`${seg.text}(${seg.ruby})`);
+        } else {
+          htmlParts.push(seg.text);
+          plainParts.push(seg.text);
+        }
+      });
+      htmlParts.push('</div>');
+
+      const htmlString = htmlParts.join('');
+      const plainString = plainParts.join('');
+
+      try {
+        const htmlBlob = new Blob([htmlString], { type: 'text/html' });
+        const textBlob = new Blob([plainString], { type: 'text/plain' });
+        const clipboardItem = new ClipboardItem({
+          'text/html': htmlBlob,
+          'text/plain': textBlob
+        });
+        await navigator.clipboard.write([clipboardItem]);
+        showToast('Word用にコピーしました！Wordを開いて貼り付け（Ctrl+V / ⌘+V）してください');
+      } catch (err) {
+        navigator.clipboard.writeText(plainString);
+        showToast('テキストをコピーしました');
+      }
+    };
+
+    document.getElementById('copyParenBtn').onclick = () => {
+      if (renderedSegments.length === 0) {
+        showToast('先にルビ変換を行ってください');
+        return;
+      }
+      const text = renderedSegments.map(seg => seg.ruby ? `${seg.text}（${seg.ruby}）` : seg.text).join('');
+      navigator.clipboard.writeText(text);
+      showToast('カッコ書き形式でコピーしました！');
+    };
+
+    // ==========================================
+    // 6. UI操作（縦書き・横書き・フォント・印刷・例文）
+    // ==========================================
+    const printArea = document.getElementById('printArea');
+    const dirHorizontalBtn = document.getElementById('dirHorizontalBtn');
+    const dirVerticalBtn = document.getElementById('dirVerticalBtn');
+    const fontToggleBtn = document.getElementById('fontToggleBtn');
+
+    dirHorizontalBtn.onclick = () => {
+      printArea.classList.remove('vertical-text');
+      printArea.classList.add('horizontal-text');
+      dirHorizontalBtn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+      dirVerticalBtn.className = 'px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-900 transition';
+    };
+
+    dirVerticalBtn.onclick = () => {
+      printArea.classList.remove('horizontal-text');
+      printArea.classList.add('vertical-text');
+      dirVerticalBtn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+      dirHorizontalBtn.className = 'px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-900 transition';
+    };
+
+    let isMincho = false;
+    fontToggleBtn.onclick = () => {
+      isMincho = !isMincho;
+      if (isMincho) {
+        printArea.classList.add('font-mincho');
+        fontToggleBtn.textContent = 'ゴシック体';
+      } else {
+        printArea.classList.remove('font-mincho');
+        fontToggleBtn.textContent = '明朝体';
+      }
+    };
+
+    document.getElementById('printBtn').onclick = () => {
+      if (renderedSegments.length === 0) {
+        showToast('先にルビ変換を行ってください');
+        return;
+      }
+      window.print();
+    };
+
+    convertBtn.onclick = convertTextToRuby;
+
+    document.getElementById('sampleTextBtn').onclick = () => {
+      document.getElementById('sourceText').value =
+        "明日の遠足では、地域の歴史博物館を見学します。\n集合時刻は午前八時三十分ですので、遅れないように登校してください。\n雨天の場合は体育館でオリエンテーションを実施します。";
+      if (tokenizer) convertTextToRuby();
+    };
+
+    document.getElementById('clearTextBtn').onclick = () => {
+      document.getElementById('sourceText').value = '';
+      fileNameLabel.textContent = '※ファイル内のテキストを自動で抽出します';
+      renderedSegments = [];
+      document.getElementById('rubyOutput').classList.add('hidden');
+      document.getElementById('emptyPlaceholder').classList.remove('hidden');
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').textContent = msg;
+      toast.classList.remove('opacity-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+      }, 3200);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
