@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>一括ルビ振りメーカー | センセイボックス</title>
-  <meta name="description" content="Wordファイル（.docx）や文章を貼り付けるだけで一気にふりがなを自動付与。学年別の未習漢字フィルタや、ルビ付きのままWordへ貼り付け・A4印刷に対応した先生向け無料Webツール。">
+  <meta name="description" content="Wordファイル（.docx）や文章を貼り付けるだけで一気にふりがなを自動付与。学年別の未習漢字フィルタや、ルビ付きWordファイル直接出力・縦書きA4横向き印刷に対応した先生向け無料Webツール。">
   <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/ruby/" />
   <link rel="icon" href="../logo.png" type="image/png">
   <!-- Tailwind CSS -->
@@ -15,20 +15,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Noto+Serif+JP:wght@500;700&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Mammoth.js (.docx ブラウザ内解析) -->
+  <!-- Mammoth.js (.docx 読込) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <!-- JSZip (.docx 直接生成出力) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style id="dynamicPrintStyle">
+    @page {
+      size: A4 portrait;
+      margin: 15mm;
+    }
+  </style>
 
   <style>
     body { font-family: 'M PLUS Rounded 1c', sans-serif; }
     .font-mono-tech { font-family: 'Chivo Mono', monospace; }
     .font-mincho { font-family: 'Noto Serif JP', serif; }
 
-    /* ルビのスタイル調整 */
+    /* ルビのスタイルとサイズ変数 */
+    :root {
+      --ruby-scale: 0.48em;
+    }
     ruby {
       ruby-align: center;
     }
     rt {
-      font-size: 0.52em;
+      font-size: var(--ruby-scale);
       font-weight: 700;
       color: #4f46e5;
       user-select: none;
@@ -46,38 +58,60 @@
       outline: 1px dashed #6366f1;
     }
 
-    /* 縦書きプレビュー用 */
+    /* 縦書き・横書きプレビュー用 */
     .vertical-text {
       writing-mode: vertical-rl;
       text-orientation: upright;
-      line-height: 2.3;
-      letter-spacing: 0.05em;
+      line-height: 2.35;
+      letter-spacing: 0.04em;
     }
     .horizontal-text {
       writing-mode: horizontal-tb;
-      line-height: 2.2;
+      line-height: 2.25;
     }
 
-    /* 印刷用スタイル（プレビュー枠の中身だけを綺麗にA4出力） */
+    /* 印刷用スタイル（横書き改ページ＆縦書きA4横向き完全対応） */
     @media print {
-      body * {
-        visibility: hidden;
-      }
-      #printArea, #printArea * {
-        visibility: visible;
-      }
-      #printArea {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        padding: 15mm;
+      html, body {
         background: white !important;
         color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      header, #dictStatusBanner, #leftColumn, #previewToolbar, #previewActions, #toast, #editRubyModal {
+        display: none !important;
+      }
+      main, #rightColumn, #previewCard {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
         border: none !important;
         box-shadow: none !important;
+        background: white !important;
         overflow: visible !important;
+      }
+      #printArea {
+        display: block !important;
+        width: 100% !important;
+        max-height: none !important;
+        overflow: visible !important;
+        border: none !important;
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 13pt !important;
+      }
+      #printArea.vertical-text {
+        height: 172mm !important;
+      }
+      #printArea.horizontal-text {
+        height: auto !important;
       }
       rt {
         color: #1e293b !important;
@@ -105,7 +139,7 @@
           <div>
             <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
               <span>一括ルビ振りメーカー</span>
-              <span class="hidden sm:inline text-[10px] font-mono-tech font-bold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full">Word対応</span>
+              <span class="hidden sm:inline text-[10px] font-mono-tech font-bold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full">Word出力対応</span>
             </h1>
             <p class="text-[10px] text-slate-400 font-bold hidden sm:block">Wordファイルや文章に一瞬でふりがなを一括付与</p>
           </div>
@@ -132,7 +166,7 @@
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
     <!-- 左カラム：入力 ＆ オプション設定 (5カラム) -->
-    <div class="lg:col-span-5 flex flex-col gap-4">
+    <div id="leftColumn" class="lg:col-span-5 flex flex-col gap-4">
       
       <!-- 1. Wordアップロード ＆ テキスト入力カード -->
       <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-4">
@@ -204,25 +238,35 @@
 
     </div>
 
-    <!-- 右カラム：プレビュー ＆ Word貼付・印刷出力 (7カラム) -->
-    <div class="lg:col-span-7 flex flex-col gap-4">
-      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between min-h-[520px]">
+    <!-- 右カラム：プレビュー ＆ Word出力・印刷 (7カラム) -->
+    <div id="rightColumn" class="lg:col-span-7 flex flex-col gap-4">
+      <div id="previewCard" class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between min-h-[540px]">
         
         <!-- 上部ツールバー -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+        <div id="previewToolbar" class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
           <div class="flex items-center gap-2">
-            <h2 class="text-sm font-black text-slate-800">プレビュー結果</h2>
-            <span class="text-[11px] text-slate-400 font-bold hidden sm:inline">（文字クリックで読み修正）</span>
+            <h2 class="text-sm font-black text-slate-800">プレビュー</h2>
+            <span class="text-[11px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">単語クリックで一括修正</span>
           </div>
 
-          <!-- 書字方向・フォント切り替え -->
-          <div class="flex items-center gap-1.5">
-            <div class="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-bold">
-              <button id="dirHorizontalBtn" class="px-2.5 py-1 rounded-lg bg-white text-slate-900 shadow-2xs transition">横書き</button>
-              <button id="dirVerticalBtn" class="px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-900 transition">縦書き</button>
+          <!-- ルビサイズ・書字方向・フォント切り替え -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <!-- ルビサイズ調整 -->
+            <div class="inline-flex items-center rounded-xl bg-slate-100 p-1 text-[11px] font-bold" title="ルビ文字の大きさ">
+              <span class="px-1.5 text-slate-400">ルビ</span>
+              <button data-rsize="small" class="rsize-btn px-2 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition">小</button>
+              <button data-rsize="normal" class="rsize-btn px-2 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition">標準</button>
+              <button data-rsize="large" class="rsize-btn px-2 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition">大</button>
             </div>
 
-            <button id="fontToggleBtn" class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition" title="書体切り替え">
+            <!-- 横書き・縦書き -->
+            <div class="inline-flex rounded-xl bg-slate-100 p-1 text-[11px] font-bold">
+              <button id="dirHorizontalBtn" class="px-2.5 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition">横書き</button>
+              <button id="dirVerticalBtn" class="px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition">縦書き</button>
+            </div>
+
+            <!-- 明朝体・ゴシック体 -->
+            <button id="fontToggleBtn" class="px-2.5 py-1 rounded-xl border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition" title="書体切り替え">
               明朝体
             </button>
           </div>
@@ -233,30 +277,40 @@
           <div id="emptyPlaceholder" class="h-full flex flex-col items-center justify-center text-center text-slate-400 py-16">
             <span class="text-4xl mb-2">📝</span>
             <p class="text-sm font-bold text-slate-500">左側に文章を入力して「一気にルビを振る！」を押してください</p>
-            <p class="text-xs mt-1">変換後、そのままWordにルビ付きで貼り付けられます</p>
+            <p class="text-xs mt-1">変換後、文字バランスが崩れない正規Wordファイル（.docx）として直接保存できます</p>
           </div>
           <div id="rubyOutput" class="hidden whitespace-pre-wrap break-words"></div>
         </div>
 
-        <!-- 下部アクションボタン群（コピー・印刷） -->
-        <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-          <!-- Word用リッチHTMLコピー -->
-          <button id="copyWordBtn" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2">
-            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-            <span>Word用にコピー（ルビ付きのまま貼付）</span>
-          </button>
+        <!-- 下部アクションボタン群（Word直接保存・コピー・印刷） -->
+        <div id="previewActions" class="pt-3 border-t border-slate-100 flex flex-col gap-2">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <!-- 正規Word (.docx) 直接ダウンロード -->
+            <button id="downloadDocxBtn" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Wordファイル（.docx）で保存</span>
+            </button>
 
-          <!-- カッコ書きテキストコピー -->
-          <button id="copyParenBtn" class="py-3 px-4 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5" title="漢字（かんじ）の形式でコピー">
-            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-            <span>カッコ書きコピー</span>
-          </button>
+            <!-- そのまま印刷（横書き改ページ・縦書きA4横向き自動対応） -->
+            <button id="printBtn" class="py-3 px-5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
+              <i data-lucide="printer" class="w-4 h-4"></i>
+              <span id="printBtnLabel">印刷（A4縦）</span>
+            </button>
+          </div>
 
-          <!-- そのままA4印刷 -->
-          <button id="printBtn" class="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
-            <i data-lucide="printer" class="w-4 h-4"></i>
-            <span>印刷</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <!-- Word用リッチHTMLコピー -->
+            <button id="copyWordBtn" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5">
+              <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-blue-600"></i>
+              <span>Word貼付用にコピー</span>
+            </button>
+
+            <!-- カッコ書きテキストコピー -->
+            <button id="copyParenBtn" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5">
+              <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>カッコ書きコピー：漢字（かんじ）</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -264,10 +318,49 @@
 
   </main>
 
+  <!-- ========================================== -->
+  <!-- 単語のルビ修正モーダル（単体修正 ＆ 一括置換対応） -->
+  <!-- ========================================== -->
+  <div id="editRubyModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="edit-3" class="w-4 h-4 text-violet-600"></i>
+          <span>ふりがなの修正</span>
+        </h3>
+        <button id="closeEditModalBtn" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 text-center">
+          <span class="text-[11px] font-bold text-slate-400 block mb-0.5">対象の単語</span>
+          <span id="editTargetWord" class="text-2xl font-black text-slate-900">豆太</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">新しいふりがな（空欄にするとルビ削除）</label>
+          <input id="editRubyInput" type="text" placeholder="例：まめた" class="w-full p-3 text-base font-bold bg-white border-2 border-violet-300 rounded-xl focus:border-violet-600 focus:outline-none">
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 pt-2">
+        <button id="applyAllSameBtn" class="w-full py-3 bg-violet-600 hover:bg-violet-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
+          <i data-lucide="replace-all" class="w-4 h-4"></i>
+          <span id="applyAllSameLabel">文章内の同じ単語をすべて一括変更</span>
+        </button>
+        <button id="applySingleBtn" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 font-bold text-xs rounded-xl transition">
+          この1箇所だけ変更する
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- トースト通知 -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl opacity-0 pointer-events-none transition-opacity duration-200 z-50 flex items-center gap-2">
     <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-    <span id="toastText">コピーしました！</span>
+    <span id="toastText">完了しました！</span>
   </div>
 
   <script>
@@ -295,8 +388,6 @@
 
     // ==========================================
     // 2. インライン Web Worker（裏方スレッド）の構築
-    //    ※ 辞書の解凍・構築・形態素解析をすべて裏側で実行し
-    //       メイン画面のフリーズ（「応答しません」警告）を完全に防ぐ
     // ==========================================
     const workerCode = `
       importScripts("https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js");
@@ -430,6 +521,9 @@
     }
 
     let renderedSegments = [];
+    let currentRubySize = 'normal'; // 'small' | 'normal' | 'large'
+    let isVertical = false;
+    let isMincho = false;
 
     function requestTokenize() {
       const rawText = document.getElementById('sourceText').value;
@@ -515,35 +609,22 @@
         if (seg.ruby) {
           const rubyEl = document.createElement('ruby');
           rubyEl.className = 'ruby-word';
-          rubyEl.title = 'クリックして読み方を修正・削除';
+          rubyEl.title = 'クリックして読み方を修正・一括置換';
           rubyEl.textContent = seg.text;
 
           const rtEl = document.createElement('rt');
           rtEl.textContent = seg.ruby;
           rubyEl.appendChild(rtEl);
 
-          rubyEl.onclick = () => {
-            const newRuby = prompt(`「${seg.text}」のふりがなを修正（空欄にするとルビを削除します）:`, seg.ruby);
-            if (newRuby !== null) {
-              renderedSegments[idx].ruby = newRuby.trim() || null;
-              renderPreview();
-            }
-          };
-
+          rubyEl.onclick = () => openEditModal(idx);
           outputEl.appendChild(rubyEl);
         } else {
           if (kanjiRegex.test(seg.text)) {
             const span = document.createElement('span');
             span.className = 'ruby-word';
-            span.title = 'クリックしてふりがなを追加';
+            span.title = 'クリックしてふりがなを追加・一括設定';
             span.textContent = seg.text;
-            span.onclick = () => {
-              const addRuby = prompt(`「${seg.text}」に付けるふりがなを入力してください:`, '');
-              if (addRuby && addRuby.trim()) {
-                renderedSegments[idx].ruby = addRuby.trim();
-                renderPreview();
-              }
-            };
+            span.onclick = () => openEditModal(idx);
             outputEl.appendChild(span);
           } else {
             outputEl.appendChild(document.createTextNode(seg.text));
@@ -553,7 +634,76 @@
     }
 
     // ==========================================
-    // 4. Word (.docx) ファイル読み込み処理
+    // 4. 単語ルビ修正モーダル（単体 ＆ 一括置換）
+    // ==========================================
+    let editingSegmentIndex = -1;
+    const editModal = document.getElementById('editRubyModal');
+    const editTargetWord = document.getElementById('editTargetWord');
+    const editRubyInput = document.getElementById('editRubyInput');
+    const applyAllSameLabel = document.getElementById('applyAllSameLabel');
+
+    function openEditModal(idx) {
+      editingSegmentIndex = idx;
+      const seg = renderedSegments[idx];
+      if (!seg) return;
+
+      const sameCount = renderedSegments.filter(s => s.text === seg.text).length;
+      editTargetWord.textContent = seg.text;
+      editRubyInput.value = seg.ruby || '';
+      applyAllSameLabel.textContent = sameCount > 1
+        ? `文章内の「${seg.text}」（全${sameCount}箇所）を一括変更`
+        : `この単語のふりがなを確定`;
+
+      editModal.classList.remove('hidden');
+      editRubyInput.focus();
+      editRubyInput.select();
+    }
+
+    function closeEditModal() {
+      editModal.classList.add('hidden');
+      editingSegmentIndex = -1;
+    }
+
+    document.getElementById('closeEditModalBtn').onclick = closeEditModal;
+    editModal.onclick = (e) => {
+      if (e.target === editModal) closeEditModal();
+    };
+
+    document.getElementById('applySingleBtn').onclick = () => {
+      if (editingSegmentIndex < 0) return;
+      const newVal = editRubyInput.value.trim() || null;
+      renderedSegments[editingSegmentIndex].ruby = newVal;
+      renderPreview();
+      closeEditModal();
+      showToast('1箇所のふりがなを更新しました');
+    };
+
+    document.getElementById('applyAllSameBtn').onclick = () => {
+      if (editingSegmentIndex < 0) return;
+      const targetText = renderedSegments[editingSegmentIndex].text;
+      const newVal = editRubyInput.value.trim() || null;
+      let count = 0;
+
+      renderedSegments.forEach(seg => {
+        if (seg.text === targetText) {
+          seg.ruby = newVal;
+          count++;
+        }
+      });
+
+      renderPreview();
+      closeEditModal();
+      showToast(`「${targetText}」（${count}箇所）を一括更新しました！`);
+    };
+
+    editRubyInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('applyAllSameBtn').click();
+      }
+    });
+
+    // ==========================================
+    // 5. Word (.docx) ファイル読み込み処理
     // ==========================================
     const docxInput = document.getElementById('docxInput');
     const dropZone = document.getElementById('dropZone');
@@ -572,7 +722,9 @@
         const arrayBuffer = event.target.result;
         mammoth.extractRawText({ arrayBuffer: arrayBuffer })
           .then(result => {
-            document.getElementById('sourceText').value = result.value.trim();
+            // 連続する余分な空行を整えつつ段落を保持
+            const cleaned = result.value.replace(/\n{3,}/g, '\n\n').trim();
+            document.getElementById('sourceText').value = cleaned;
             fileNameLabel.textContent = `✅ 読込完了: ${file.name}`;
             requestTokenize();
           })
@@ -603,7 +755,132 @@
     });
 
     // ==========================================
-    // 5. Word貼付用リッチコピー ＆ カッコ書きコピー
+    // 6. 正規 Wordファイル（.docx）直接ダウンロード生成
+    //    ※ OOXML <w:ruby> 形式で出力するため文字バランスが一切崩れない
+    // ==========================================
+    function escapeXml(str) {
+      return str.replace(/[<>&'"]/g, c => ({
+        '<': '&lt;', '>': '&gt;', '&': '&amp;', '\'': '&apos;', '"': '&quot;'
+      }[c]));
+    }
+
+    document.getElementById('downloadDocxBtn').onclick = async () => {
+      if (renderedSegments.length === 0) {
+        showToast('先にルビ変換を行ってください');
+        return;
+      }
+
+      const zip = new JSZip();
+
+      // フォント・ルビサイズ設定（half-points単位: 22 = 11pt, 10 = 5pt）
+      const fontName = isMincho ? 'Yu Mincho' : 'Yu Gothic';
+      const baseHps = 22; // 11pt
+      const rubyHpsMap = { small: 8, normal: 10, large: 12 }; // 4pt / 5pt / 6pt
+      const rubyHps = rubyHpsMap[currentRubySize] || 10;
+      const hpsRaise = 20; // 10pt上げ
+
+      // 段落ごとに分割
+      const paragraphs = [[]];
+      renderedSegments.forEach(seg => {
+        if (seg.text === '\n') {
+          paragraphs.push([]);
+        } else {
+          paragraphs[paragraphs.length - 1].push(seg);
+        }
+      });
+
+      const rPrXml = `<w:rPr><w:rFonts w:ascii="${fontName}" w:eastAsia="${fontName}" w:hAnsi="${fontName}"/><w:sz w:val="${baseHps}"/><w:szCs w:val="${baseHps}"/></w:rPr>`;
+      const rtRPrXml = `<w:rPr><w:rFonts w:ascii="${fontName}" w:eastAsia="${fontName}" w:hAnsi="${fontName}"/><w:sz w:val="${rubyHps}"/><w:szCs w:val="${rubyHps}"/></w:rPr>`;
+
+      let bodyParagraphsXml = '';
+      paragraphs.forEach(pSegs => {
+        if (pSegs.length === 0) {
+          bodyParagraphsXml += '<w:p/>';
+          return;
+        }
+        let runsXml = '';
+        pSegs.forEach(seg => {
+          if (seg.ruby) {
+            runsXml += `
+              <w:r>
+                ${rPrXml}
+                <w:ruby>
+                  <w:rubyPr>
+                    <w:rubyAlign w:val="distributeSpace"/>
+                    <w:hps w:val="${rubyHps}"/>
+                    <w:hpsRaise w:val="${hpsRaise}"/>
+                    <w:hpsBaseText w:val="${baseHps}"/>
+                    <w:lid w:val="ja-JP"/>
+                  </w:rubyPr>
+                  <w:rt>
+                    <w:r>
+                      ${rtRPrXml}
+                      <w:t>${escapeXml(seg.ruby)}</w:t>
+                    </w:r>
+                  </w:rt>
+                  <w:rubyBase>
+                    <w:r>
+                      ${rPrXml}
+                      <w:t xml:space="preserve">${escapeXml(seg.text)}</w:t>
+                    </w:r>
+                  </w:rubyBase>
+                </w:ruby>
+              </w:r>`;
+          } else {
+            runsXml += `
+              <w:r>
+                ${rPrXml}
+                <w:t xml:space="preserve">${escapeXml(seg.text)}</w:t>
+              </w:r>`;
+          }
+        });
+        bodyParagraphsXml += `<w:p>${runsXml}</w:p>`;
+      });
+
+      // 用紙設定（縦書き時はA4横向き＋縦書き方向、横書き時はA4縦向き）
+      const sectPrXml = isVertical
+        ? `<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/><w:textDirection w:val="tbRl"/></w:sectPr>`
+        : `<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>`;
+
+      const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    ${bodyParagraphsXml}
+    ${sectPrXml}
+  </w:body>
+</w:document>`;
+
+      const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+
+      const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+      zip.file('[Content_Types].xml', contentTypesXml);
+      zip.folder('_rels').file('.rels', relsXml);
+      zip.folder('word').file('document.xml', documentXml);
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ルビ付きプリント_${new Date().toISOString().slice(0, 10)}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Wordファイル（.docx）をダウンロードしました！');
+    };
+
+    // ==========================================
+    // 7. Word貼付用リッチHTMLコピー ＆ カッコ書きコピー
     // ==========================================
     document.getElementById('copyWordBtn').onclick = async () => {
       if (renderedSegments.length === 0) {
@@ -611,7 +888,11 @@
         return;
       }
 
-      let htmlParts = ['<div style="font-family: \'Yu Mincho\', \'MS Mincho\', serif; font-size: 12pt; line-height: 2.0;">'];
+      const rtPtMap = { small: '4.5pt', normal: '5.5pt', large: '6.5pt' };
+      const rtPt = rtPtMap[currentRubySize] || '5.5pt';
+      const fontFamily = isMincho ? "'Yu Mincho', 'MS Mincho', serif" : "'Yu Gothic', 'Meiryo', sans-serif";
+
+      let htmlParts = [`<div style="font-family: ${fontFamily}; font-size: 11pt; line-height: 1.9;">`];
       let plainParts = [];
 
       renderedSegments.forEach(seg => {
@@ -619,7 +900,7 @@
           htmlParts.push('<br>');
           plainParts.push('\n');
         } else if (seg.ruby) {
-          htmlParts.push(`<ruby>${seg.text}<rt>${seg.ruby}</rt></ruby>`);
+          htmlParts.push(`<ruby style="ruby-align:center;">${seg.text}<rt style="font-size:${rtPt};">${seg.ruby}</rt></ruby>`);
           plainParts.push(`${seg.text}(${seg.ruby})`);
         } else {
           htmlParts.push(seg.text);
@@ -639,7 +920,7 @@
           'text/plain': textBlob
         });
         await navigator.clipboard.write([clipboardItem]);
-        showToast('Word用にコピーしました！Wordを開いて貼り付け（Ctrl+V / ⌘+V）してください');
+        showToast('Word用にコピーしました！そのまま貼り付け（Ctrl+V / ⌘+V）できます');
       } catch (err) {
         navigator.clipboard.writeText(plainString);
         showToast('テキストをコピーしました');
@@ -657,28 +938,51 @@
     };
 
     // ==========================================
-    // 6. UI操作（縦書き・横書き・フォント・印刷・例文）
+    // 8. UI操作（ルビサイズ・縦書き/横書き・フォント・印刷）
     // ==========================================
     const printArea = document.getElementById('printArea');
     const dirHorizontalBtn = document.getElementById('dirHorizontalBtn');
     const dirVerticalBtn = document.getElementById('dirVerticalBtn');
     const fontToggleBtn = document.getElementById('fontToggleBtn');
+    const printBtnLabel = document.getElementById('printBtnLabel');
+    const dynamicPrintStyle = document.getElementById('dynamicPrintStyle');
 
+    // ルビサイズ切り替え
+    document.querySelectorAll('.rsize-btn').forEach(btn => {
+      btn.onclick = () => {
+        currentRubySize = btn.dataset.rsize;
+        const scaleMap = { small: '0.38em', normal: '0.48em', large: '0.60em' };
+        document.documentElement.style.setProperty('--ruby-scale', scaleMap[currentRubySize]);
+
+        document.querySelectorAll('.rsize-btn').forEach(b => {
+          b.className = 'rsize-btn px-2 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+        });
+        btn.className = 'rsize-btn px-2 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+      };
+    });
+
+    // 横書き（印刷はA4縦向き）
     dirHorizontalBtn.onclick = () => {
+      isVertical = false;
       printArea.classList.remove('vertical-text');
       printArea.classList.add('horizontal-text');
-      dirHorizontalBtn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-900 shadow-2xs transition';
-      dirVerticalBtn.className = 'px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-900 transition';
+      dirHorizontalBtn.className = 'px-2.5 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+      dirVerticalBtn.className = 'px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+      printBtnLabel.textContent = '印刷（A4縦）';
+      dynamicPrintStyle.textContent = '@page { size: A4 portrait; margin: 15mm; }';
     };
 
+    // 縦書き（印刷はA4横向き）
     dirVerticalBtn.onclick = () => {
+      isVertical = true;
       printArea.classList.remove('horizontal-text');
       printArea.classList.add('vertical-text');
-      dirVerticalBtn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-900 shadow-2xs transition';
-      dirHorizontalBtn.className = 'px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-900 transition';
+      dirVerticalBtn.className = 'px-2.5 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+      dirHorizontalBtn.className = 'px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+      printBtnLabel.textContent = '印刷（A4横）';
+      dynamicPrintStyle.textContent = '@page { size: A4 landscape; margin: 15mm; }';
     };
 
-    let isMincho = false;
     fontToggleBtn.onclick = () => {
       isMincho = !isMincho;
       if (isMincho) {
