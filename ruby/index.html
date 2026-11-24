@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>一括ルビ振りメーカー | センセイボックス</title>
-  <meta name="description" content="Wordファイル（.docx）のレイアウトや書式を100%維持したまま一気にルビを自動付与。マイ辞書、初出のみルビ、UDデジタル教科書体変換、縦書きA4横向き印刷に対応した先生向け無料Webツール。">
+  <meta name="description" content="Wordファイル（.docx）のレイアウトや書式を100%維持したまま一気にルビを自動付与。学年別フィルタ、マイ辞書、UDデジタル教科書体変換、縦書きA4横向き印刷に対応した先生向け無料Webツール。">
   <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/ruby/" />
   <link rel="icon" href="../logo.png" type="image/png">
   <!-- Tailwind CSS -->
@@ -34,7 +34,7 @@
     /* ルビのスタイルとサイズ・色変数 */
     :root {
       --ruby-scale: 0.48em;
-      --ruby-color: #4f46e5;
+      --ruby-color: #475569;
     }
     ruby {
       ruby-align: center;
@@ -86,7 +86,7 @@
         height: auto !important;
         overflow: visible !important;
       }
-      header, #dictStatusBanner, #leftColumn, #previewToolbar, #previewActions, #toast, #editRubyModal, #myDictModal {
+      header, #dictStatusBanner, #leftColumn, #previewToolbar, #previewActions, #toast, #editRubyModal, #myDictModal, #helpGuideModal {
         display: none !important;
       }
       main, #rightColumn, #previewCard {
@@ -130,8 +130,8 @@
 
   <!-- ヘッダー -->
   <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
         <a href="../" class="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition" title="ポータルへ戻る">
           <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </a>
@@ -142,24 +142,30 @@
           <div>
             <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
               <span>一括ルビ振りメーカー</span>
-              <span class="hidden sm:inline text-[10px] font-mono-tech font-bold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full">Word書式完全維持</span>
+              <span class="hidden sm:inline text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">Word書式そのまま</span>
             </h1>
-            <p class="text-[10px] text-slate-400 font-bold hidden sm:block">元のWordレイアウト・表組・フォントを崩さずルビを一括埋め込み</p>
+            <p class="text-[10px] text-slate-400 font-bold hidden sm:block">プリントのレイアウトを崩さず、一気にふりがなをつけます</p>
           </div>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
+        <!-- 使い方ガイドボタン -->
+        <button id="openHelpBtn" class="px-3 py-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-black transition flex items-center gap-1.5 shadow-2xs">
+          <i data-lucide="help-circle" class="w-4 h-4 text-amber-600"></i>
+          <span>使い方ガイド</span>
+        </button>
+
         <!-- マイ辞書管理ボタン -->
         <button id="openMyDictBtn" class="px-3 py-1.5 rounded-xl border border-violet-200 bg-violet-50 hover:bg-violet-100 text-violet-800 text-xs font-black transition flex items-center gap-1.5">
           <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
-          <span>マイ辞書</span>
+          <span class="hidden sm:inline">マイ辞書</span>
           <span id="myDictCountBadge" class="bg-violet-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-mono-tech">0</span>
         </button>
 
-        <span class="hidden md:inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
+        <span class="hidden lg:inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
           <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          <span>サーバー送信ゼロ</span>
+          <span>外部送信ゼロで安心</span>
         </span>
       </div>
     </div>
@@ -168,137 +174,163 @@
   <!-- 辞書ロード状態バー -->
   <div id="dictStatusBanner" class="bg-indigo-600 text-white text-xs font-bold py-2 px-4 text-center flex items-center justify-center gap-2">
     <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-    <span id="dictStatusText">裏方で日本語ふりがな辞書を準備中です（画面操作はそのまま可能です）...</span>
+    <span id="dictStatusText">ふりがな辞書を準備中です（数秒で完了します）...</span>
   </div>
 
   <!-- メインエリア -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- 左カラム：入力 ＆ プロ仕様オプション設定 (5カラム) -->
+    <!-- 左カラム：3ステップ操作パネル (5カラム) -->
     <div id="leftColumn" class="lg:col-span-5 flex flex-col gap-4">
       
-      <!-- 1. Wordアップロード ＆ テキスト入力カード -->
+      <!-- ステップ1：ファイルを入れる・文章を貼る -->
       <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-3.5">
         <div class="flex items-center justify-between">
-          <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
-            <span class="w-5 h-5 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-mono-tech">1</span>
-            <span>Word読込 または 文章入力</span>
+          <h2 class="text-sm sm:text-base font-black text-slate-800 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-mono-tech">1</span>
+            <span>Wordファイルを入れる</span>
           </h2>
           <div class="flex items-center gap-1.5">
-            <button id="stripRubyBtn" class="text-[11px] font-bold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition" title="すでに入っているルビをすべて解除します">
-              既存ルビ解除
+            <button id="stripRubyBtn" class="text-[11px] font-bold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition" title="すでについているふりがなをすべて消します">
+              ルビを消す
             </button>
             <button id="sampleTextBtn" class="text-[11px] font-bold text-violet-600 hover:text-violet-800 bg-violet-50 px-2.5 py-1 rounded-lg transition">
-              例文
+              おためし文章
             </button>
           </div>
         </div>
 
         <!-- Word (.docx) ドラッグ＆ドロップ枠 -->
-        <label id="dropZone" class="border-2 border-dashed border-blue-300 bg-blue-50/30 hover:border-blue-500 hover:bg-blue-50/70 rounded-2xl p-3.5 text-center cursor-pointer transition flex flex-col items-center justify-center gap-1 group">
+        <label id="dropZone" class="border-2 border-dashed border-blue-300 bg-blue-50/40 hover:border-blue-500 hover:bg-blue-50 rounded-2xl p-4 text-center cursor-pointer transition flex flex-col items-center justify-center gap-1.5 group">
           <input id="docxInput" type="file" accept=".docx" class="hidden">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <i data-lucide="file-check-2" class="w-4 h-4"></i>
-            </div>
-            <div class="text-left">
-              <p class="text-xs font-black text-slate-800">Wordファイル（.docx）を選択 / ドロップ</p>
-              <p id="fileNameLabel" class="text-[10px] text-blue-700 font-bold">★元のレイアウト・表組・文字サイズを維持して出力</p>
-            </div>
+          <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i data-lucide="file-up" class="w-5 h-5"></i>
           </div>
+          <p class="text-xs sm:text-sm font-black text-slate-800">ここを押してWordファイル（.docx）を選ぶ</p>
+          <p id="fileNameLabel" class="text-[11px] text-blue-700 font-bold">元の文字サイズ・表・余白を崩さずそのまま変換できます</p>
         </label>
 
-        <!-- テキストエリア -->
-        <div class="relative">
-          <textarea id="sourceText" rows="5" placeholder="Wordを使わない場合は、ここに直接文章を貼り付けてください。" class="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-violet-500 focus:outline-none leading-relaxed resize-y"></textarea>
-          <button id="clearTextBtn" class="absolute bottom-2.5 right-2.5 text-[11px] font-bold text-slate-400 hover:text-rose-500 bg-white/95 border border-slate-200 px-2 py-0.5 rounded-lg shadow-2xs transition">
-            クリア
-          </button>
+        <!-- テキスト直接入力 -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-slate-400">※Wordを使わず、文章を直接貼り付けることもできます</span>
+            <button id="clearTextBtn" class="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition">
+              入力を消す
+            </button>
+          </div>
+          <textarea id="sourceText" rows="4" placeholder="ここに文章を貼り付けても使えます。" class="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-violet-500 focus:outline-none leading-relaxed resize-y"></textarea>
         </div>
       </div>
 
-      <!-- 2. ルビ振り・教材作成オプション設定 -->
-      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-3.5">
-        <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
-          <span class="w-5 h-5 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-mono-tech">2</span>
-          <span>ルビ振り・プリント作成設定</span>
+      <!-- ステップ2：学年をえらぶ ＆ 変換ボタンを押す -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-4">
+        <h2 class="text-sm sm:text-base font-black text-slate-800 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-mono-tech">2</span>
+          <span>ふりがなのつけ方をえらぶ</span>
         </h2>
 
-        <!-- 学年 ＆ 表記形式 -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <!-- いつも使う基本設定（2項目だけ） -->
+        <div class="space-y-3">
           <div>
-            <label class="block text-[11px] font-bold text-slate-500 mb-1">対象学年フィルタ</label>
-            <select id="gradeFilter" class="w-full p-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
-              <option value="0" selected>すべての漢字（総ルビ）</option>
-              <option value="1">小1未習のみ（小2以上）</option>
-              <option value="2">小2未習のみ（小3以上）</option>
-              <option value="3">小3未習のみ（小4以上）</option>
-              <option value="4">小4未習のみ（小5以上）</option>
-              <option value="5">小5未習のみ（小6以上）</option>
-              <option value="6">小6未習のみ（中学生以上）</option>
+            <label class="block text-xs font-black text-slate-700 mb-1">どの学年の子どもに配りますか？</label>
+            <select id="gradeFilter" class="w-full p-3 text-xs sm:text-sm font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-violet-500 focus:bg-white focus:outline-none">
+              <option value="0" selected>すべての漢字にふる（1年生・支援学級向け）</option>
+              <option value="1">2年生が習っていない漢字だけ</option>
+              <option value="2">3年生が習っていない漢字だけ</option>
+              <option value="3">4年生が習っていない漢字だけ</option>
+              <option value="4">5年生が習っていない漢字だけ</option>
+              <option value="5">6年生が習っていない漢字だけ</option>
+              <option value="6">中学生が習っていない漢字だけ</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-500 mb-1">ふりがなの表記・モード</label>
-            <select id="rubyScriptMode" class="w-full p-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
-              <option value="hiragana" selected>ひらがなルビ（標準）</option>
-              <option value="katakana">カタカナルビ</option>
-              <option value="anaume">漢字穴埋め問題化：（  ）</option>
+            <label class="block text-xs font-black text-slate-700 mb-1">ふりがなの見た目</label>
+            <select id="rubyScriptMode" class="w-full p-3 text-xs sm:text-sm font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-violet-500 focus:bg-white focus:outline-none">
+              <option value="hiragana" selected>ひらがなでふる（ふつう）</option>
+              <option value="katakana">カタカナでふる</option>
+              <option value="anaume">漢字テスト用にする：漢字を（  ）に変える</option>
             </select>
           </div>
         </div>
 
-        <!-- 詳細プロ仕様スイッチ群 -->
-        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 space-y-2 text-xs">
-          <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-              <input id="firstOnlyCheck" type="checkbox" class="w-4 h-4 accent-violet-600 rounded">
-              <span>初出（1回目）のみ</span>
+        <!-- 折りたたみ式：もっと細かく調整する -->
+        <div class="border border-slate-200/90 rounded-2xl overflow-hidden">
+          <button id="toggleAdvancedBtn" type="button" class="w-full px-4 py-2.5 bg-slate-50 hover:bg-slate-100 flex items-center justify-between text-xs font-black text-slate-600 transition">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-violet-600"></i>
+              <span>もっと細かく調整する（必要なときだけ）</span>
+            </span>
+            <i data-lucide="chevron-down" id="advancedChevron" class="w-4 h-4 transition-transform duration-200"></i>
+          </button>
+
+          <div id="advancedPanel" class="hidden p-4 bg-white border-t border-slate-200/80 space-y-3 text-xs">
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input id="firstOnlyCheck" type="checkbox" class="w-4 h-4 mt-0.5 accent-violet-600 rounded">
+              <div>
+                <span class="font-black text-slate-800 block">同じ漢字は「最初の1回だけ」ふる</span>
+                <span class="text-[11px] text-slate-400">2回目からはふりがなを省略します</span>
+              </div>
             </label>
 
-            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-              <input id="skipLargeTitleCheck" type="checkbox" checked class="w-4 h-4 accent-violet-600 rounded">
-              <span>大見出し除外(16pt+)</span>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input id="skipLargeTitleCheck" type="checkbox" checked class="w-4 h-4 mt-0.5 accent-violet-600 rounded">
+              <div>
+                <span class="font-black text-slate-800 block">タイトル・大きな見出しにはふらない</span>
+                <span class="text-[11px] text-slate-400">16pt以上の大きな文字を自動で除外します</span>
+              </div>
             </label>
 
-            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-              <input id="udFontCheck" type="checkbox" class="w-4 h-4 accent-violet-600 rounded">
-              <span>UDデジタル教科書体化</span>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input id="udFontCheck" type="checkbox" class="w-4 h-4 mt-0.5 accent-violet-600 rounded">
+              <div>
+                <span class="font-black text-slate-800 block">読みやすい「UD教科書体」に変える</span>
+                <span class="text-[11px] text-slate-400">書体だけをユニバーサルデザイン体に変更します</span>
+              </div>
             </label>
 
-            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-              <input id="grayRubyCheck" type="checkbox" checked class="w-4 h-4 accent-violet-600 rounded">
-              <span>ルビ薄グレー化</span>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input id="grayRubyCheck" type="checkbox" checked class="w-4 h-4 mt-0.5 accent-violet-600 rounded">
+              <div>
+                <span class="font-black text-slate-800 block">ふりがなを「うすい黒（グレー）」にする</span>
+                <span class="text-[11px] text-slate-400">白黒印刷したときに元の漢字が見やすくなります</span>
+              </div>
             </label>
 
-            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-              <input id="katakanaRubyCheck" type="checkbox" class="w-4 h-4 accent-violet-600 rounded">
-              <span>カタカナにもルビ</span>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input id="katakanaRubyCheck" type="checkbox" class="w-4 h-4 mt-0.5 accent-violet-600 rounded">
+              <div>
+                <span class="font-black text-slate-800 block">カタカナの言葉にもひらがなをふる</span>
+                <span class="text-[11px] text-slate-400">例：「テレビ」の上に「てれび」とふります</span>
+              </div>
             </label>
 
-            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-              <input id="tcyNumberCheck" type="checkbox" checked class="w-4 h-4 accent-violet-600 rounded">
-              <span>縦書き数字の自動補正</span>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input id="tcyNumberCheck" type="checkbox" checked class="w-4 h-4 mt-0.5 accent-violet-600 rounded">
+              <div>
+                <span class="font-black text-slate-800 block">縦書きのとき、2けたの数字を横向きにそろえる</span>
+                <span class="text-[11px] text-slate-400">「12月」などの数字がバラバラになるのを防ぎます</span>
+              </div>
             </label>
-          </div>
 
-          <!-- Word内の対象エリア指定 -->
-          <div class="pt-2 border-t border-slate-200/80 flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-600">
-            <span class="text-slate-400">Word対象範囲:</span>
-            <label class="flex items-center gap-1 cursor-pointer">
-              <input id="includeTablesCheck" type="checkbox" checked class="w-3.5 h-3.5 accent-blue-600 rounded">
-              <span>表の中</span>
-            </label>
-            <label class="flex items-center gap-1 cursor-pointer">
-              <input id="includeTextBoxesCheck" type="checkbox" checked class="w-3.5 h-3.5 accent-blue-600 rounded">
-              <span>テキストボックス内</span>
-            </label>
+            <div class="pt-2.5 border-t border-slate-100 space-y-1.5">
+              <span class="text-[11px] font-black text-slate-500 block">Wordファイル内の対象範囲</span>
+              <div class="flex flex-wrap gap-4">
+                <label class="flex items-center gap-1.5 cursor-pointer font-bold text-slate-700">
+                  <input id="includeTablesCheck" type="checkbox" checked class="w-4 h-4 accent-blue-600 rounded">
+                  <span>「表の中」にもふる</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer font-bold text-slate-700">
+                  <input id="includeTextBoxesCheck" type="checkbox" checked class="w-4 h-4 accent-blue-600 rounded">
+                  <span>「吹き出し・枠内」にもふる</span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- 実行ボタン -->
-        <button id="convertBtn" disabled class="w-full py-3.5 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed active:scale-98 text-white font-black text-sm sm:text-base rounded-2xl shadow-md transition flex items-center justify-center gap-2">
+        <!-- ステップ3：実行ボタン -->
+        <button id="convertBtn" disabled class="w-full py-4 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed active:scale-98 text-white font-black text-base rounded-2xl shadow-md transition flex items-center justify-center gap-2">
           <i data-lucide="sparkles" class="w-5 h-5"></i>
           <span id="convertBtnText">辞書準備中...</span>
         </button>
@@ -306,27 +338,27 @@
 
     </div>
 
-    <!-- 右カラム：プレビュー ＆ Word出力・印刷 (7カラム) -->
+    <!-- 右カラム：仕上がり確認 ＆ ダウンロード・印刷 (7カラム) -->
     <div id="rightColumn" class="lg:col-span-7 flex flex-col gap-4">
       <div id="previewCard" class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between min-h-[560px]">
         
         <!-- 上部ツールバー -->
         <div id="previewToolbar" class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
           <div class="flex items-center gap-2">
-            <h2 class="text-sm font-black text-slate-800">プレビュー</h2>
+            <h2 class="text-sm sm:text-base font-black text-slate-800">仕上がり確認</h2>
             <span id="docxModeBadge" class="hidden text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md">
-              Word書式維持モード中
+              Word書式そのまま
             </span>
-            <span class="text-[11px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">単語クリックで修正</span>
+            <span class="text-[11px] text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">読み間違いは単語をクリックで修正</span>
           </div>
 
           <!-- ルビサイズ・書字方向・フォント切り替え -->
           <div class="flex flex-wrap items-center gap-1.5">
             <!-- ルビサイズ調整 -->
-            <div class="inline-flex items-center rounded-xl bg-slate-100 p-1 text-[11px] font-bold" title="ルビ文字の大きさ">
-              <span class="px-1.5 text-slate-400">ルビ</span>
+            <div class="inline-flex items-center rounded-xl bg-slate-100 p-1 text-[11px] font-bold" title="ふりがなの大きさ">
+              <span class="px-1.5 text-slate-400">文字サイズ</span>
               <button data-rsize="small" class="rsize-btn px-2 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition">小</button>
-              <button data-rsize="normal" class="rsize-btn px-2 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition">標準</button>
+              <button data-rsize="normal" class="rsize-btn px-2 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition">ふつう</button>
               <button data-rsize="large" class="rsize-btn px-2 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition">大</button>
             </div>
 
@@ -337,7 +369,7 @@
             </div>
 
             <!-- 明朝体・ゴシック体 -->
-            <button id="fontToggleBtn" class="px-2.5 py-1 rounded-xl border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition" title="書体切り替え">
+            <button id="fontToggleBtn" class="px-2.5 py-1 rounded-xl border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition" title="プレビューの書体切り替え">
               明朝体
             </button>
           </div>
@@ -347,25 +379,25 @@
         <div id="printArea" class="my-4 flex-1 p-5 sm:p-6 bg-slate-50/70 border border-slate-200/80 rounded-2xl overflow-auto max-h-[470px] horizontal-text text-lg sm:text-xl text-slate-900">
           <div id="emptyPlaceholder" class="h-full flex flex-col items-center justify-center text-center text-slate-400 py-16">
             <span class="text-4xl mb-2">📄</span>
-            <p class="text-sm font-bold text-slate-500">Wordファイル（.docx）をドロップするか、文章を入力してください</p>
-            <p class="text-xs mt-1">元のフォント・サイズ・表組・余白をそのまま残してルビ付きWordを出力できます</p>
+            <p class="text-sm font-bold text-slate-600">左側からWordファイルを入れると、ここにふりがな付きで表示されます</p>
+            <p class="text-xs mt-1.5 text-slate-400">確認したら、下の青いボタンで「ルビ付きのWord」として保存できます</p>
           </div>
           <div id="rubyOutput" class="hidden whitespace-pre-wrap break-words"></div>
         </div>
 
-        <!-- 下部アクションボタン群（Word直接保存・コピー・印刷） -->
+        <!-- 下部アクションボタン群 -->
         <div id="previewActions" class="pt-3 border-t border-slate-100 flex flex-col gap-2">
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <!-- 正規Word (.docx) 直接ダウンロード -->
-            <button id="downloadDocxBtn" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+            <button id="downloadDocxBtn" class="flex-1 py-3.5 px-4 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2">
               <i data-lucide="download" class="w-4 h-4"></i>
-              <span id="downloadDocxBtnLabel">Wordファイル（.docx）で保存</span>
+              <span>ルビ付きのWordをダウンロード</span>
             </button>
 
-            <!-- そのまま印刷（横書き改ページ・縦書きA4横向き自動対応） -->
-            <button id="printBtn" class="py-3 px-5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
+            <!-- そのまま印刷 -->
+            <button id="printBtn" class="py-3.5 px-5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
               <i data-lucide="printer" class="w-4 h-4"></i>
-              <span id="printBtnLabel">印刷（A4縦）</span>
+              <span id="printBtnLabel">このまま印刷（A4縦）</span>
             </button>
           </div>
 
@@ -373,13 +405,13 @@
             <!-- Word用リッチHTMLコピー -->
             <button id="copyWordBtn" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5">
               <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-blue-600"></i>
-              <span>Word貼付用にコピー</span>
+              <span>コピーしてWordに貼り付ける</span>
             </button>
 
             <!-- カッコ書きテキストコピー -->
             <button id="copyParenBtn" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5">
               <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-500"></i>
-              <span>カッコ書きコピー：漢字（かんじ）</span>
+              <span>カッコ書きでコピー：漢字（かんじ）</span>
             </button>
           </div>
         </div>
@@ -388,6 +420,74 @@
     </div>
 
   </main>
+
+  <!-- ========================================== -->
+  <!-- 使い方ガイド モーダル（同画面ポップアップ） -->
+  <!-- ========================================== -->
+  <div id="helpGuideModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-black text-lg">❓</div>
+          <div>
+            <h3 class="font-black text-lg text-slate-900">一括ルビ振りメーカー かんたん使い方ガイド</h3>
+            <p class="text-xs text-slate-400 font-bold">3ステップでいつものWordプリントにふりがながつきます</p>
+          </div>
+        </div>
+        <button id="closeHelpBtn" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto py-5 space-y-5 pr-1 text-sm leading-relaxed">
+        <!-- 基本の3ステップ -->
+        <div class="space-y-3">
+          <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/80 flex gap-3.5">
+            <span class="w-7 h-7 rounded-full bg-blue-600 text-white font-mono-tech font-black text-sm flex items-center justify-center shrink-0 mt-0.5">1</span>
+            <div>
+              <h4 class="font-black text-slate-900">Wordファイル（.docx）を入れる</h4>
+              <p class="text-xs text-slate-600 mt-1">青い点線の枠を押して、いつも使っているプリントやテストのWordファイルを選びます。<b>文字の大きさ・表・余白などのデザインはそのまま残ります。</b></p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-violet-50/70 border border-violet-200/80 flex gap-3.5">
+            <span class="w-7 h-7 rounded-full bg-violet-600 text-white font-mono-tech font-black text-sm flex items-center justify-center shrink-0 mt-0.5">2</span>
+            <div>
+              <h4 class="font-black text-slate-900">学年をえらんで「一気にルビを振る！」を押す</h4>
+              <p class="text-xs text-slate-600 mt-1">「3年生が習っていない漢字だけ」のように学年を選ぶと、<b>習っていない漢字だけに自動でふりがな</b>がつきます。支援学級や1年生向けには「すべての漢字にふる」を選んでください。</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex gap-3.5">
+            <span class="w-7 h-7 rounded-full bg-emerald-600 text-white font-mono-tech font-black text-sm flex items-center justify-center shrink-0 mt-0.5">3</span>
+            <div>
+              <h4 class="font-black text-slate-900">「ルビ付きのWordをダウンロード」で保存</h4>
+              <p class="text-xs text-slate-600 mt-1">右側の画面で仕上がりを確認したら、下の青いボタンを押します。ふりがながついた新しいWordファイルがダウンロードされます。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 便利な小ワザ -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+          <h4 class="font-black text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i>
+            <span>知っておくと便利な機能</span>
+          </h4>
+          <ul class="text-xs text-slate-600 space-y-2 list-disc pl-4">
+            <li><b>読み間違いを一括で直す：</b> 右側の画面で読み方が違う漢字をクリックすると、文章内の同じ単語を<b>まとめて一括修正</b>できます。「マイ辞書」に覚えておけば、次のプリントからは最初から正しく変換されます。</li>
+            <li><b>ふりがなを全部消す：</b> ルビ付きのWordファイルを入れて左上の「ルビを消す」を押すと、高学年向けのルビなしプリントに戻せます。</li>
+            <li><b>個人情報の安心設計：</b> 読み込んだWordファイルや児童の名前がインターネット上のサーバーに送信されることは一切ありません。お使いのパソコンの中だけで安全に処理されます。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-100 flex justify-end shrink-0">
+        <button id="closeHelpFooterBtn" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm rounded-xl transition">
+          閉じて作業に戻る
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================== -->
   <!-- 単語のルビ修正モーダル（単体・一括・マイ辞書登録） -->
@@ -406,12 +506,12 @@
 
       <div class="space-y-3">
         <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 text-center">
-          <span class="text-[11px] font-bold text-slate-400 block mb-0.5">対象の単語</span>
+          <span class="text-[11px] font-bold text-slate-400 block mb-0.5">直す単語</span>
           <span id="editTargetWord" class="text-2xl font-black text-slate-900">豆太</span>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">新しいふりがな（空欄にするとルビ削除）</label>
+          <label class="block text-xs font-bold text-slate-600 mb-1">正しいふりがな（空欄にするとふりがなを消します）</label>
           <input id="editRubyInput" type="text" placeholder="例：まめた" class="w-full p-3 text-base font-bold bg-white border-2 border-violet-300 rounded-xl focus:border-violet-600 focus:outline-none">
         </div>
 
@@ -419,8 +519,8 @@
         <label class="flex items-center gap-2 p-2.5 rounded-xl bg-violet-50/80 border border-violet-200/70 cursor-pointer">
           <input id="saveToMyDictCheck" type="checkbox" checked class="w-4 h-4 accent-violet-600 rounded">
           <div class="text-xs">
-            <span class="font-black text-violet-900 block">「マイ辞書」に自動記憶する</span>
-            <span class="text-[10px] text-violet-700 font-bold">次回以降のプリントでも自動でこの読みになります</span>
+            <span class="font-black text-violet-900 block">「マイ辞書」に覚えておく</span>
+            <span class="text-[10px] text-violet-700 font-bold">次回のプリントから自動でこの読みになります</span>
           </div>
         </label>
       </div>
@@ -445,7 +545,7 @@
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
           <i data-lucide="book-marked" class="w-4 h-4 text-violet-600"></i>
-          <span>マイ辞書（登録済みの読み一覧）</span>
+          <span>マイ辞書（覚えておいた読み一覧）</span>
         </h3>
         <button id="closeMyDictBtn" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -453,7 +553,7 @@
       </div>
 
       <p class="text-xs text-slate-500 font-medium">
-        児童の名前・先生名・学校名など、一度修正して記憶させた読みは次回から自動で優先適用されます。
+        児童の名前・先生名・学校名など、一度修正して覚えさせた読みは次回から自動で優先されます。
       </p>
 
       <!-- 新規直接追加フォーム -->
@@ -507,7 +607,7 @@
     // 2. マイ辞書（localStorage 永続化）
     // ==========================================
     const MY_DICT_STORAGE_KEY = 'senseibox_ruby_mydict_v1';
-    let myDictionary = {}; // { "豆太": "まめた", ... }
+    let myDictionary = {};
 
     function loadMyDictionary() {
       try {
@@ -555,7 +655,6 @@
             self.postMessage({ type: "error", message: "辞書がまだ準備中です" });
             return;
           }
-          // texts: string[]
           const results = msg.texts.map(function(txt) {
             return tokenizer.tokenize(txt).map(function(t) {
               return {
@@ -589,12 +688,11 @@
     // ==========================================
     // 4. 統合データモデル（Word書式維持 ＆ テキスト共通）
     // ==========================================
-    // 段落リスト: [ { pIndex, isTable, isTextBox, maxFontSizePt, segments: [ { text, ruby, rPrXml, isRubyTarget } ] } ]
     let paragraphModels = [];
-    let uploadedDocxBuffer = null; // 元の .docx バイナリ
+    let uploadedDocxBuffer = null;
     let uploadedDocxName = '';
 
-    let currentRubySize = 'normal'; // 'small' | 'normal' | 'large'
+    let currentRubySize = 'normal';
     let isVertical = false;
     let isMincho = false;
 
@@ -648,12 +746,11 @@
       return result;
     }
 
-    // 既存ルビを解除してベーステキストに戻す（Word XML要素向け）
     function unwrapExistingRubiesInDoc(xmlDoc) {
       const rubies = Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'ruby'));
       rubies.forEach(rubyEl => {
-        const parent = rubyEl.parentNode; // 通常は w:r
-        const grandParent = parent ? parent.parentNode : null; // 通常は w:p
+        const parent = rubyEl.parentNode;
+        const grandParent = parent ? parent.parentNode : null;
         const rubyBase = rubyEl.getElementsByTagNameNS(W_NS, 'rubyBase')[0];
         if (rubyBase && grandParent) {
           const baseRuns = Array.from(rubyBase.getElementsByTagNameNS(W_NS, 'r'));
@@ -665,7 +762,6 @@
       });
     }
 
-    // 祖先要素に特定のタグ名があるか判定
     function hasAncestorTag(node, localName) {
       let cur = node.parentNode;
       while (cur) {
@@ -676,9 +772,9 @@
     }
 
     // ==========================================
-    // 5. 変換リクエスト構築（.docx書式維持モード / テキストモード両対応）
+    // 5. 変換リクエスト構築
     // ==========================================
-    let pendingChunksMeta = []; // バッチ解析のメタデータ
+    let pendingChunksMeta = [];
 
     async function startConversion(stripOnly = false) {
       if (!isWorkerReady && !stripOnly) {
@@ -698,7 +794,6 @@
           const parser = new DOMParser();
           const xmlDoc = parser.parseFromString(docXmlStr, 'application/xml');
 
-          // 二重ルビ防止・既存ルビ解除のため一旦ルビタグを展開
           unwrapExistingRubiesInDoc(xmlDoc);
 
           const pNodes = Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'p'));
@@ -711,11 +806,8 @@
           pNodes.forEach((pNode, pIdx) => {
             const isTable = hasAncestorTag(pNode, 'tbl');
             const isTextBox = hasAncestorTag(pNode, 'txbxContent') || hasAncestorTag(pNode, 'textbox');
-
-            // 対象外エリア判定
             const skipArea = (isTable && !includeTables) || (isTextBox && !includeTextBoxes);
 
-            // 段落内の直下ラン（w:r）を走査し、同じ書式(rPr)の連続テキストをグループ化
             const childRuns = Array.from(pNode.childNodes).filter(n => n.localName === 'r');
             const chunks = [];
             let maxFontSizePt = 10.5;
@@ -724,7 +816,6 @@
               const rPr = rNode.getElementsByTagNameNS(W_NS, 'rPr')[0];
               const rPrXml = rPr ? serializer.serializeToString(rPr) : '';
 
-              // フォントサイズ(half-points)取得
               if (rPr) {
                 const sz = rPr.getElementsByTagNameNS(W_NS, 'sz')[0];
                 if (sz) {
@@ -733,7 +824,6 @@
                 }
               }
 
-              // 画像や特殊オブジェクトを含むランはそのまま保持
               const hasDrawing = rNode.getElementsByTagNameNS(W_NS, 'drawing').length > 0 ||
                                  rNode.getElementsByTagNameNS(W_NS, 'pict').length > 0 ||
                                  rNode.getElementsByTagNameNS(W_NS, 'tab').length > 0 ||
@@ -773,7 +863,6 @@
             };
             paragraphModels.push(pModel);
 
-            // 既存ルビ解除のみの場合はトークナイズ不要
             if (stripOnly || skipArea) {
               chunks.forEach(ch => {
                 pModel.segments.push({
@@ -798,19 +887,19 @@
 
           if (stripOnly) {
             renderPreviewFromModels();
-            showToast('既存ルビをすべて解除しました！');
+            showToast('ふりがなをすべて消しました！');
             return;
           }
 
           if (textsToTokenize.length === 0) {
             renderPreviewFromModels();
-            showToast('変換対象のテキストが見つかりませんでした');
+            showToast('変換できる文章が見つかりませんでした');
             return;
           }
 
           latestRequestId++;
           convertBtn.disabled = true;
-          convertBtnText.textContent = "解析・変換中...";
+          convertBtnText.textContent = "ふりがなをつけています...";
 
           rubyWorker.postMessage({
             type: "tokenizeBatch",
@@ -820,7 +909,7 @@
 
         } catch (err) {
           console.error(err);
-          alert('Wordファイルの解析中にエラーが発生しました。');
+          alert('Wordファイルの読み込み中にエラーが発生しました。');
         }
         return;
       }
@@ -828,7 +917,7 @@
       // ケースB：テキストエリア直接入力の場合
       const rawText = document.getElementById('sourceText').value;
       if (!rawText.trim()) {
-        showToast('Wordファイルを読み込むか、文章を入力してください');
+        showToast('Wordファイルを入れるか、文章を貼り付けてください');
         return;
       }
 
@@ -857,13 +946,13 @@
 
       if (stripOnly) {
         renderPreviewFromModels();
-        showToast('ルビを解除しました');
+        showToast('ふりがなを消しました');
         return;
       }
 
       latestRequestId++;
       convertBtn.disabled = true;
-      convertBtnText.textContent = "解析・変換中...";
+      convertBtnText.textContent = "ふりがなをつけています...";
 
       rubyWorker.postMessage({
         type: "tokenizeBatch",
@@ -881,7 +970,7 @@
       if (data.type === "ready") {
         isWorkerReady = true;
         dictBanner.className = "bg-emerald-600 text-white text-xs font-bold py-1.5 px-4 text-center transition-all";
-        dictText.textContent = "✅ 準備完了！いつでもルビ変換できます";
+        dictText.textContent = "✅ 準備できました！いつでもふりがなをつけられます";
         convertBtn.disabled = false;
         convertBtnText.textContent = "一気にルビを振る！";
 
@@ -899,7 +988,7 @@
         applyRubyRulesToTokens(data.results);
         convertBtn.disabled = false;
         convertBtnText.textContent = "一気にルビを振る！";
-        showToast('ルビを一括変換しました！');
+        showToast('ふりがなをつけました！右側の画面で確認してください');
       }
       else if (data.type === "error") {
         dictBanner.className = "bg-rose-600 text-white text-xs font-bold py-2 px-4 text-center";
@@ -918,7 +1007,7 @@
       const skipLargeTitleOn = document.getElementById('skipLargeTitleCheck').checked;
       const scriptMode = document.getElementById('rubyScriptMode').value;
 
-      const seenWordsSet = new Set(); // 初出判定用
+      const seenWordsSet = new Set();
 
       tokenizedResults.forEach((tokens, idx) => {
         const meta = pendingChunksMeta[idx];
@@ -935,14 +1024,13 @@
           return;
         }
 
-        // 16pt以上の大見出し除外判定
         const isLargeTitle = skipLargeTitleOn && pModel.maxFontSizePt >= 16;
 
         tokens.forEach(token => {
           const surface = token.surface_form;
           const reading = token.reading;
 
-          // 1. マイ辞書に完全一致する単語があれば最優先
+          // 1. マイ辞書に一致する単語があれば最優先
           if (Object.prototype.hasOwnProperty.call(myDictionary, surface)) {
             const customReading = myDictionary[surface];
             if (isLargeTitle || !customReading) {
@@ -975,7 +1063,6 @@
               const parts = splitKanjiAndOkurigana(surface, hira);
               parts.forEach(p => {
                 if (p.ruby) {
-                  // コア部分もマイ辞書チェック
                   const dictHit = Object.prototype.hasOwnProperty.call(myDictionary, p.text)
                     ? myDictionary[p.text]
                     : p.ruby;
@@ -1024,7 +1111,7 @@
     }
 
     // ==========================================
-    // 7. プレビュー描画（縦中横・穴埋め問題化・UDフォント対応）
+    // 7. プレビュー描画
     // ==========================================
     function renderPreviewFromModels() {
       const outputEl = document.getElementById('rubyOutput');
@@ -1047,7 +1134,6 @@
           if (seg.rawXml && !seg.text) return;
 
           if (seg.ruby) {
-            // 漢字穴埋めテスト化モード
             if (scriptMode === 'anaume') {
               const span = document.createElement('span');
               span.className = 'ruby-word font-bold text-violet-800';
@@ -1058,7 +1144,7 @@
             } else {
               const rubyEl = document.createElement('ruby');
               rubyEl.className = 'ruby-word';
-              rubyEl.title = 'クリックして読み方を修正・マイ辞書登録';
+              rubyEl.title = 'クリックして読み方を修正';
               rubyEl.textContent = seg.text;
 
               const rtEl = document.createElement('rt');
@@ -1069,7 +1155,6 @@
               pDiv.appendChild(rubyEl);
             }
           } else {
-            // 縦書き時の2桁半角数字を縦中横表示
             if (isVertical && tcyOn && /^[0-9]{2}$/.test(seg.text)) {
               const tcySpan = document.createElement('span');
               tcySpan.className = 'tcy';
@@ -1093,7 +1178,7 @@
     }
 
     // ==========================================
-    // 8. 単語ルビ修正モーダル（単体・一括・マイ辞書登録）
+    // 8. 単語ルビ修正モーダル
     // ==========================================
     let editTargetPIdx = -1;
     let editTargetSIdx = -1;
@@ -1183,7 +1268,7 @@
     });
 
     // ==========================================
-    // 9. マイ辞書 管理モーダル操作
+    // 9. マイ辞書 ＆ 使い方ガイド モーダル操作
     // ==========================================
     const myDictModal = document.getElementById('myDictModal');
     const myDictList = document.getElementById('myDictList');
@@ -1204,7 +1289,7 @@
           <div class="flex items-center gap-2 font-black text-slate-800">
             <span>${escapeHtml(word)}</span>
             <span class="text-slate-400">➔</span>
-            <span class="text-violet-700">${reading ? escapeHtml(reading) : '（ルビなし）'}</span>
+            <span class="text-violet-700">${reading ? escapeHtml(reading) : '（ふりがななし）'}</span>
           </div>
           <button class="text-slate-400 hover:text-rose-500 p-1" title="削除">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -1236,7 +1321,7 @@
       document.getElementById('dictNewWord').value = '';
       document.getElementById('dictNewReading').value = '';
       renderMyDictList();
-      showToast(`「${w}」をマイ辞書に登録しました`);
+      showToast(`「${w}」をマイ辞書に覚えました`);
     };
 
     document.getElementById('clearMyDictBtn').onclick = () => {
@@ -1245,6 +1330,22 @@
         saveMyDictionary();
         renderMyDictList();
       }
+    };
+
+    // 使い方ガイドモーダル
+    const helpGuideModal = document.getElementById('helpGuideModal');
+    document.getElementById('openHelpBtn').onclick = () => helpGuideModal.classList.remove('hidden');
+    document.getElementById('closeHelpBtn').onclick = () => helpGuideModal.classList.add('hidden');
+    document.getElementById('closeHelpFooterBtn').onclick = () => helpGuideModal.classList.add('hidden');
+    helpGuideModal.onclick = (e) => { if (e.target === helpGuideModal) helpGuideModal.classList.add('hidden'); };
+
+    // 折りたたみ詳細パネル
+    const toggleAdvancedBtn = document.getElementById('toggleAdvancedBtn');
+    const advancedPanel = document.getElementById('advancedPanel');
+    const advancedChevron = document.getElementById('advancedChevron');
+    toggleAdvancedBtn.onclick = () => {
+      const isHidden = advancedPanel.classList.toggle('hidden');
+      advancedChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
     };
 
     // ==========================================
@@ -1267,9 +1368,9 @@
       reader.onload = function(event) {
         uploadedDocxBuffer = event.target.result;
         uploadedDocxName = file.name.replace(/\.docx$/i, '');
-        fileNameLabel.textContent = `✅ 読込完了（書式維持）: ${file.name}`;
+        fileNameLabel.textContent = `✅ 読込完了（書式そのまま）: ${file.name}`;
         docxModeBadge.classList.remove('hidden');
-        document.getElementById('sourceText').value = `【Wordファイル読込中：${file.name}】\n※元のフォント・文字サイズ・表組・余白を保持したまま変換します。\n（テキスト入力に切り替える場合は「クリア」を押してください）`;
+        document.getElementById('sourceText').value = `【Wordファイル読込中：${file.name}】\n※元のフォント・文字サイズ・表・余白を保持したまま変換します。\n（テキスト入力に切り替える場合は「入力を消す」を押してください）`;
         startConversion(false);
       };
       reader.readAsArrayBuffer(file);
@@ -1292,8 +1393,6 @@
 
     // ==========================================
     // 11. Wordファイル（.docx）直接ダウンロード出力
-    //     ※ 元の.docxがある場合はXMLを直接書き換え、
-    //        テキスト入力のみの場合は新規.docxを組み立てる
     // ==========================================
     function escapeXml(str) {
       return str.replace(/[<>&'"]/g, c => ({
@@ -1307,7 +1406,6 @@
       }[m]));
     }
 
-    // セグメントからOOXML <w:r> 要素文字列を生成
     function buildRunXmlFromSegment(seg) {
       if (seg.rawXml && !seg.text) {
         return seg.rawXml;
@@ -1318,7 +1416,6 @@
       const tcyOn = document.getElementById('tcyNumberCheck').checked;
       const scriptMode = document.getElementById('rubyScriptMode').value;
 
-      // 元のrPrから基本サイズを抽出（なければ21=10.5pt）
       let baseHps = 21;
       const szMatch = seg.rPrXml.match(/<w:sz\b[^>]*w:val="(\d+)"/);
       if (szMatch) baseHps = parseInt(szMatch[1], 10);
@@ -1327,7 +1424,6 @@
       const rubyHps = Math.max(8, Math.round(baseHps * (ratioMap[currentRubySize] || 0.50)));
       const hpsRaise = Math.max(12, Math.round(baseHps * 0.92));
 
-      // ベース文字のrPr構築
       let baseRPr = seg.rPrXml || '<w:rPr/>';
       if (udFontOn) {
         const udFontsTag = `<w:rFonts w:ascii="UD デジタル 教科書体 NK-R" w:eastAsia="UD デジタル 教科書体 NK-R" w:hAnsi="UD デジタル 教科書体 NK-R"/>`;
@@ -1338,18 +1434,15 @@
         }
       }
 
-      // ルビ文字用のrPr構築（薄グレー化・フォント・サイズ）
       const rubyFontName = udFontOn ? 'UD デジタル 教科書体 NK-R' : (isMincho ? 'Yu Mincho' : 'Yu Gothic');
       const rubyColorTag = grayRubyOn ? '<w:color w:val="555555"/>' : '';
       const rtRPr = `<w:rPr><w:rFonts w:ascii="${rubyFontName}" w:eastAsia="${rubyFontName}" w:hAnsi="${rubyFontName}"/>${rubyColorTag}<w:sz w:val="${rubyHps}"/><w:szCs w:val="${rubyHps}"/></w:rPr>`;
 
-      // 1. 漢字穴埋めテスト化モードの場合
       if (seg.ruby && scriptMode === 'anaume') {
         const anaumeText = `（  ）（${seg.ruby}）`;
         return `<w:r>${baseRPr}<w:t xml:space="preserve">${escapeXml(anaumeText)}</w:t></w:r>`;
       }
 
-      // 2. ルビ付き単語の場合
       if (seg.ruby) {
         return `
           <w:r>
@@ -1378,7 +1471,6 @@
           </w:r>`;
       }
 
-      // 3. 縦書き時の2桁半角数字（縦中横）
       if (isVertical && tcyOn && /^[0-9]{2}$/.test(seg.text)) {
         const tcyTag = '<w:eastAsianLayout w:id="1" w:vert="1"/>';
         let tcyRPr = baseRPr;
@@ -1390,18 +1482,16 @@
         return `<w:r>${tcyRPr}<w:t>${escapeXml(seg.text)}</w:t></w:r>`;
       }
 
-      // 4. 通常テキスト
       return `<w:r>${baseRPr}<w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r>`;
     }
 
     document.getElementById('downloadDocxBtn').onclick = async () => {
       if (paragraphModels.length === 0) {
-        showToast('先にルビ変換を行ってください');
+        showToast('先に「一気にルビを振る！」を押してください');
         return;
       }
 
       try {
-        // パターンA：元のWordファイル（.docx）をそのまま書き換えて出力
         if (uploadedDocxBuffer) {
           const zip = await JSZip.loadAsync(uploadedDocxBuffer);
           const docXmlStr = await zip.file('word/document.xml').async('string');
@@ -1416,11 +1506,9 @@
             const pModel = paragraphModels[pIdx];
             if (!pModel) return;
 
-            // 既存の w:r をすべて削除（w:pPr などの段落書式は100%残す）
             const oldRuns = Array.from(pNode.childNodes).filter(n => n.localName === 'r');
             oldRuns.forEach(r => pNode.removeChild(r));
 
-            // 変換後セグメントから新しい w:r を挿入
             const runsXmlStr = pModel.segments.map(seg => buildRunXmlFromSegment(seg)).join('');
             if (runsXmlStr.trim()) {
               const tempDoc = parser.parseFromString(
@@ -1440,11 +1528,10 @@
 
           const blob = await zip.generateAsync({ type: 'blob' });
           triggerDownload(blob, `${uploadedDocxName}_ルビ付き.docx`);
-          showToast('元の書式を維持したままWord（.docx）を保存しました！');
+          showToast('元の書式そのままのWordファイルをダウンロードしました！');
           return;
         }
 
-        // パターンB：テキスト直接入力から新規 .docx を生成して出力
         const zip = new JSZip();
         const udFontOn = document.getElementById('udFontCheck').checked;
         const fontName = udFontOn ? 'UD デジタル 教科書体 NK-R' : (isMincho ? 'Yu Mincho' : 'Yu Gothic');
@@ -1493,7 +1580,7 @@
 
         const blob = await zip.generateAsync({ type: 'blob' });
         triggerDownload(blob, `ルビ付きプリント_${new Date().toISOString().slice(0, 10)}.docx`);
-        showToast('Wordファイル（.docx）をダウンロードしました！');
+        showToast('ルビ付きのWordをダウンロードしました！');
 
       } catch (err) {
         console.error(err);
@@ -1513,11 +1600,11 @@
     }
 
     // ==========================================
-    // 12. Word貼付用リッチHTMLコピー ＆ カッコ書きコピー
+    // 12. コピー処理
     // ==========================================
     document.getElementById('copyWordBtn').onclick = async () => {
       if (paragraphModels.length === 0) {
-        showToast('先にルビ変換を行ってください');
+        showToast('先に「一気にルビを振る！」を押してください');
         return;
       }
 
@@ -1560,7 +1647,7 @@
           'text/plain': new Blob([plainParts.join('')], { type: 'text/plain' })
         });
         await navigator.clipboard.write([clipboardItem]);
-        showToast('Word用にコピーしました！そのまま貼り付け（Ctrl+V / ⌘+V）できます');
+        showToast('コピーしました！Wordにそのまま貼り付けできます');
       } catch (err) {
         navigator.clipboard.writeText(plainParts.join(''));
         showToast('テキストをコピーしました');
@@ -1569,7 +1656,7 @@
 
     document.getElementById('copyParenBtn').onclick = () => {
       if (paragraphModels.length === 0) {
-        showToast('先にルビ変換を行ってください');
+        showToast('先に「一気にルビを振る！」を押してください');
         return;
       }
       const scriptMode = document.getElementById('rubyScriptMode').value;
@@ -1584,7 +1671,7 @@
     };
 
     // ==========================================
-    // 13. UIコントロール（ルビサイズ・色・UD体・縦横・印刷）
+    // 13. UIコントロール
     // ==========================================
     const printArea = document.getElementById('printArea');
     const dirHorizontalBtn = document.getElementById('dirHorizontalBtn');
@@ -1624,7 +1711,7 @@
       printArea.classList.add('horizontal-text');
       dirHorizontalBtn.className = 'px-2.5 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
       dirVerticalBtn.className = 'px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
-      printBtnLabel.textContent = '印刷（A4縦）';
+      printBtnLabel.textContent = 'このまま印刷（A4縦）';
       dynamicPrintStyle.textContent = '@page { size: A4 portrait; margin: 15mm; }';
       if (paragraphModels.length > 0) renderPreviewFromModels();
     };
@@ -1635,7 +1722,7 @@
       printArea.classList.add('vertical-text');
       dirVerticalBtn.className = 'px-2.5 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
       dirHorizontalBtn.className = 'px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
-      printBtnLabel.textContent = '印刷（A4横）';
+      printBtnLabel.textContent = 'このまま印刷（A4横）';
       dynamicPrintStyle.textContent = '@page { size: A4 landscape; margin: 15mm; }';
       if (paragraphModels.length > 0) renderPreviewFromModels();
     };
@@ -1653,7 +1740,7 @@
 
     document.getElementById('printBtn').onclick = () => {
       if (paragraphModels.length === 0) {
-        showToast('先にルビ変換を行ってください');
+        showToast('先に「一気にルビを振る！」を押してください');
         return;
       }
       window.print();
@@ -1666,9 +1753,9 @@
       uploadedDocxBuffer = null;
       uploadedDocxName = '';
       docxModeBadge.classList.add('hidden');
-      fileNameLabel.textContent = '★元のレイアウト・表組・文字サイズを維持して出力';
+      fileNameLabel.textContent = '元の文字サイズ・表・余白を崩さずそのまま変換できます';
       document.getElementById('sourceText').value =
-        "モチモチの木\n斎藤 隆介 文 滝平 二郎 絵\n\n全く、豆太ほどおくびょうなやつはいない。もう五つにもなったんだから、夜中に一人でせっちんぐらいに行けたっていい。\nところが豆太は、せっちんは表にあるし、表には大きなモチモチの木がつっ立っていて、空いっぱいのかみの毛をバサバサとふるって、両手を「ワァッ！」とあげるからって、夜中には、じさまについてってもらわないと、一人じゃしょうべんもできないのだ。";
+        "明日の遠足では、地域の歴史博物館を見学します。\n集合時刻は午前八時三十分ですので、遅れないように登校してください。\n雨天の場合は体育館でオリエンテーションを実施します。";
       startConversion(false);
     };
 
@@ -1677,20 +1764,19 @@
       uploadedDocxName = '';
       docxInput.value = '';
       docxModeBadge.classList.add('hidden');
-      fileNameLabel.textContent = '★元のレイアウト・表組・文字サイズを維持して出力';
+      fileNameLabel.textContent = '元の文字サイズ・表・余白を崩さずそのまま変換できます';
       document.getElementById('sourceText').value = '';
       paragraphModels = [];
       document.getElementById('rubyOutput').classList.add('hidden');
       document.getElementById('emptyPlaceholder').classList.remove('hidden');
     };
 
-    // テキストエリア手動編集時はWordファイルモードを解除してテキストモードへ移行
     document.getElementById('sourceText').addEventListener('input', () => {
       if (uploadedDocxBuffer) {
         uploadedDocxBuffer = null;
         uploadedDocxName = '';
         docxModeBadge.classList.add('hidden');
-        fileNameLabel.textContent = '★元のレイアウト・表組・文字サイズを維持して出力';
+        fileNameLabel.textContent = '元の文字サイズ・表・余白を崩さずそのまま変換できます';
       }
     });
 
