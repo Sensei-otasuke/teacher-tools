@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>一括ルビ振りメーカー | センセイボックス</title>
-  <meta name="description" content="Wordファイル（.docx）や文章を貼り付けるだけで一気にふりがなを自動付与。学年別の未習漢字フィルタや、ルビ付きWordファイル直接出力・縦書きA4横向き印刷に対応した先生向け無料Webツール。">
+  <meta name="description" content="Wordファイル（.docx）のレイアウトや書式を100%維持したまま一気にルビを自動付与。マイ辞書、初出のみルビ、UDデジタル教科書体変換、縦書きA4横向き印刷に対応した先生向け無料Webツール。">
   <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/ruby/" />
   <link rel="icon" href="../logo.png" type="image/png">
   <!-- Tailwind CSS -->
@@ -12,12 +12,10 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Noto+Serif+JP:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Noto+Serif+JP:wght@500;700&family=BIZ+UDGothic:wght@400;700&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Mammoth.js (.docx 読込) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
-  <!-- JSZip (.docx 直接生成出力) -->
+  <!-- JSZip (.docx 直接解析・生成) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style id="dynamicPrintStyle">
@@ -31,10 +29,12 @@
     body { font-family: 'M PLUS Rounded 1c', sans-serif; }
     .font-mono-tech { font-family: 'Chivo Mono', monospace; }
     .font-mincho { font-family: 'Noto Serif JP', serif; }
+    .font-ud { font-family: 'BIZ UDGothic', 'UD デジタル 教科書体 NK-R', sans-serif; }
 
-    /* ルビのスタイルとサイズ変数 */
+    /* ルビのスタイルとサイズ・色変数 */
     :root {
       --ruby-scale: 0.48em;
+      --ruby-color: #4f46e5;
     }
     ruby {
       ruby-align: center;
@@ -42,11 +42,17 @@
     rt {
       font-size: var(--ruby-scale);
       font-weight: 700;
-      color: #4f46e5;
+      color: var(--ruby-color);
       user-select: none;
     }
 
-    /* クリック編集可能なルビ単語 */
+    /* 縦中横（縦書き時の2桁数字整列） */
+    .tcy {
+      text-combine-upright: all;
+      -webkit-text-combine: horizontal;
+    }
+
+    /* クリック編集可能な単語 */
     .ruby-word {
       cursor: pointer;
       border-radius: 4px;
@@ -80,7 +86,7 @@
         height: auto !important;
         overflow: visible !important;
       }
-      header, #dictStatusBanner, #leftColumn, #previewToolbar, #previewActions, #toast, #editRubyModal {
+      header, #dictStatusBanner, #leftColumn, #previewToolbar, #previewActions, #toast, #editRubyModal, #myDictModal {
         display: none !important;
       }
       main, #rightColumn, #previewCard {
@@ -113,9 +119,6 @@
       #printArea.horizontal-text {
         height: auto !important;
       }
-      rt {
-        color: #1e293b !important;
-      }
       .ruby-word:hover {
         background-color: transparent !important;
         outline: none !important;
@@ -139,18 +142,24 @@
           <div>
             <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
               <span>一括ルビ振りメーカー</span>
-              <span class="hidden sm:inline text-[10px] font-mono-tech font-bold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full">Word出力対応</span>
+              <span class="hidden sm:inline text-[10px] font-mono-tech font-bold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full">Word書式完全維持</span>
             </h1>
-            <p class="text-[10px] text-slate-400 font-bold hidden sm:block">Wordファイルや文章に一瞬でふりがなを一括付与</p>
+            <p class="text-[10px] text-slate-400 font-bold hidden sm:block">元のWordレイアウト・表組・フォントを崩さずルビを一括埋め込み</p>
           </div>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
+        <!-- マイ辞書管理ボタン -->
+        <button id="openMyDictBtn" class="px-3 py-1.5 rounded-xl border border-violet-200 bg-violet-50 hover:bg-violet-100 text-violet-800 text-xs font-black transition flex items-center gap-1.5">
+          <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
+          <span>マイ辞書</span>
+          <span id="myDictCountBadge" class="bg-violet-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-mono-tech">0</span>
+        </button>
+
+        <span class="hidden md:inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
           <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">サーバー送信ゼロ（ブラウザ内処理）</span>
-          <span class="sm:hidden">完全ローカル</span>
+          <span>サーバー送信ゼロ</span>
         </span>
       </div>
     </div>
@@ -165,73 +174,132 @@
   <!-- メインエリア -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- 左カラム：入力 ＆ オプション設定 (5カラム) -->
+    <!-- 左カラム：入力 ＆ プロ仕様オプション設定 (5カラム) -->
     <div id="leftColumn" class="lg:col-span-5 flex flex-col gap-4">
       
       <!-- 1. Wordアップロード ＆ テキスト入力カード -->
-      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-4">
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-3.5">
         <div class="flex items-center justify-between">
           <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
             <span class="w-5 h-5 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-mono-tech">1</span>
-            <span>文章を入力 または Word読込</span>
+            <span>Word読込 または 文章入力</span>
           </h2>
-          <button id="sampleTextBtn" class="text-[11px] font-bold text-violet-600 hover:text-violet-800 bg-violet-50 px-2.5 py-1 rounded-lg transition">
-            例文を入れる
-          </button>
+          <div class="flex items-center gap-1.5">
+            <button id="stripRubyBtn" class="text-[11px] font-bold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition" title="すでに入っているルビをすべて解除します">
+              既存ルビ解除
+            </button>
+            <button id="sampleTextBtn" class="text-[11px] font-bold text-violet-600 hover:text-violet-800 bg-violet-50 px-2.5 py-1 rounded-lg transition">
+              例文
+            </button>
+          </div>
         </div>
 
         <!-- Word (.docx) ドラッグ＆ドロップ枠 -->
-        <label id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-violet-500 hover:bg-violet-50/40 rounded-2xl p-4 text-center cursor-pointer transition flex flex-col items-center justify-center gap-1.5 group">
+        <label id="dropZone" class="border-2 border-dashed border-blue-300 bg-blue-50/30 hover:border-blue-500 hover:bg-blue-50/70 rounded-2xl p-3.5 text-center cursor-pointer transition flex flex-col items-center justify-center gap-1 group">
           <input id="docxInput" type="file" accept=".docx" class="hidden">
-          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-            <i data-lucide="file-text" class="w-5 h-5"></i>
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <i data-lucide="file-check-2" class="w-4 h-4"></i>
+            </div>
+            <div class="text-left">
+              <p class="text-xs font-black text-slate-800">Wordファイル（.docx）を選択 / ドロップ</p>
+              <p id="fileNameLabel" class="text-[10px] text-blue-700 font-bold">★元のレイアウト・表組・文字サイズを維持して出力</p>
+            </div>
           </div>
-          <p class="text-xs font-black text-slate-700">Wordファイル（.docx）を選択 または ドロップ</p>
-          <p id="fileNameLabel" class="text-[11px] text-slate-400 font-medium">※ファイル内のテキストを自動で抽出します</p>
         </label>
 
         <!-- テキストエリア -->
         <div class="relative">
-          <textarea id="sourceText" rows="7" placeholder="ここにルビを振りたい文章を貼り付けてください。&#10;（Wordからコピーした文章もそのまま貼り付けできます）" class="w-full p-3.5 text-sm bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-violet-500 focus:outline-none leading-relaxed resize-y"></textarea>
-          <button id="clearTextBtn" class="absolute bottom-3 right-3 text-[11px] font-bold text-slate-400 hover:text-rose-500 bg-white/90 border border-slate-200 px-2 py-1 rounded-lg shadow-2xs transition">
+          <textarea id="sourceText" rows="5" placeholder="Wordを使わない場合は、ここに直接文章を貼り付けてください。" class="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-violet-500 focus:outline-none leading-relaxed resize-y"></textarea>
+          <button id="clearTextBtn" class="absolute bottom-2.5 right-2.5 text-[11px] font-bold text-slate-400 hover:text-rose-500 bg-white/95 border border-slate-200 px-2 py-0.5 rounded-lg shadow-2xs transition">
             クリア
           </button>
         </div>
       </div>
 
-      <!-- 2. ルビ振りルール設定 -->
-      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-4">
+      <!-- 2. ルビ振り・教材作成オプション設定 -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-3.5">
         <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
           <span class="w-5 h-5 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-mono-tech">2</span>
-          <span>ルビを振る対象の設定</span>
+          <span>ルビ振り・プリント作成設定</span>
         </h2>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- 学年 ＆ 表記形式 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div>
             <label class="block text-[11px] font-bold text-slate-500 mb-1">対象学年フィルタ</label>
-            <select id="gradeFilter" class="w-full p-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
-              <option value="0" selected>すべての漢字にルビを振る（総ルビ）</option>
-              <option value="1">小1で未習の漢字のみ（小2以上）</option>
-              <option value="2">小2で未習の漢字のみ（小3以上）</option>
-              <option value="3">小3で未習の漢字のみ（小4以上）</option>
-              <option value="4">小4で未習の漢字のみ（小5以上）</option>
-              <option value="5">小5で未習の漢字のみ（小6以上）</option>
-              <option value="6">小6で未習の漢字のみ（中学生以上）</option>
+            <select id="gradeFilter" class="w-full p-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
+              <option value="0" selected>すべての漢字（総ルビ）</option>
+              <option value="1">小1未習のみ（小2以上）</option>
+              <option value="2">小2未習のみ（小3以上）</option>
+              <option value="3">小3未習のみ（小4以上）</option>
+              <option value="4">小4未習のみ（小5以上）</option>
+              <option value="5">小5未習のみ（小6以上）</option>
+              <option value="6">小6未習のみ（中学生以上）</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-500 mb-1">カタカナ語へのルビ</label>
-            <select id="katakanaOption" class="w-full p-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
-              <option value="none" selected>カタカナには振らない（標準）</option>
-              <option value="hiragana">カタカナにもひらがなルビを振る</option>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">ふりがなの表記・モード</label>
+            <select id="rubyScriptMode" class="w-full p-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
+              <option value="hiragana" selected>ひらがなルビ（標準）</option>
+              <option value="katakana">カタカナルビ</option>
+              <option value="anaume">漢字穴埋め問題化：（  ）</option>
             </select>
+          </div>
+        </div>
+
+        <!-- 詳細プロ仕様スイッチ群 -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 space-y-2 text-xs">
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+              <input id="firstOnlyCheck" type="checkbox" class="w-4 h-4 accent-violet-600 rounded">
+              <span>初出（1回目）のみ</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+              <input id="skipLargeTitleCheck" type="checkbox" checked class="w-4 h-4 accent-violet-600 rounded">
+              <span>大見出し除外(16pt+)</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+              <input id="udFontCheck" type="checkbox" class="w-4 h-4 accent-violet-600 rounded">
+              <span>UDデジタル教科書体化</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+              <input id="grayRubyCheck" type="checkbox" checked class="w-4 h-4 accent-violet-600 rounded">
+              <span>ルビ薄グレー化</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+              <input id="katakanaRubyCheck" type="checkbox" class="w-4 h-4 accent-violet-600 rounded">
+              <span>カタカナにもルビ</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+              <input id="tcyNumberCheck" type="checkbox" checked class="w-4 h-4 accent-violet-600 rounded">
+              <span>縦書き数字の自動補正</span>
+            </label>
+          </div>
+
+          <!-- Word内の対象エリア指定 -->
+          <div class="pt-2 border-t border-slate-200/80 flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-600">
+            <span class="text-slate-400">Word対象範囲:</span>
+            <label class="flex items-center gap-1 cursor-pointer">
+              <input id="includeTablesCheck" type="checkbox" checked class="w-3.5 h-3.5 accent-blue-600 rounded">
+              <span>表の中</span>
+            </label>
+            <label class="flex items-center gap-1 cursor-pointer">
+              <input id="includeTextBoxesCheck" type="checkbox" checked class="w-3.5 h-3.5 accent-blue-600 rounded">
+              <span>テキストボックス内</span>
+            </label>
           </div>
         </div>
 
         <!-- 実行ボタン -->
         <button id="convertBtn" disabled class="w-full py-3.5 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed active:scale-98 text-white font-black text-sm sm:text-base rounded-2xl shadow-md transition flex items-center justify-center gap-2">
-          <i data-lucide="sparkles" class="w-5 h-5" id="convertBtnIcon"></i>
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
           <span id="convertBtnText">辞書準備中...</span>
         </button>
       </div>
@@ -240,13 +308,16 @@
 
     <!-- 右カラム：プレビュー ＆ Word出力・印刷 (7カラム) -->
     <div id="rightColumn" class="lg:col-span-7 flex flex-col gap-4">
-      <div id="previewCard" class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between min-h-[540px]">
+      <div id="previewCard" class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between min-h-[560px]">
         
         <!-- 上部ツールバー -->
         <div id="previewToolbar" class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
           <div class="flex items-center gap-2">
             <h2 class="text-sm font-black text-slate-800">プレビュー</h2>
-            <span class="text-[11px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">単語クリックで一括修正</span>
+            <span id="docxModeBadge" class="hidden text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md">
+              Word書式維持モード中
+            </span>
+            <span class="text-[11px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">単語クリックで修正</span>
           </div>
 
           <!-- ルビサイズ・書字方向・フォント切り替え -->
@@ -273,11 +344,11 @@
         </div>
 
         <!-- ルビ表示・印刷エリア -->
-        <div id="printArea" class="my-4 flex-1 p-5 sm:p-6 bg-slate-50/70 border border-slate-200/80 rounded-2xl overflow-auto max-h-[460px] horizontal-text text-lg sm:text-xl text-slate-900">
+        <div id="printArea" class="my-4 flex-1 p-5 sm:p-6 bg-slate-50/70 border border-slate-200/80 rounded-2xl overflow-auto max-h-[470px] horizontal-text text-lg sm:text-xl text-slate-900">
           <div id="emptyPlaceholder" class="h-full flex flex-col items-center justify-center text-center text-slate-400 py-16">
-            <span class="text-4xl mb-2">📝</span>
-            <p class="text-sm font-bold text-slate-500">左側に文章を入力して「一気にルビを振る！」を押してください</p>
-            <p class="text-xs mt-1">変換後、文字バランスが崩れない正規Wordファイル（.docx）として直接保存できます</p>
+            <span class="text-4xl mb-2">📄</span>
+            <p class="text-sm font-bold text-slate-500">Wordファイル（.docx）をドロップするか、文章を入力してください</p>
+            <p class="text-xs mt-1">元のフォント・サイズ・表組・余白をそのまま残してルビ付きWordを出力できます</p>
           </div>
           <div id="rubyOutput" class="hidden whitespace-pre-wrap break-words"></div>
         </div>
@@ -288,7 +359,7 @@
             <!-- 正規Word (.docx) 直接ダウンロード -->
             <button id="downloadDocxBtn" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2">
               <i data-lucide="download" class="w-4 h-4"></i>
-              <span>Wordファイル（.docx）で保存</span>
+              <span id="downloadDocxBtnLabel">Wordファイル（.docx）で保存</span>
             </button>
 
             <!-- そのまま印刷（横書き改ページ・縦書きA4横向き自動対応） -->
@@ -319,7 +390,7 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- 単語のルビ修正モーダル（単体修正 ＆ 一括置換対応） -->
+  <!-- 単語のルビ修正モーダル（単体・一括・マイ辞書登録） -->
   <!-- ========================================== -->
   <div id="editRubyModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
@@ -343,9 +414,18 @@
           <label class="block text-xs font-bold text-slate-600 mb-1">新しいふりがな（空欄にするとルビ削除）</label>
           <input id="editRubyInput" type="text" placeholder="例：まめた" class="w-full p-3 text-base font-bold bg-white border-2 border-violet-300 rounded-xl focus:border-violet-600 focus:outline-none">
         </div>
+
+        <!-- マイ辞書登録チェック -->
+        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-violet-50/80 border border-violet-200/70 cursor-pointer">
+          <input id="saveToMyDictCheck" type="checkbox" checked class="w-4 h-4 accent-violet-600 rounded">
+          <div class="text-xs">
+            <span class="font-black text-violet-900 block">「マイ辞書」に自動記憶する</span>
+            <span class="text-[10px] text-violet-700 font-bold">次回以降のプリントでも自動でこの読みになります</span>
+          </div>
+        </label>
       </div>
 
-      <div class="flex flex-col gap-2 pt-2">
+      <div class="flex flex-col gap-2 pt-1">
         <button id="applyAllSameBtn" class="w-full py-3 bg-violet-600 hover:bg-violet-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
           <i data-lucide="replace-all" class="w-4 h-4"></i>
           <span id="applyAllSameLabel">文章内の同じ単語をすべて一括変更</span>
@@ -353,6 +433,43 @@
         <button id="applySingleBtn" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 font-bold text-xs rounded-xl transition">
           この1箇所だけ変更する
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- マイ辞書 管理モーダル -->
+  <!-- ========================================== -->
+  <div id="myDictModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="book-marked" class="w-4 h-4 text-violet-600"></i>
+          <span>マイ辞書（登録済みの読み一覧）</span>
+        </h3>
+        <button id="closeMyDictBtn" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500 font-medium">
+        児童の名前・先生名・学校名など、一度修正して記憶させた読みは次回から自動で優先適用されます。
+      </p>
+
+      <!-- 新規直接追加フォーム -->
+      <div class="flex items-center gap-2">
+        <input id="dictNewWord" type="text" placeholder="単語（例：豆太）" class="flex-1 p-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
+        <input id="dictNewReading" type="text" placeholder="よみ（例：まめた）" class="flex-1 p-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none">
+        <button id="dictAddDirectBtn" class="px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white font-black text-xs rounded-xl transition">追加</button>
+      </div>
+
+      <div id="myDictList" class="max-h-60 overflow-y-auto space-y-1.5 pr-1">
+        <!-- JSで一覧描画 -->
+      </div>
+
+      <div class="pt-2 border-t border-slate-100 flex justify-between items-center">
+        <button id="clearMyDictBtn" class="text-[11px] font-bold text-rose-500 hover:underline">すべて削除</button>
+        <button id="closeMyDictFooterBtn" class="px-4 py-2 bg-slate-800 text-white font-bold text-xs rounded-xl">閉じる</button>
       </div>
     </div>
   </div>
@@ -387,7 +504,35 @@
     }
 
     // ==========================================
-    // 2. インライン Web Worker（裏方スレッド）の構築
+    // 2. マイ辞書（localStorage 永続化）
+    // ==========================================
+    const MY_DICT_STORAGE_KEY = 'senseibox_ruby_mydict_v1';
+    let myDictionary = {}; // { "豆太": "まめた", ... }
+
+    function loadMyDictionary() {
+      try {
+        const saved = localStorage.getItem(MY_DICT_STORAGE_KEY);
+        if (saved) myDictionary = JSON.parse(saved);
+      } catch (e) {
+        myDictionary = {};
+      }
+      updateMyDictBadge();
+    }
+
+    function saveMyDictionary() {
+      try {
+        localStorage.setItem(MY_DICT_STORAGE_KEY, JSON.stringify(myDictionary));
+      } catch (e) {}
+      updateMyDictBadge();
+    }
+
+    function updateMyDictBadge() {
+      const count = Object.keys(myDictionary).length;
+      document.getElementById('myDictCountBadge').textContent = count;
+    }
+
+    // ==========================================
+    // 3. インライン Web Worker（裏方スレッド）
     // ==========================================
     const workerCode = `
       importScripts("https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js");
@@ -405,14 +550,14 @@
 
       self.onmessage = function(e) {
         const msg = e.data;
-        if (msg.type === "tokenize") {
+        if (msg.type === "tokenizeBatch") {
           if (!tokenizer) {
             self.postMessage({ type: "error", message: "辞書がまだ準備中です" });
             return;
           }
-          const lines = msg.text.split("\\n");
-          const tokenizedLines = lines.map(function(line) {
-            return tokenizer.tokenize(line).map(function(t) {
+          // texts: string[]
+          const results = msg.texts.map(function(txt) {
+            return tokenizer.tokenize(txt).map(function(t) {
               return {
                 surface_form: t.surface_form,
                 reading: t.reading || ""
@@ -420,8 +565,8 @@
             });
           });
           self.postMessage({
-            type: "tokenized",
-            tokenizedLines: tokenizedLines,
+            type: "tokenizedBatch",
+            results: results,
             requestId: msg.requestId
           });
         }
@@ -433,7 +578,7 @@
     const rubyWorker = new Worker(workerUrl);
 
     let isWorkerReady = false;
-    let pendingAutoConvert = false;
+    let pendingConvertTrigger = false;
     let latestRequestId = 0;
 
     const dictBanner = document.getElementById('dictStatusBanner');
@@ -441,51 +586,34 @@
     const convertBtn = document.getElementById('convertBtn');
     const convertBtnText = document.getElementById('convertBtnText');
 
-    rubyWorker.onmessage = function(e) {
-      const data = e.data;
-
-      if (data.type === "ready") {
-        isWorkerReady = true;
-        dictBanner.className = "bg-emerald-600 text-white text-xs font-bold py-1.5 px-4 text-center transition-all";
-        dictText.textContent = "✅ 準備完了！いつでもルビ変換できます";
-        convertBtn.disabled = false;
-        convertBtnText.textContent = "一気にルビを振る！";
-
-        setTimeout(() => {
-          dictBanner.classList.add('hidden');
-        }, 2500);
-
-        if (pendingAutoConvert) {
-          pendingAutoConvert = false;
-          requestTokenize();
-        }
-      }
-      else if (data.type === "tokenized") {
-        if (data.requestId !== latestRequestId) return;
-        buildRubySegments(data.tokenizedLines);
-        convertBtn.disabled = false;
-        convertBtnText.textContent = "一気にルビを振る！";
-        showToast('ルビを一括変換しました！');
-      }
-      else if (data.type === "error") {
-        dictBanner.className = "bg-rose-600 text-white text-xs font-bold py-2 px-4 text-center";
-        dictBanner.classList.remove('hidden');
-        dictText.textContent = data.message + "（ページを再読み込みしてください）";
-        convertBtn.disabled = false;
-        convertBtnText.textContent = "一気にルビを振る！";
-      }
-    };
-
     // ==========================================
-    // 3. 文字判定 ＆ ルビ割り当てロジック
+    // 4. 統合データモデル（Word書式維持 ＆ テキスト共通）
     // ==========================================
+    // 段落リスト: [ { pIndex, isTable, isTextBox, maxFontSizePt, segments: [ { text, ruby, rPrXml, isRubyTarget } ] } ]
+    let paragraphModels = [];
+    let uploadedDocxBuffer = null; // 元の .docx バイナリ
+    let uploadedDocxName = '';
+
+    let currentRubySize = 'normal'; // 'small' | 'normal' | 'large'
+    let isVertical = false;
+    let isMincho = false;
+
     const kanjiRegex = /[\u4E00-\u9FFF\u3400-\u4DBF々ヶ]/;
     const katakanaRegex = /^[\u30A1-\u30F6ー]+$/;
+    const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 
     function katakanaToHiragana(str) {
-      return str.replace(/[\u30A1-\u30F6]/g, match => {
-        return String.fromCharCode(match.charCodeAt(0) - 0x60);
-      });
+      return str.replace(/[\u30A1-\u30F6]/g, match => String.fromCharCode(match.charCodeAt(0) - 0x60));
+    }
+
+    function hiraganaToKatakana(str) {
+      return str.replace(/[\u3041-\u3096]/g, match => String.fromCharCode(match.charCodeAt(0) + 0x60));
+    }
+
+    function formatRubyScript(hiraStr) {
+      const mode = document.getElementById('rubyScriptMode').value;
+      if (mode === 'katakana') return hiraganaToKatakana(hiraStr);
+      return hiraStr;
     }
 
     function splitKanjiAndOkurigana(surface, readingHira) {
@@ -520,50 +648,324 @@
       return result;
     }
 
-    let renderedSegments = [];
-    let currentRubySize = 'normal'; // 'small' | 'normal' | 'large'
-    let isVertical = false;
-    let isMincho = false;
+    // 既存ルビを解除してベーステキストに戻す（Word XML要素向け）
+    function unwrapExistingRubiesInDoc(xmlDoc) {
+      const rubies = Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'ruby'));
+      rubies.forEach(rubyEl => {
+        const parent = rubyEl.parentNode; // 通常は w:r
+        const grandParent = parent ? parent.parentNode : null; // 通常は w:p
+        const rubyBase = rubyEl.getElementsByTagNameNS(W_NS, 'rubyBase')[0];
+        if (rubyBase && grandParent) {
+          const baseRuns = Array.from(rubyBase.getElementsByTagNameNS(W_NS, 'r'));
+          baseRuns.forEach(r => {
+            grandParent.insertBefore(r.cloneNode(true), parent);
+          });
+          grandParent.removeChild(parent);
+        }
+      });
+    }
 
-    function requestTokenize() {
-      const rawText = document.getElementById('sourceText').value;
-      if (!rawText.trim()) {
-        showToast('文章を入力してください');
+    // 祖先要素に特定のタグ名があるか判定
+    function hasAncestorTag(node, localName) {
+      let cur = node.parentNode;
+      while (cur) {
+        if (cur.localName === localName) return true;
+        cur = cur.parentNode;
+      }
+      return false;
+    }
+
+    // ==========================================
+    // 5. 変換リクエスト構築（.docx書式維持モード / テキストモード両対応）
+    // ==========================================
+    let pendingChunksMeta = []; // バッチ解析のメタデータ
+
+    async function startConversion(stripOnly = false) {
+      if (!isWorkerReady && !stripOnly) {
+        pendingConvertTrigger = true;
+        showToast('辞書の準備が終わるまで数秒お待ちください...');
         return;
       }
 
-      if (!isWorkerReady) {
-        pendingAutoConvert = true;
-        showToast('辞書の準備が終わるまで数秒お待ちください...');
+      const includeTables = document.getElementById('includeTablesCheck').checked;
+      const includeTextBoxes = document.getElementById('includeTextBoxesCheck').checked;
+
+      // ケースA：Wordファイル（.docx）がアップロードされている場合
+      if (uploadedDocxBuffer) {
+        try {
+          const zip = await JSZip.loadAsync(uploadedDocxBuffer);
+          const docXmlStr = await zip.file('word/document.xml').async('string');
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(docXmlStr, 'application/xml');
+
+          // 二重ルビ防止・既存ルビ解除のため一旦ルビタグを展開
+          unwrapExistingRubiesInDoc(xmlDoc);
+
+          const pNodes = Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'p'));
+          const serializer = new XMLSerializer();
+
+          paragraphModels = [];
+          pendingChunksMeta = [];
+          const textsToTokenize = [];
+
+          pNodes.forEach((pNode, pIdx) => {
+            const isTable = hasAncestorTag(pNode, 'tbl');
+            const isTextBox = hasAncestorTag(pNode, 'txbxContent') || hasAncestorTag(pNode, 'textbox');
+
+            // 対象外エリア判定
+            const skipArea = (isTable && !includeTables) || (isTextBox && !includeTextBoxes);
+
+            // 段落内の直下ラン（w:r）を走査し、同じ書式(rPr)の連続テキストをグループ化
+            const childRuns = Array.from(pNode.childNodes).filter(n => n.localName === 'r');
+            const chunks = [];
+            let maxFontSizePt = 10.5;
+
+            childRuns.forEach(rNode => {
+              const rPr = rNode.getElementsByTagNameNS(W_NS, 'rPr')[0];
+              const rPrXml = rPr ? serializer.serializeToString(rPr) : '';
+
+              // フォントサイズ(half-points)取得
+              if (rPr) {
+                const sz = rPr.getElementsByTagNameNS(W_NS, 'sz')[0];
+                if (sz) {
+                  const val = parseInt(sz.getAttribute('w:val') || sz.getAttribute('val') || '21', 10);
+                  if (!isNaN(val)) maxFontSizePt = Math.max(maxFontSizePt, val / 2);
+                }
+              }
+
+              // 画像や特殊オブジェクトを含むランはそのまま保持
+              const hasDrawing = rNode.getElementsByTagNameNS(W_NS, 'drawing').length > 0 ||
+                                 rNode.getElementsByTagNameNS(W_NS, 'pict').length > 0 ||
+                                 rNode.getElementsByTagNameNS(W_NS, 'tab').length > 0 ||
+                                 rNode.getElementsByTagNameNS(W_NS, 'br').length > 0;
+
+              const tNodes = Array.from(rNode.getElementsByTagNameNS(W_NS, 't'));
+              const textContent = tNodes.map(t => t.textContent).join('');
+
+              if (hasDrawing || !textContent) {
+                chunks.push({
+                  type: 'raw',
+                  rawXml: serializer.serializeToString(rNode),
+                  text: textContent,
+                  rPrXml
+                });
+              } else {
+                const prev = chunks[chunks.length - 1];
+                if (prev && prev.type === 'text' && prev.rPrXml === rPrXml) {
+                  prev.text += textContent;
+                } else {
+                  chunks.push({
+                    type: 'text',
+                    text: textContent,
+                    rPrXml
+                  });
+                }
+              }
+            });
+
+            const pModel = {
+              pIndex: pIdx,
+              isTable,
+              isTextBox,
+              maxFontSizePt,
+              chunks,
+              segments: []
+            };
+            paragraphModels.push(pModel);
+
+            // 既存ルビ解除のみの場合はトークナイズ不要
+            if (stripOnly || skipArea) {
+              chunks.forEach(ch => {
+                pModel.segments.push({
+                  text: ch.text || '',
+                  ruby: null,
+                  rPrXml: ch.rPrXml || '',
+                  rawXml: ch.type === 'raw' ? ch.rawXml : null
+                });
+              });
+            } else {
+              chunks.forEach((ch, cIdx) => {
+                if (ch.type === 'text' && ch.text.trim().length > 0) {
+                  pendingChunksMeta.push({ pIdx, cIdx, rPrXml: ch.rPrXml, rawXml: null });
+                  textsToTokenize.push(ch.text);
+                } else {
+                  pendingChunksMeta.push({ pIdx, cIdx, rPrXml: ch.rPrXml, rawXml: ch.rawXml || null, staticText: ch.text || '' });
+                  textsToTokenize.push('');
+                }
+              });
+            }
+          });
+
+          if (stripOnly) {
+            renderPreviewFromModels();
+            showToast('既存ルビをすべて解除しました！');
+            return;
+          }
+
+          if (textsToTokenize.length === 0) {
+            renderPreviewFromModels();
+            showToast('変換対象のテキストが見つかりませんでした');
+            return;
+          }
+
+          latestRequestId++;
+          convertBtn.disabled = true;
+          convertBtnText.textContent = "解析・変換中...";
+
+          rubyWorker.postMessage({
+            type: "tokenizeBatch",
+            texts: textsToTokenize,
+            requestId: latestRequestId
+          });
+
+        } catch (err) {
+          console.error(err);
+          alert('Wordファイルの解析中にエラーが発生しました。');
+        }
+        return;
+      }
+
+      // ケースB：テキストエリア直接入力の場合
+      const rawText = document.getElementById('sourceText').value;
+      if (!rawText.trim()) {
+        showToast('Wordファイルを読み込むか、文章を入力してください');
+        return;
+      }
+
+      const lines = rawText.split('\n');
+      paragraphModels = [];
+      pendingChunksMeta = [];
+      const textsToTokenize = [];
+
+      lines.forEach((line, pIdx) => {
+        paragraphModels.push({
+          pIndex: pIdx,
+          isTable: false,
+          isTextBox: false,
+          maxFontSizePt: 11,
+          chunks: [],
+          segments: []
+        });
+
+        if (stripOnly) {
+          paragraphModels[pIdx].segments.push({ text: line, ruby: null, rPrXml: '', rawXml: null });
+        } else {
+          pendingChunksMeta.push({ pIdx, cIdx: 0, rPrXml: '', rawXml: null });
+          textsToTokenize.push(line);
+        }
+      });
+
+      if (stripOnly) {
+        renderPreviewFromModels();
+        showToast('ルビを解除しました');
         return;
       }
 
       latestRequestId++;
       convertBtn.disabled = true;
-      convertBtnText.textContent = "変換中...";
+      convertBtnText.textContent = "解析・変換中...";
 
       rubyWorker.postMessage({
-        type: "tokenize",
-        text: rawText,
+        type: "tokenizeBatch",
+        texts: textsToTokenize,
         requestId: latestRequestId
       });
     }
 
-    function buildRubySegments(tokenizedLines) {
+    // ==========================================
+    // 6. Workerからの解析結果受信 ＆ ルビ割り当て
+    // ==========================================
+    rubyWorker.onmessage = function(e) {
+      const data = e.data;
+
+      if (data.type === "ready") {
+        isWorkerReady = true;
+        dictBanner.className = "bg-emerald-600 text-white text-xs font-bold py-1.5 px-4 text-center transition-all";
+        dictText.textContent = "✅ 準備完了！いつでもルビ変換できます";
+        convertBtn.disabled = false;
+        convertBtnText.textContent = "一気にルビを振る！";
+
+        setTimeout(() => {
+          dictBanner.classList.add('hidden');
+        }, 2500);
+
+        if (pendingConvertTrigger) {
+          pendingConvertTrigger = false;
+          startConversion(false);
+        }
+      }
+      else if (data.type === "tokenizedBatch") {
+        if (data.requestId !== latestRequestId) return;
+        applyRubyRulesToTokens(data.results);
+        convertBtn.disabled = false;
+        convertBtnText.textContent = "一気にルビを振る！";
+        showToast('ルビを一括変換しました！');
+      }
+      else if (data.type === "error") {
+        dictBanner.className = "bg-rose-600 text-white text-xs font-bold py-2 px-4 text-center";
+        dictBanner.classList.remove('hidden');
+        dictText.textContent = data.message;
+        convertBtn.disabled = false;
+        convertBtnText.textContent = "一気にルビを振る！";
+      }
+    };
+
+    function applyRubyRulesToTokens(tokenizedResults) {
       const maxGrade = parseInt(document.getElementById('gradeFilter').value, 10);
       const learnedSet = maxGrade > 0 ? getLearnedKanjiSet(maxGrade) : null;
-      const katakanaMode = document.getElementById('katakanaOption').value;
+      const katakanaRubyOn = document.getElementById('katakanaRubyCheck').checked;
+      const firstOnlyOn = document.getElementById('firstOnlyCheck').checked;
+      const skipLargeTitleOn = document.getElementById('skipLargeTitleCheck').checked;
+      const scriptMode = document.getElementById('rubyScriptMode').value;
 
-      renderedSegments = [];
+      const seenWordsSet = new Set(); // 初出判定用
 
-      tokenizedLines.forEach((tokens, lineIdx) => {
+      tokenizedResults.forEach((tokens, idx) => {
+        const meta = pendingChunksMeta[idx];
+        if (!meta) return;
+        const pModel = paragraphModels[meta.pIdx];
+
+        if (meta.rawXml !== null) {
+          pModel.segments.push({
+            text: meta.staticText || '',
+            ruby: null,
+            rPrXml: meta.rPrXml,
+            rawXml: meta.rawXml
+          });
+          return;
+        }
+
+        // 16pt以上の大見出し除外判定
+        const isLargeTitle = skipLargeTitleOn && pModel.maxFontSizePt >= 16;
+
         tokens.forEach(token => {
           const surface = token.surface_form;
           const reading = token.reading;
 
-          if (kanjiRegex.test(surface) && reading) {
+          // 1. マイ辞書に完全一致する単語があれば最優先
+          if (Object.prototype.hasOwnProperty.call(myDictionary, surface)) {
+            const customReading = myDictionary[surface];
+            if (isLargeTitle || !customReading) {
+              pModel.segments.push({ text: surface, ruby: null, rPrXml: meta.rPrXml, rawXml: null });
+            } else if (firstOnlyOn && seenWordsSet.has(surface)) {
+              pModel.segments.push({ text: surface, ruby: null, rPrXml: meta.rPrXml, rawXml: null });
+            } else {
+              seenWordsSet.add(surface);
+              pModel.segments.push({
+                text: surface,
+                ruby: formatRubyScript(customReading),
+                rPrXml: meta.rPrXml,
+                rawXml: null
+              });
+            }
+            return;
+          }
+
+          // 2. 漢字を含む場合
+          if (!isLargeTitle && kanjiRegex.test(surface) && reading) {
             const hira = katakanaToHiragana(reading);
             let shouldAddRuby = true;
+
             if (learnedSet) {
               const kanjiChars = [...surface].filter(c => kanjiRegex.test(c) && c !== '々' && c !== 'ヶ');
               shouldAddRuby = kanjiChars.some(c => !learnedSet.has(c));
@@ -571,83 +973,150 @@
 
             if (shouldAddRuby && surface !== hira) {
               const parts = splitKanjiAndOkurigana(surface, hira);
-              parts.forEach(p => renderedSegments.push(p));
+              parts.forEach(p => {
+                if (p.ruby) {
+                  // コア部分もマイ辞書チェック
+                  const dictHit = Object.prototype.hasOwnProperty.call(myDictionary, p.text)
+                    ? myDictionary[p.text]
+                    : p.ruby;
+
+                  if (!dictHit || (firstOnlyOn && seenWordsSet.has(p.text))) {
+                    pModel.segments.push({ text: p.text, ruby: null, rPrXml: meta.rPrXml, rawXml: null });
+                  } else {
+                    seenWordsSet.add(p.text);
+                    pModel.segments.push({
+                      text: p.text,
+                      ruby: formatRubyScript(dictHit),
+                      rPrXml: meta.rPrXml,
+                      rawXml: null
+                    });
+                  }
+                } else {
+                  pModel.segments.push({ text: p.text, ruby: null, rPrXml: meta.rPrXml, rawXml: null });
+                }
+              });
             } else {
-              renderedSegments.push({ text: surface, ruby: null });
+              pModel.segments.push({ text: surface, ruby: null, rPrXml: meta.rPrXml, rawXml: null });
             }
           }
-          else if (katakanaMode === 'hiragana' && katakanaRegex.test(surface) && surface.length > 1) {
-            renderedSegments.push({ text: surface, ruby: katakanaToHiragana(surface) });
+          // 3. カタカナ語へのルビオプション
+          else if (!isLargeTitle && katakanaRubyOn && katakanaRegex.test(surface) && surface.length > 1 && scriptMode !== 'anaume') {
+            if (firstOnlyOn && seenWordsSet.has(surface)) {
+              pModel.segments.push({ text: surface, ruby: null, rPrXml: meta.rPrXml, rawXml: null });
+            } else {
+              seenWordsSet.add(surface);
+              pModel.segments.push({
+                text: surface,
+                ruby: formatRubyScript(katakanaToHiragana(surface)),
+                rPrXml: meta.rPrXml,
+                rawXml: null
+              });
+            }
           }
+          // 4. その他
           else {
-            renderedSegments.push({ text: surface, ruby: null });
+            pModel.segments.push({ text: surface, ruby: null, rPrXml: meta.rPrXml, rawXml: null });
           }
         });
-
-        if (lineIdx < tokenizedLines.length - 1) {
-          renderedSegments.push({ text: '\n', ruby: null });
-        }
       });
 
-      renderPreview();
+      renderPreviewFromModels();
     }
 
-    function renderPreview() {
+    // ==========================================
+    // 7. プレビュー描画（縦中横・穴埋め問題化・UDフォント対応）
+    // ==========================================
+    function renderPreviewFromModels() {
       const outputEl = document.getElementById('rubyOutput');
       const placeholder = document.getElementById('emptyPlaceholder');
+      const scriptMode = document.getElementById('rubyScriptMode').value;
+      const tcyOn = document.getElementById('tcyNumberCheck').checked;
 
       placeholder.classList.add('hidden');
       outputEl.classList.remove('hidden');
       outputEl.innerHTML = '';
 
-      renderedSegments.forEach((seg, idx) => {
-        if (seg.text === '\n') {
-          outputEl.appendChild(document.createElement('br'));
-          return;
+      paragraphModels.forEach((pModel, pIdx) => {
+        const pDiv = document.createElement('div');
+        pDiv.className = 'min-h-[1.5em]';
+        if (pModel.isTable) {
+          pDiv.className += ' pl-2 border-l-2 border-blue-200 text-slate-700';
         }
 
-        if (seg.ruby) {
-          const rubyEl = document.createElement('ruby');
-          rubyEl.className = 'ruby-word';
-          rubyEl.title = 'クリックして読み方を修正・一括置換';
-          rubyEl.textContent = seg.text;
+        pModel.segments.forEach((seg, sIdx) => {
+          if (seg.rawXml && !seg.text) return;
 
-          const rtEl = document.createElement('rt');
-          rtEl.textContent = seg.ruby;
-          rubyEl.appendChild(rtEl);
+          if (seg.ruby) {
+            // 漢字穴埋めテスト化モード
+            if (scriptMode === 'anaume') {
+              const span = document.createElement('span');
+              span.className = 'ruby-word font-bold text-violet-800';
+              span.textContent = `（  ）（${seg.ruby}）`;
+              span.title = `元の漢字：${seg.text}（クリックで修正）`;
+              span.onclick = () => openEditModal(pIdx, sIdx);
+              pDiv.appendChild(span);
+            } else {
+              const rubyEl = document.createElement('ruby');
+              rubyEl.className = 'ruby-word';
+              rubyEl.title = 'クリックして読み方を修正・マイ辞書登録';
+              rubyEl.textContent = seg.text;
 
-          rubyEl.onclick = () => openEditModal(idx);
-          outputEl.appendChild(rubyEl);
-        } else {
-          if (kanjiRegex.test(seg.text)) {
-            const span = document.createElement('span');
-            span.className = 'ruby-word';
-            span.title = 'クリックしてふりがなを追加・一括設定';
-            span.textContent = seg.text;
-            span.onclick = () => openEditModal(idx);
-            outputEl.appendChild(span);
+              const rtEl = document.createElement('rt');
+              rtEl.textContent = seg.ruby;
+              rubyEl.appendChild(rtEl);
+
+              rubyEl.onclick = () => openEditModal(pIdx, sIdx);
+              pDiv.appendChild(rubyEl);
+            }
           } else {
-            outputEl.appendChild(document.createTextNode(seg.text));
+            // 縦書き時の2桁半角数字を縦中横表示
+            if (isVertical && tcyOn && /^[0-9]{2}$/.test(seg.text)) {
+              const tcySpan = document.createElement('span');
+              tcySpan.className = 'tcy';
+              tcySpan.textContent = seg.text;
+              pDiv.appendChild(tcySpan);
+            } else if (kanjiRegex.test(seg.text)) {
+              const span = document.createElement('span');
+              span.className = 'ruby-word';
+              span.title = 'クリックしてふりがなを追加';
+              span.textContent = seg.text;
+              span.onclick = () => openEditModal(pIdx, sIdx);
+              pDiv.appendChild(span);
+            } else {
+              pDiv.appendChild(document.createTextNode(seg.text));
+            }
           }
-        }
+        });
+
+        outputEl.appendChild(pDiv);
       });
     }
 
     // ==========================================
-    // 4. 単語ルビ修正モーダル（単体 ＆ 一括置換）
+    // 8. 単語ルビ修正モーダル（単体・一括・マイ辞書登録）
     // ==========================================
-    let editingSegmentIndex = -1;
+    let editTargetPIdx = -1;
+    let editTargetSIdx = -1;
+
     const editModal = document.getElementById('editRubyModal');
     const editTargetWord = document.getElementById('editTargetWord');
     const editRubyInput = document.getElementById('editRubyInput');
     const applyAllSameLabel = document.getElementById('applyAllSameLabel');
+    const saveToMyDictCheck = document.getElementById('saveToMyDictCheck');
 
-    function openEditModal(idx) {
-      editingSegmentIndex = idx;
-      const seg = renderedSegments[idx];
+    function openEditModal(pIdx, sIdx) {
+      editTargetPIdx = pIdx;
+      editTargetSIdx = sIdx;
+      const seg = paragraphModels[pIdx]?.segments[sIdx];
       if (!seg) return;
 
-      const sameCount = renderedSegments.filter(s => s.text === seg.text).length;
+      let sameCount = 0;
+      paragraphModels.forEach(pm => {
+        pm.segments.forEach(s => {
+          if (s.text === seg.text) sameCount++;
+        });
+      });
+
       editTargetWord.textContent = seg.text;
       editRubyInput.value = seg.ruby || '';
       applyAllSameLabel.textContent = sameCount > 1
@@ -661,53 +1130,130 @@
 
     function closeEditModal() {
       editModal.classList.add('hidden');
-      editingSegmentIndex = -1;
+      editTargetPIdx = -1;
+      editTargetSIdx = -1;
     }
 
     document.getElementById('closeEditModalBtn').onclick = closeEditModal;
-    editModal.onclick = (e) => {
-      if (e.target === editModal) closeEditModal();
-    };
+    editModal.onclick = (e) => { if (e.target === editModal) closeEditModal(); };
 
     document.getElementById('applySingleBtn').onclick = () => {
-      if (editingSegmentIndex < 0) return;
+      if (editTargetPIdx < 0) return;
+      const seg = paragraphModels[editTargetPIdx].segments[editTargetSIdx];
       const newVal = editRubyInput.value.trim() || null;
-      renderedSegments[editingSegmentIndex].ruby = newVal;
-      renderPreview();
+      seg.ruby = newVal;
+
+      if (saveToMyDictCheck.checked) {
+        myDictionary[seg.text] = newVal || '';
+        saveMyDictionary();
+      }
+
+      renderPreviewFromModels();
       closeEditModal();
       showToast('1箇所のふりがなを更新しました');
     };
 
     document.getElementById('applyAllSameBtn').onclick = () => {
-      if (editingSegmentIndex < 0) return;
-      const targetText = renderedSegments[editingSegmentIndex].text;
+      if (editTargetPIdx < 0) return;
+      const targetText = paragraphModels[editTargetPIdx].segments[editTargetSIdx].text;
       const newVal = editRubyInput.value.trim() || null;
       let count = 0;
 
-      renderedSegments.forEach(seg => {
-        if (seg.text === targetText) {
-          seg.ruby = newVal;
-          count++;
-        }
+      paragraphModels.forEach(pm => {
+        pm.segments.forEach(s => {
+          if (s.text === targetText) {
+            s.ruby = newVal;
+            count++;
+          }
+        });
       });
 
-      renderPreview();
+      if (saveToMyDictCheck.checked) {
+        myDictionary[targetText] = newVal || '';
+        saveMyDictionary();
+      }
+
+      renderPreviewFromModels();
       closeEditModal();
       showToast(`「${targetText}」（${count}箇所）を一括更新しました！`);
     };
 
     editRubyInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        document.getElementById('applyAllSameBtn').click();
-      }
+      if (e.key === 'Enter') document.getElementById('applyAllSameBtn').click();
     });
 
     // ==========================================
-    // 5. Word (.docx) ファイル読み込み処理
+    // 9. マイ辞書 管理モーダル操作
+    // ==========================================
+    const myDictModal = document.getElementById('myDictModal');
+    const myDictList = document.getElementById('myDictList');
+
+    function renderMyDictList() {
+      const keys = Object.keys(myDictionary);
+      myDictList.innerHTML = '';
+      if (keys.length === 0) {
+        myDictList.innerHTML = '<p class="text-center text-xs text-slate-400 py-8 font-bold">まだ単語が登録されていません</p>';
+        return;
+      }
+
+      keys.forEach(word => {
+        const reading = myDictionary[word];
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs';
+        row.innerHTML = `
+          <div class="flex items-center gap-2 font-black text-slate-800">
+            <span>${escapeHtml(word)}</span>
+            <span class="text-slate-400">➔</span>
+            <span class="text-violet-700">${reading ? escapeHtml(reading) : '（ルビなし）'}</span>
+          </div>
+          <button class="text-slate-400 hover:text-rose-500 p-1" title="削除">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+        row.querySelector('button').onclick = () => {
+          delete myDictionary[word];
+          saveMyDictionary();
+          renderMyDictList();
+        };
+        myDictList.appendChild(row);
+      });
+      lucide.createIcons();
+    }
+
+    document.getElementById('openMyDictBtn').onclick = () => {
+      renderMyDictList();
+      myDictModal.classList.remove('hidden');
+    };
+    document.getElementById('closeMyDictBtn').onclick = () => myDictModal.classList.add('hidden');
+    document.getElementById('closeMyDictFooterBtn').onclick = () => myDictModal.classList.add('hidden');
+
+    document.getElementById('dictAddDirectBtn').onclick = () => {
+      const w = document.getElementById('dictNewWord').value.trim();
+      const r = document.getElementById('dictNewReading').value.trim();
+      if (!w) return;
+      myDictionary[w] = r;
+      saveMyDictionary();
+      document.getElementById('dictNewWord').value = '';
+      document.getElementById('dictNewReading').value = '';
+      renderMyDictList();
+      showToast(`「${w}」をマイ辞書に登録しました`);
+    };
+
+    document.getElementById('clearMyDictBtn').onclick = () => {
+      if (confirm('マイ辞書の登録内容をすべて削除しますか？')) {
+        myDictionary = {};
+        saveMyDictionary();
+        renderMyDictList();
+      }
+    };
+
+    // ==========================================
+    // 10. Word (.docx) ファイル読み込み処理
     // ==========================================
     const docxInput = document.getElementById('docxInput');
     const dropZone = document.getElementById('dropZone');
     const fileNameLabel = document.getElementById('fileNameLabel');
+    const docxModeBadge = document.getElementById('docxModeBadge');
 
     function handleDocxFile(file) {
       if (!file) return;
@@ -719,20 +1265,12 @@
       fileNameLabel.textContent = `📄 読み込み中: ${file.name}`;
       const reader = new FileReader();
       reader.onload = function(event) {
-        const arrayBuffer = event.target.result;
-        mammoth.extractRawText({ arrayBuffer: arrayBuffer })
-          .then(result => {
-            // 連続する余分な空行を整えつつ段落を保持
-            const cleaned = result.value.replace(/\n{3,}/g, '\n\n').trim();
-            document.getElementById('sourceText').value = cleaned;
-            fileNameLabel.textContent = `✅ 読込完了: ${file.name}`;
-            requestTokenize();
-          })
-          .catch(err => {
-            console.error(err);
-            alert('Wordファイルの読み込みに失敗しました。');
-            fileNameLabel.textContent = '※ファイル内のテキストを自動で抽出します';
-          });
+        uploadedDocxBuffer = event.target.result;
+        uploadedDocxName = file.name.replace(/\.docx$/i, '');
+        fileNameLabel.textContent = `✅ 読込完了（書式維持）: ${file.name}`;
+        docxModeBadge.classList.remove('hidden');
+        document.getElementById('sourceText').value = `【Wordファイル読込中：${file.name}】\n※元のフォント・文字サイズ・表組・余白を保持したまま変換します。\n（テキスト入力に切り替える場合は「クリア」を押してください）`;
+        startConversion(false);
       };
       reader.readAsArrayBuffer(file);
     }
@@ -741,22 +1279,21 @@
 
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
-      dropZone.classList.add('border-violet-500', 'bg-violet-50');
+      dropZone.classList.add('border-blue-500', 'bg-blue-50');
     });
     dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('border-violet-500', 'bg-violet-50');
+      dropZone.classList.remove('border-blue-500', 'bg-blue-50');
     });
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
-      dropZone.classList.remove('border-violet-500', 'bg-violet-50');
-      if (e.dataTransfer.files.length > 0) {
-        handleDocxFile(e.dataTransfer.files[0]);
-      }
+      dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+      if (e.dataTransfer.files.length > 0) handleDocxFile(e.dataTransfer.files[0]);
     });
 
     // ==========================================
-    // 6. 正規 Wordファイル（.docx）直接ダウンロード生成
-    //    ※ OOXML <w:ruby> 形式で出力するため文字バランスが一切崩れない
+    // 11. Wordファイル（.docx）直接ダウンロード出力
+    //     ※ 元の.docxがある場合はXMLを直接書き換え、
+    //        テキスト入力のみの場合は新規.docxを組み立てる
     // ==========================================
     function escapeXml(str) {
       return str.replace(/[<>&'"]/g, c => ({
@@ -764,85 +1301,173 @@
       }[c]));
     }
 
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // セグメントからOOXML <w:r> 要素文字列を生成
+    function buildRunXmlFromSegment(seg) {
+      if (seg.rawXml && !seg.text) {
+        return seg.rawXml;
+      }
+
+      const udFontOn = document.getElementById('udFontCheck').checked;
+      const grayRubyOn = document.getElementById('grayRubyCheck').checked;
+      const tcyOn = document.getElementById('tcyNumberCheck').checked;
+      const scriptMode = document.getElementById('rubyScriptMode').value;
+
+      // 元のrPrから基本サイズを抽出（なければ21=10.5pt）
+      let baseHps = 21;
+      const szMatch = seg.rPrXml.match(/<w:sz\b[^>]*w:val="(\d+)"/);
+      if (szMatch) baseHps = parseInt(szMatch[1], 10);
+
+      const ratioMap = { small: 0.42, normal: 0.50, large: 0.60 };
+      const rubyHps = Math.max(8, Math.round(baseHps * (ratioMap[currentRubySize] || 0.50)));
+      const hpsRaise = Math.max(12, Math.round(baseHps * 0.92));
+
+      // ベース文字のrPr構築
+      let baseRPr = seg.rPrXml || '<w:rPr/>';
+      if (udFontOn) {
+        const udFontsTag = `<w:rFonts w:ascii="UD デジタル 教科書体 NK-R" w:eastAsia="UD デジタル 教科書体 NK-R" w:hAnsi="UD デジタル 教科書体 NK-R"/>`;
+        if (/<w:rFonts\b[^>]*\/>/.test(baseRPr)) {
+          baseRPr = baseRPr.replace(/<w:rFonts\b[^>]*\/>/, udFontsTag);
+        } else {
+          baseRPr = baseRPr.replace('<w:rPr>', `<w:rPr>${udFontsTag}`).replace('<w:rPr/>', `<w:rPr>${udFontsTag}</w:rPr>`);
+        }
+      }
+
+      // ルビ文字用のrPr構築（薄グレー化・フォント・サイズ）
+      const rubyFontName = udFontOn ? 'UD デジタル 教科書体 NK-R' : (isMincho ? 'Yu Mincho' : 'Yu Gothic');
+      const rubyColorTag = grayRubyOn ? '<w:color w:val="555555"/>' : '';
+      const rtRPr = `<w:rPr><w:rFonts w:ascii="${rubyFontName}" w:eastAsia="${rubyFontName}" w:hAnsi="${rubyFontName}"/>${rubyColorTag}<w:sz w:val="${rubyHps}"/><w:szCs w:val="${rubyHps}"/></w:rPr>`;
+
+      // 1. 漢字穴埋めテスト化モードの場合
+      if (seg.ruby && scriptMode === 'anaume') {
+        const anaumeText = `（  ）（${seg.ruby}）`;
+        return `<w:r>${baseRPr}<w:t xml:space="preserve">${escapeXml(anaumeText)}</w:t></w:r>`;
+      }
+
+      // 2. ルビ付き単語の場合
+      if (seg.ruby) {
+        return `
+          <w:r>
+            ${baseRPr}
+            <w:ruby>
+              <w:rubyPr>
+                <w:rubyAlign w:val="distributeSpace"/>
+                <w:hps w:val="${rubyHps}"/>
+                <w:hpsRaise w:val="${hpsRaise}"/>
+                <w:hpsBaseText w:val="${baseHps}"/>
+                <w:lid w:val="ja-JP"/>
+              </w:rubyPr>
+              <w:rt>
+                <w:r>
+                  ${rtRPr}
+                  <w:t>${escapeXml(seg.ruby)}</w:t>
+                </w:r>
+              </w:rt>
+              <w:rubyBase>
+                <w:r>
+                  ${baseRPr}
+                  <w:t xml:space="preserve">${escapeXml(seg.text)}</w:t>
+                </w:r>
+              </w:rubyBase>
+            </w:ruby>
+          </w:r>`;
+      }
+
+      // 3. 縦書き時の2桁半角数字（縦中横）
+      if (isVertical && tcyOn && /^[0-9]{2}$/.test(seg.text)) {
+        const tcyTag = '<w:eastAsianLayout w:id="1" w:vert="1"/>';
+        let tcyRPr = baseRPr;
+        if (tcyRPr === '<w:rPr/>') {
+          tcyRPr = `<w:rPr>${tcyTag}</w:rPr>`;
+        } else {
+          tcyRPr = tcyRPr.replace('</w:rPr>', `${tcyTag}</w:rPr>`);
+        }
+        return `<w:r>${tcyRPr}<w:t>${escapeXml(seg.text)}</w:t></w:r>`;
+      }
+
+      // 4. 通常テキスト
+      return `<w:r>${baseRPr}<w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r>`;
+    }
+
     document.getElementById('downloadDocxBtn').onclick = async () => {
-      if (renderedSegments.length === 0) {
+      if (paragraphModels.length === 0) {
         showToast('先にルビ変換を行ってください');
         return;
       }
 
-      const zip = new JSZip();
+      try {
+        // パターンA：元のWordファイル（.docx）をそのまま書き換えて出力
+        if (uploadedDocxBuffer) {
+          const zip = await JSZip.loadAsync(uploadedDocxBuffer);
+          const docXmlStr = await zip.file('word/document.xml').async('string');
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(docXmlStr, 'application/xml');
 
-      // フォント・ルビサイズ設定（half-points単位: 22 = 11pt, 10 = 5pt）
-      const fontName = isMincho ? 'Yu Mincho' : 'Yu Gothic';
-      const baseHps = 22; // 11pt
-      const rubyHpsMap = { small: 8, normal: 10, large: 12 }; // 4pt / 5pt / 6pt
-      const rubyHps = rubyHpsMap[currentRubySize] || 10;
-      const hpsRaise = 20; // 10pt上げ
+          unwrapExistingRubiesInDoc(xmlDoc);
 
-      // 段落ごとに分割
-      const paragraphs = [[]];
-      renderedSegments.forEach(seg => {
-        if (seg.text === '\n') {
-          paragraphs.push([]);
-        } else {
-          paragraphs[paragraphs.length - 1].push(seg);
-        }
-      });
+          const pNodes = Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'p'));
 
-      const rPrXml = `<w:rPr><w:rFonts w:ascii="${fontName}" w:eastAsia="${fontName}" w:hAnsi="${fontName}"/><w:sz w:val="${baseHps}"/><w:szCs w:val="${baseHps}"/></w:rPr>`;
-      const rtRPrXml = `<w:rPr><w:rFonts w:ascii="${fontName}" w:eastAsia="${fontName}" w:hAnsi="${fontName}"/><w:sz w:val="${rubyHps}"/><w:szCs w:val="${rubyHps}"/></w:rPr>`;
+          pNodes.forEach((pNode, pIdx) => {
+            const pModel = paragraphModels[pIdx];
+            if (!pModel) return;
 
-      let bodyParagraphsXml = '';
-      paragraphs.forEach(pSegs => {
-        if (pSegs.length === 0) {
-          bodyParagraphsXml += '<w:p/>';
+            // 既存の w:r をすべて削除（w:pPr などの段落書式は100%残す）
+            const oldRuns = Array.from(pNode.childNodes).filter(n => n.localName === 'r');
+            oldRuns.forEach(r => pNode.removeChild(r));
+
+            // 変換後セグメントから新しい w:r を挿入
+            const runsXmlStr = pModel.segments.map(seg => buildRunXmlFromSegment(seg)).join('');
+            if (runsXmlStr.trim()) {
+              const tempDoc = parser.parseFromString(
+                `<w:root xmlns:w="${W_NS}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:v="urn:schemas-microsoft-com:vml">${runsXmlStr}</w:root>`,
+                'application/xml'
+              );
+              const newRuns = Array.from(tempDoc.documentElement.childNodes);
+              newRuns.forEach(nr => {
+                pNode.appendChild(xmlDoc.importNode(nr, true));
+              });
+            }
+          });
+
+          const serializer = new XMLSerializer();
+          const updatedXmlStr = serializer.serializeToString(xmlDoc);
+          zip.file('word/document.xml', updatedXmlStr);
+
+          const blob = await zip.generateAsync({ type: 'blob' });
+          triggerDownload(blob, `${uploadedDocxName}_ルビ付き.docx`);
+          showToast('元の書式を維持したままWord（.docx）を保存しました！');
           return;
         }
-        let runsXml = '';
-        pSegs.forEach(seg => {
-          if (seg.ruby) {
-            runsXml += `
-              <w:r>
-                ${rPrXml}
-                <w:ruby>
-                  <w:rubyPr>
-                    <w:rubyAlign w:val="distributeSpace"/>
-                    <w:hps w:val="${rubyHps}"/>
-                    <w:hpsRaise w:val="${hpsRaise}"/>
-                    <w:hpsBaseText w:val="${baseHps}"/>
-                    <w:lid w:val="ja-JP"/>
-                  </w:rubyPr>
-                  <w:rt>
-                    <w:r>
-                      ${rtRPrXml}
-                      <w:t>${escapeXml(seg.ruby)}</w:t>
-                    </w:r>
-                  </w:rt>
-                  <w:rubyBase>
-                    <w:r>
-                      ${rPrXml}
-                      <w:t xml:space="preserve">${escapeXml(seg.text)}</w:t>
-                    </w:r>
-                  </w:rubyBase>
-                </w:ruby>
-              </w:r>`;
-          } else {
-            runsXml += `
-              <w:r>
-                ${rPrXml}
-                <w:t xml:space="preserve">${escapeXml(seg.text)}</w:t>
-              </w:r>`;
+
+        // パターンB：テキスト直接入力から新規 .docx を生成して出力
+        const zip = new JSZip();
+        const udFontOn = document.getElementById('udFontCheck').checked;
+        const fontName = udFontOn ? 'UD デジタル 教科書体 NK-R' : (isMincho ? 'Yu Mincho' : 'Yu Gothic');
+        const defaultRPr = `<w:rPr><w:rFonts w:ascii="${fontName}" w:eastAsia="${fontName}" w:hAnsi="${fontName}"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr>`;
+
+        let bodyParagraphsXml = '';
+        paragraphModels.forEach(pModel => {
+          if (pModel.segments.length === 0) {
+            bodyParagraphsXml += '<w:p/>';
+            return;
           }
+          const runsXml = pModel.segments.map(seg => {
+            const segWithFont = { ...seg, rPrXml: defaultRPr };
+            return buildRunXmlFromSegment(segWithFont);
+          }).join('');
+          bodyParagraphsXml += `<w:p>${runsXml}</w:p>`;
         });
-        bodyParagraphsXml += `<w:p>${runsXml}</w:p>`;
-      });
 
-      // 用紙設定（縦書き時はA4横向き＋縦書き方向、横書き時はA4縦向き）
-      const sectPrXml = isVertical
-        ? `<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/><w:textDirection w:val="tbRl"/></w:sectPr>`
-        : `<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>`;
+        const sectPrXml = isVertical
+          ? `<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/><w:textDirection w:val="tbRl"/></w:sectPr>`
+          : `<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>`;
 
-      const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:body>
     ${bodyParagraphsXml}
@@ -850,95 +1475,116 @@
   </w:body>
 </w:document>`;
 
-      const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
   <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
 </Types>`;
 
-      const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
 </Relationships>`;
 
-      zip.file('[Content_Types].xml', contentTypesXml);
-      zip.folder('_rels').file('.rels', relsXml);
-      zip.folder('word').file('document.xml', documentXml);
+        zip.file('[Content_Types].xml', contentTypesXml);
+        zip.folder('_rels').file('.rels', relsXml);
+        zip.folder('word').file('document.xml', documentXml);
 
-      const blob = await zip.generateAsync({ type: 'blob' });
+        const blob = await zip.generateAsync({ type: 'blob' });
+        triggerDownload(blob, `ルビ付きプリント_${new Date().toISOString().slice(0, 10)}.docx`);
+        showToast('Wordファイル（.docx）をダウンロードしました！');
+
+      } catch (err) {
+        console.error(err);
+        alert('Wordファイルの生成に失敗しました。');
+      }
+    };
+
+    function triggerDownload(blob, filename) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `ルビ付きプリント_${new Date().toISOString().slice(0, 10)}.docx`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-      showToast('Wordファイル（.docx）をダウンロードしました！');
-    };
+    }
 
     // ==========================================
-    // 7. Word貼付用リッチHTMLコピー ＆ カッコ書きコピー
+    // 12. Word貼付用リッチHTMLコピー ＆ カッコ書きコピー
     // ==========================================
     document.getElementById('copyWordBtn').onclick = async () => {
-      if (renderedSegments.length === 0) {
+      if (paragraphModels.length === 0) {
         showToast('先にルビ変換を行ってください');
         return;
       }
 
       const rtPtMap = { small: '4.5pt', normal: '5.5pt', large: '6.5pt' };
       const rtPt = rtPtMap[currentRubySize] || '5.5pt';
-      const fontFamily = isMincho ? "'Yu Mincho', 'MS Mincho', serif" : "'Yu Gothic', 'Meiryo', sans-serif";
+      const udFontOn = document.getElementById('udFontCheck').checked;
+      const fontFamily = udFontOn
+        ? "'UD デジタル 教科書体 NK-R', 'BIZ UDGothic', sans-serif"
+        : (isMincho ? "'Yu Mincho', 'MS Mincho', serif" : "'Yu Gothic', 'Meiryo', sans-serif");
+      const scriptMode = document.getElementById('rubyScriptMode').value;
 
       let htmlParts = [`<div style="font-family: ${fontFamily}; font-size: 11pt; line-height: 1.9;">`];
       let plainParts = [];
 
-      renderedSegments.forEach(seg => {
-        if (seg.text === '\n') {
+      paragraphModels.forEach((pModel, pIdx) => {
+        pModel.segments.forEach(seg => {
+          if (seg.ruby) {
+            if (scriptMode === 'anaume') {
+              htmlParts.push(`（  ）（${seg.ruby}）`);
+              plainParts.push(`（  ）（${seg.ruby}）`);
+            } else {
+              htmlParts.push(`<ruby style="ruby-align:center;">${seg.text}<rt style="font-size:${rtPt};">${seg.ruby}</rt></ruby>`);
+              plainParts.push(`${seg.text}(${seg.ruby})`);
+            }
+          } else {
+            htmlParts.push(seg.text);
+            plainParts.push(seg.text);
+          }
+        });
+        if (pIdx < paragraphModels.length - 1) {
           htmlParts.push('<br>');
           plainParts.push('\n');
-        } else if (seg.ruby) {
-          htmlParts.push(`<ruby style="ruby-align:center;">${seg.text}<rt style="font-size:${rtPt};">${seg.ruby}</rt></ruby>`);
-          plainParts.push(`${seg.text}(${seg.ruby})`);
-        } else {
-          htmlParts.push(seg.text);
-          plainParts.push(seg.text);
         }
       });
       htmlParts.push('</div>');
 
-      const htmlString = htmlParts.join('');
-      const plainString = plainParts.join('');
-
       try {
-        const htmlBlob = new Blob([htmlString], { type: 'text/html' });
-        const textBlob = new Blob([plainString], { type: 'text/plain' });
         const clipboardItem = new ClipboardItem({
-          'text/html': htmlBlob,
-          'text/plain': textBlob
+          'text/html': new Blob([htmlParts.join('')], { type: 'text/html' }),
+          'text/plain': new Blob([plainParts.join('')], { type: 'text/plain' })
         });
         await navigator.clipboard.write([clipboardItem]);
         showToast('Word用にコピーしました！そのまま貼り付け（Ctrl+V / ⌘+V）できます');
       } catch (err) {
-        navigator.clipboard.writeText(plainString);
+        navigator.clipboard.writeText(plainParts.join(''));
         showToast('テキストをコピーしました');
       }
     };
 
     document.getElementById('copyParenBtn').onclick = () => {
-      if (renderedSegments.length === 0) {
+      if (paragraphModels.length === 0) {
         showToast('先にルビ変換を行ってください');
         return;
       }
-      const text = renderedSegments.map(seg => seg.ruby ? `${seg.text}（${seg.ruby}）` : seg.text).join('');
-      navigator.clipboard.writeText(text);
+      const scriptMode = document.getElementById('rubyScriptMode').value;
+      const lines = paragraphModels.map(pm =>
+        pm.segments.map(seg => {
+          if (!seg.ruby) return seg.text;
+          return scriptMode === 'anaume' ? `（  ）（${seg.ruby}）` : `${seg.text}（${seg.ruby}）`;
+        }).join('')
+      );
+      navigator.clipboard.writeText(lines.join('\n'));
       showToast('カッコ書き形式でコピーしました！');
     };
 
     // ==========================================
-    // 8. UI操作（ルビサイズ・縦書き/横書き・フォント・印刷）
+    // 13. UIコントロール（ルビサイズ・色・UD体・縦横・印刷）
     // ==========================================
     const printArea = document.getElementById('printArea');
     const dirHorizontalBtn = document.getElementById('dirHorizontalBtn');
@@ -947,7 +1593,6 @@
     const printBtnLabel = document.getElementById('printBtnLabel');
     const dynamicPrintStyle = document.getElementById('dynamicPrintStyle');
 
-    // ルビサイズ切り替え
     document.querySelectorAll('.rsize-btn').forEach(btn => {
       btn.onclick = () => {
         currentRubySize = btn.dataset.rsize;
@@ -961,7 +1606,18 @@
       };
     });
 
-    // 横書き（印刷はA4縦向き）
+    document.getElementById('grayRubyCheck').onchange = (e) => {
+      document.documentElement.style.setProperty('--ruby-color', e.target.checked ? '#475569' : '#4f46e5');
+    };
+
+    document.getElementById('udFontCheck').onchange = (e) => {
+      if (e.target.checked) {
+        printArea.classList.add('font-ud');
+      } else {
+        printArea.classList.remove('font-ud');
+      }
+    };
+
     dirHorizontalBtn.onclick = () => {
       isVertical = false;
       printArea.classList.remove('vertical-text');
@@ -970,9 +1626,9 @@
       dirVerticalBtn.className = 'px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
       printBtnLabel.textContent = '印刷（A4縦）';
       dynamicPrintStyle.textContent = '@page { size: A4 portrait; margin: 15mm; }';
+      if (paragraphModels.length > 0) renderPreviewFromModels();
     };
 
-    // 縦書き（印刷はA4横向き）
     dirVerticalBtn.onclick = () => {
       isVertical = true;
       printArea.classList.remove('horizontal-text');
@@ -981,6 +1637,7 @@
       dirHorizontalBtn.className = 'px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
       printBtnLabel.textContent = '印刷（A4横）';
       dynamicPrintStyle.textContent = '@page { size: A4 landscape; margin: 15mm; }';
+      if (paragraphModels.length > 0) renderPreviewFromModels();
     };
 
     fontToggleBtn.onclick = () => {
@@ -995,28 +1652,47 @@
     };
 
     document.getElementById('printBtn').onclick = () => {
-      if (renderedSegments.length === 0) {
+      if (paragraphModels.length === 0) {
         showToast('先にルビ変換を行ってください');
         return;
       }
       window.print();
     };
 
-    convertBtn.onclick = requestTokenize;
+    convertBtn.onclick = () => startConversion(false);
+    document.getElementById('stripRubyBtn').onclick = () => startConversion(true);
 
     document.getElementById('sampleTextBtn').onclick = () => {
+      uploadedDocxBuffer = null;
+      uploadedDocxName = '';
+      docxModeBadge.classList.add('hidden');
+      fileNameLabel.textContent = '★元のレイアウト・表組・文字サイズを維持して出力';
       document.getElementById('sourceText').value =
-        "明日の遠足では、地域の歴史博物館を見学します。\n集合時刻は午前八時三十分ですので、遅れないように登校してください。\n雨天の場合は体育館でオリエンテーションを実施します。";
-      requestTokenize();
+        "モチモチの木\n斎藤 隆介 文 滝平 二郎 絵\n\n全く、豆太ほどおくびょうなやつはいない。もう五つにもなったんだから、夜中に一人でせっちんぐらいに行けたっていい。\nところが豆太は、せっちんは表にあるし、表には大きなモチモチの木がつっ立っていて、空いっぱいのかみの毛をバサバサとふるって、両手を「ワァッ！」とあげるからって、夜中には、じさまについてってもらわないと、一人じゃしょうべんもできないのだ。";
+      startConversion(false);
     };
 
     document.getElementById('clearTextBtn').onclick = () => {
+      uploadedDocxBuffer = null;
+      uploadedDocxName = '';
+      docxInput.value = '';
+      docxModeBadge.classList.add('hidden');
+      fileNameLabel.textContent = '★元のレイアウト・表組・文字サイズを維持して出力';
       document.getElementById('sourceText').value = '';
-      fileNameLabel.textContent = '※ファイル内のテキストを自動で抽出します';
-      renderedSegments = [];
+      paragraphModels = [];
       document.getElementById('rubyOutput').classList.add('hidden');
       document.getElementById('emptyPlaceholder').classList.remove('hidden');
     };
+
+    // テキストエリア手動編集時はWordファイルモードを解除してテキストモードへ移行
+    document.getElementById('sourceText').addEventListener('input', () => {
+      if (uploadedDocxBuffer) {
+        uploadedDocxBuffer = null;
+        uploadedDocxName = '';
+        docxModeBadge.classList.add('hidden');
+        fileNameLabel.textContent = '★元のレイアウト・表組・文字サイズを維持して出力';
+      }
+    });
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
@@ -1028,6 +1704,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      loadMyDictionary();
       lucide.createIcons();
     });
   </script>
