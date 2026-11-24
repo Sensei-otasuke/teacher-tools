@@ -59,10 +59,13 @@
       transition: transform 0.2s ease;
     }
 
-    /* 印刷用スタイル（1枚ぴったり実寸出力・2枚目白紙防止） */
+    /* 印刷用スタイル（角丸枠・影・背景を完全消去し純粋な用紙として出力） */
     @media print {
+      @page {
+        margin: 0 !important;
+      }
       html, body {
-        background: white !important;
+        background: #ffffff !important;
         margin: 0 !important;
         padding: 0 !important;
         width: 100% !important;
@@ -77,9 +80,13 @@
         width: 100% !important;
         height: 100% !important;
         max-width: none !important;
+        min-height: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
-        background: white !important;
+        background: #ffffff !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
         overflow: hidden !important;
       }
       #paperSheet {
@@ -87,6 +94,8 @@
         box-shadow: none !important;
         margin: 0 !important;
         border: none !important;
+        border-radius: 0 !important;
+        background: #ffffff !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
       }
@@ -603,11 +612,15 @@
       sheet.style.height = `${paperH}mm`;
       sheet.style.padding = `${margin}mm`;
 
-      // crispEdgesを外し、アンチエイリアス＋単一線描画で全倍率において均一な線幅を実現
+      // 外枠の線がクリップされないようviewBoxに0.25mmの余白を確保
+      const pad = 0.25;
+      const svgW = +(totalGridW + pad * 2).toFixed(3);
+      const svgH = +(totalGridH + pad * 2).toFixed(3);
+
       sheet.innerHTML = `
         ${headerHtml}
-        <div class="flex-1 flex items-center justify-center overflow-hidden">
-          <svg width="${totalGridW}mm" height="${totalGridH}mm" viewBox="0 0 ${totalGridW} ${totalGridH}" xmlns="http://www.w3.org/2000/svg">
+        <div class="flex-1 flex items-center justify-center">
+          <svg width="${svgW}mm" height="${svgH}mm" viewBox="${-pad} ${-pad} ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">
             ${svgParts.join('')}
           </svg>
         </div>
