@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>方眼・マス目プリントメーカー | センセイボックス</title>
+  <meta name="description" content="A4・A3・B5・B4対応。ミリ単位の実寸方眼やマス数指定、低学年向け十字リーダー、漢字練習帳レイアウト、黒・青・緑のカラー選択ができる先生向け無料プリント作成ツール。">
+  <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/grid/" />
+  <link rel="icon" href="../logo.png" type="image/png">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- 動的印刷用紙サイズ定義 -->
+  <style id="dynamicPageStyle">
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+  </style>
+
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; }
+    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
+
+    /* プレビュー用紙の影と質感 */
+    .paper-sheet {
+      background-color: #ffffff;
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+      transform-origin: top center;
+      transition: transform 0.2s ease;
+    }
+
+    /* 印刷用スタイル（1枚ぴったり実寸出力・2枚目白紙防止） */
+    @media print {
+      html, body {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+      header, #leftColumn, #previewToolbar, #printTipBanner {
+        display: none !important;
+      }
+      main, #rightColumn, #previewViewport {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: white !important;
+        overflow: hidden !important;
+      }
+      #paperSheet {
+        transform: none !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        border: none !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- ヘッダー -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a href="../" class="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition" title="ポータルへ戻る">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-xl">
+            📐
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <span>方眼・マス目プリントメーカー</span>
+              <span class="hidden sm:inline text-[10px] font-mono-tech font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">A4 / A3 / B5 / B4</span>
+            </h1>
+            <p class="text-[10px] text-slate-400 font-bold hidden sm:block">実寸方眼・十字リーダー・漢字練習帳・工作設計図をそのまま印刷</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="headerPrintBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center gap-1.5">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>この用紙を印刷する</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインエリア -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- 左カラム：設定パネル (5カラム) -->
+    <div id="leftColumn" class="lg:col-span-5 flex flex-col gap-4">
+
+      <!-- 0. ワンタッチ定番プリセット -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-4 shadow-xs space-y-2.5">
+        <span class="text-[11px] font-black text-slate-500 flex items-center gap-1">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>よく使う定番設定（ワンクリック切替）</span>
+        </span>
+        <div class="flex flex-wrap gap-1.5">
+          <button data-preset="grade1" class="preset-chip px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-black text-[11px] transition">1年・こくご(18mm十字)</button>
+          <button data-preset="kanji2" class="preset-chip px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-700 font-bold text-[11px] transition">2年・かんじ練習帳</button>
+          <button data-preset="math5" class="preset-chip px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-700 font-bold text-[11px] transition">算数・5mm方眼(太線付)</button>
+          <button data-preset="craft10" class="preset-chip px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-700 font-bold text-[11px] transition">図工・1cm実寸方眼</button>
+          <button data-preset="sakubun" class="preset-chip px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-700 font-bold text-[11px] transition">作文・20×20マス</button>
+        </div>
+      </div>
+
+      <!-- 1. 用紙サイズ ＆ 向き -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs space-y-3.5">
+        <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+          <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-mono-tech">1</span>
+          <span>用紙のサイズと向き</span>
+        </h2>
+
+        <div class="grid grid-cols-4 gap-1.5">
+          <button data-paper="A4" class="paper-btn py-2 rounded-xl bg-emerald-600 text-white font-mono-tech font-black text-xs shadow-2xs transition">A4</button>
+          <button data-paper="A3" class="paper-btn py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-mono-tech font-black text-xs transition">A3</button>
+          <button data-paper="B5" class="paper-btn py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-mono-tech font-black text-xs transition">B5</button>
+          <button data-paper="B4" class="paper-btn py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-mono-tech font-black text-xs transition">B4</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div class="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-black">
+            <button id="orientPortraitBtn" class="flex-1 py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs transition">縦向き</button>
+            <button id="orientLandscapeBtn" class="flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition">横向き</button>
+          </div>
+
+          <select id="marginSelect" class="p-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none" title="周囲の余白">
+            <option value="12" selected>余白：ふつう（12mm）</option>
+            <option value="8">余白：せまい（8mm）</option>
+            <option value="18">余白：ひろい（18mm・とじしろ用）</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 2. マス目のサイズ・マス数・種類 -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs space-y-4">
+        <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+          <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-mono-tech">2</span>
+          <span>マス目のサイズと種類</span>
+        </h2>
+
+        <!-- 指定方法タブ（実寸mm指定 / マス数指定） -->
+        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-black">
+          <button id="modeMmBtn" class="py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs transition">実寸サイズ指定（mm）</button>
+          <button id="modeCountBtn" class="py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition">マス数指定（縦×横）</button>
+        </div>
+
+        <!-- A. 実寸サイズ指定（mm）パネル -->
+        <div id="mmControlPanel" class="space-y-2.5">
+          <div class="flex flex-wrap gap-1.5">
+            <button data-mm="5" class="mm-chip px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono-tech font-bold text-xs">5mm</button>
+            <button data-mm="8" class="mm-chip px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono-tech font-bold text-xs">8mm</button>
+            <button data-mm="10" class="mm-chip px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 ring-2 ring-emerald-400 font-mono-tech font-black text-xs">10mm(1cm)</button>
+            <button data-mm="12" class="mm-chip px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono-tech font-bold text-xs">12mm</button>
+            <button data-mm="15" class="mm-chip px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono-tech font-bold text-xs">15mm</button>
+            <button data-mm="18" class="mm-chip px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono-tech font-bold text-xs">18mm</button>
+            <button data-mm="20" class="mm-chip px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono-tech font-bold text-xs">20mm</button>
+            <button data-mm="22" class="mm-chip px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono-tech font-bold text-xs">22mm</button>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <label class="text-xs font-bold text-slate-600">1マスの大きさ（自由入力）</label>
+            <div class="flex items-center gap-1.5">
+              <input id="cellSizeMmInput" type="number" min="3" max="50" step="0.5" value="10" class="w-20 p-1.5 text-center font-mono-tech font-black text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+              <span class="text-xs font-bold text-slate-500">mm</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- B. マス数指定（縦×横）パネル -->
+        <div id="countControlPanel" class="hidden space-y-2.5">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">横のマス数（列）</label>
+              <input id="colsCountInput" type="number" min="2" max="60" value="12" class="w-full p-2 text-center font-mono-tech font-black text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">縦のマス数（行）</label>
+              <input id="rowsCountInput" type="number" min="2" max="80" value="17" class="w-full p-2 text-center font-mono-tech font-black text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+            </div>
+          </div>
+          <p id="calculatedMmInfo" class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg text-center">
+            自動計算された1マスのサイズ：約 14.5 mm
+          </p>
+        </div>
+
+        <!-- マス目のスタイル（通常方眼 / 漢字練習帳縦 / 漢字練習帳横） -->
+        <div class="pt-2 border-t border-slate-100 space-y-2.5">
+          <label class="block text-xs font-black text-slate-700">マスの並び方</label>
+          <select id="layoutTypeSelect" class="w-full p-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+            <option value="grid" selected>ふつうの方眼（すき間なし）</option>
+            <option value="kanji_v">漢字練習帳・縦書き（右側にふりがな列つき）</option>
+            <option value="kanji_h">漢字練習帳・横書き（上側にふりがな行つき）</option>
+          </select>
+
+          <!-- 補助線スイッチ -->
+          <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer font-bold text-slate-700">
+              <input id="crossLeaderCheck" type="checkbox" class="w-4 h-4 accent-emerald-600 rounded">
+              <span>十字リーダー（点線）</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer font-bold text-slate-700">
+              <input id="boldEvery5Check" type="checkbox" class="w-4 h-4 accent-emerald-600 rounded">
+              <span>5マスごとに太線</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 線の色・濃さ ＆ 名前欄オプション -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs space-y-3.5">
+        <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+          <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-mono-tech">3</span>
+          <span>線の色・名前欄の設定</span>
+        </h2>
+
+        <!-- カラー3色（黒・青・緑） ＆ 濃さ -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">線のカラー</label>
+            <div class="grid grid-cols-3 gap-1.5">
+              <button data-color="black" class="color-btn py-2 rounded-xl border-2 border-slate-800 bg-slate-800 text-white font-black text-xs transition flex items-center justify-center gap-1">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>黒
+              </button>
+              <button data-color="blue" class="color-btn py-2 rounded-xl border border-slate-200 bg-white text-sky-700 font-black text-xs transition flex items-center justify-center gap-1">
+                <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>青
+              </button>
+              <button data-color="green" class="color-btn py-2 rounded-xl border border-slate-200 bg-white text-emerald-700 font-black text-xs transition flex items-center justify-center gap-1">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>緑
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">線の濃さ（印刷用）</label>
+            <select id="lineIntensitySelect" class="w-full p-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+              <option value="light">うすめ（鉛筆の文字が主役）</option>
+              <option value="normal" selected>ふつう（標準）</option>
+              <option value="dark">こいめ（コピー・工作用）</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 名前欄・実寸スケールスイッチ -->
+        <div class="space-y-2 pt-1 text-xs">
+          <div class="flex items-center justify-between gap-2">
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+              <input id="showHeaderCheck" type="checkbox" checked class="w-4 h-4 accent-emerald-600 rounded">
+              <span>上部に「年・組・番・なまえ」欄をつける</span>
+            </label>
+          </div>
+
+          <input id="sheetTitleInput" type="text" placeholder="プリントのタイトル（空欄でもOK）" class="w-full p-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-emerald-500 focus:outline-none">
+
+          <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700 pt-1">
+            <input id="showScaleCheck" type="checkbox" checked class="w-4 h-4 accent-emerald-600 rounded">
+            <span>下部に「5cm実寸確認目盛り」を表示する</span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 右カラム：リアルタイム用紙プレビュー (7カラム) -->
+    <div id="rightColumn" class="lg:col-span-7 flex flex-col gap-3">
+      
+      <!-- プレビュー上部ツールバー -->
+      <div id="previewToolbar" class="bg-white rounded-2xl border border-slate-200/90 px-4 py-2.5 shadow-2xs flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 text-xs font-black text-slate-700">
+          <span id="paperSpecBadge" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono-tech">A4 縦（210×297mm）</span>
+          <span id="gridCountBadge" class="text-slate-500 font-bold">横18 × 縦24マス</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] font-bold text-slate-400">表示倍率:</span>
+          <div class="inline-flex rounded-xl bg-slate-100 p-1 text-[11px] font-bold">
+            <button id="zoomFitBtn" class="px-2.5 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition">全体表示</button>
+            <button id="zoom100Btn" class="px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition">実寸拡大</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 印刷時のアドバイスバー -->
+      <div id="printTipBanner" class="bg-amber-50 border border-amber-200/80 text-amber-900 text-[11px] font-bold px-3.5 py-2 rounded-xl flex items-center gap-2">
+        <i data-lucide="info" class="w-4 h-4 text-amber-600 shrink-0"></i>
+        <span>実寸通り（1cm方眼など）で印刷するときは、印刷画面の倍率を<b>「100%（実際のサイズ）」</b>にしてください。</span>
+      </div>
+
+      <!-- 用紙プレビュー表示領域 -->
+      <div id="previewViewport" class="flex-1 bg-slate-200/70 rounded-3xl border border-slate-300/70 p-4 sm:p-6 overflow-auto flex justify-center items-start min-h-[560px]">
+        <!-- 実際の印刷対象シート（mm単位で精密描画） -->
+        <div id="paperSheet" class="paper-sheet relative box-border flex flex-col justify-between">
+          <!-- JSでSVG方眼とヘッダー・スケールを描画 -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // ==========================================
+    // 1. JIS規格 用紙寸法定義（mm）
+    // ==========================================
+    const PAPER_SIZES = {
+      A4: { w: 210, h: 297 },
+      A3: { w: 297, h: 420 },
+      B5: { w: 182, h: 257 },
+      B4: { w: 257, h: 364 }
+    };
+
+    // カラーパレット（黒・青・緑 × 濃さ3段階）
+    const COLOR_PALETTES = {
+      black: {
+        light: { main: '#94a3b8', sub: '#cbd5e1', bold: '#475569', text: '#334155' },
+        normal: { main: '#475569', sub: '#94a3b8', bold: '#1e293b', text: '#1e293b' },
+        dark: { main: '#1e293b', sub: '#64748b', bold: '#0f172a', text: '#0f172a' }
+      },
+      blue: {
+        light: { main: '#7dd3fc', sub: '#bae6fd', bold: '#0284c7', text: '#0369a1' },
+        normal: { main: '#0ea5e9', sub: '#7dd3fc', bold: '#0369a1', text: '#0369a1' },
+        dark: { main: '#0284c7', sub: '#38bdf8', bold: '#075985', text: '#075985' }
+      },
+      green: {
+        light: { main: '#6ee7b7', sub: '#a7f3d0', bold: '#059669', text: '#047857' },
+        normal: { main: '#10b981', sub: '#6ee7b7', bold: '#047857', text: '#047857' },
+        dark: { main: '#059669', sub: '#34d399', bold: '#065f46', text: '#065f46' }
+      }
+    };
+
+    // ==========================================
+    // 2. アプリ状態管理
+    // ==========================================
+    const state = {
+      paper: 'A4',
+      orientation: 'portrait', // 'portrait' | 'landscape'
+      marginMm: 12,
+      sizeMode: 'mm', // 'mm' | 'count'
+      cellMm: 10,
+      colsCount: 12,
+      rowsCount: 17,
+      layoutType: 'grid', // 'grid' | 'kanji_v' | 'kanji_h'
+      crossLeader: false,
+      boldEvery5: false,
+      color: 'black', // 'black' | 'blue' | 'green'
+      intensity: 'normal', // 'light' | 'normal' | 'dark'
+      showHeader: true,
+      sheetTitle: '',
+      showScale: true,
+      zoomMode: 'fit' // 'fit' | '100'
+    };
+
+    // ==========================================
+    // 3. 印刷CSS（@page）同期 ＆ プレビュー倍率調整
+    // ==========================================
+    function syncPrintPageRule() {
+      const styleEl = document.getElementById('dynamicPageStyle');
+      styleEl.textContent = `@page { size: ${state.paper} ${state.orientation}; margin: 0; }`;
+    }
+
+    function applyPreviewScale() {
+      const viewport = document.getElementById('previewViewport');
+      const sheet = document.getElementById('paperSheet');
+      const base = PAPER_SIZES[state.paper];
+      const paperW = state.orientation === 'portrait' ? base.w : base.h;
+      const paperH = state.orientation === 'portrait' ? base.h : base.w;
+
+      if (state.zoomMode === '100') {
+        sheet.style.transform = 'scale(1)';
+        sheet.style.marginBottom = '0px';
+        return;
+      }
+
+      // 1mm ≒ 3.7795px
+      const pxPerMm = 3.7795275591;
+      const sheetPxW = paperW * pxPerMm;
+      const sheetPxH = paperH * pxPerMm;
+      const availW = Math.max(260, viewport.clientWidth - 48);
+
+      const scale = Math.min(1, availW / sheetPxW);
+      sheet.style.transform = `scale(${scale})`;
+      // transform:scale で縮めた分の余白詰まり補正
+      const reducedHeight = sheetPxH * (1 - scale);
+      sheet.style.marginBottom = `-${reducedHeight}px`;
+    }
+
+    // ==========================================
+    // 4. SVGベクター方眼・マス目レンダリングエンジン
+    // ==========================================
+    function renderSheet() {
+      syncPrintPageRule();
+
+      const base = PAPER_SIZES[state.paper];
+      const paperW = state.orientation === 'portrait' ? base.w : base.h;
+      const paperH = state.orientation === 'portrait' ? base.h : base.w;
+      const margin = state.marginMm;
+
+      const palette = COLOR_PALETTES[state.color][state.intensity];
+
+      // ヘッダー高さと下部スケール高さ（mm）
+      const headerH = state.showHeader ? 14 : 0;
+      const footerH = state.showScale ? 8 : 0;
+
+      const availW = paperW - margin * 2;
+      const availH = paperH - margin * 2 - headerH - footerH;
+
+      let cellW = state.cellMm;
+      let cellH = state.cellMm;
+      let cols = 10;
+      let rows = 10;
+
+      // 漢字練習帳のふりがな欄幅（マスの36%）
+      const furiganaRatio = 0.36;
+
+      if (state.sizeMode === 'mm') {
+        cellW = Math.max(3, Math.min(50, state.cellMm));
+        cellH = cellW;
+
+        if (state.layoutType === 'kanji_v') {
+          const unitW = cellW * (1 + furiganaRatio);
+          cols = Math.max(1, Math.floor(availW / unitW));
+          rows = Math.max(1, Math.floor(availH / cellH));
+        } else if (state.layoutType === 'kanji_h') {
+          const unitH = cellH * (1 + furiganaRatio);
+          cols = Math.max(1, Math.floor(availW / cellW));
+          rows = Math.max(1, Math.floor(availH / unitH));
+        } else {
+          cols = Math.max(1, Math.floor(availW / cellW));
+          rows = Math.max(1, Math.floor(availH / cellH));
+        }
+      } else {
+        // マス数指定モード（正方形を維持しつつ用紙に最大フィット）
+        cols = Math.max(1, state.colsCount);
+        rows = Math.max(1, state.rowsCount);
+
+        let maxCellW = availW / cols;
+        let maxCellH = availH / rows;
+
+        if (state.layoutType === 'kanji_v') {
+          maxCellW = availW / (cols * (1 + furiganaRatio));
+        } else if (state.layoutType === 'kanji_h') {
+          maxCellH = availH / (rows * (1 + furiganaRatio));
+        }
+
+        const fitSize = Math.floor(Math.min(maxCellW, maxCellH) * 10) / 10;
+        cellW = Math.max(3, fitSize);
+        cellH = cellW;
+        document.getElementById('calculatedMmInfo').textContent = `自動計算された1マスのサイズ：${cellW.toFixed(1)} mm`;
+      }
+
+      // 描画全体の幅と高さ（mm）
+      const unitW = state.layoutType === 'kanji_v' ? cellW * (1 + furiganaRatio) : cellW;
+      const unitH = state.layoutType === 'kanji_h' ? cellH * (1 + furiganaRatio) : cellH;
+
+      const totalGridW = cols * unitW;
+      const totalGridH = rows * unitH;
+
+      // バッジ更新
+      document.getElementById('paperSpecBadge').textContent =
+        `${state.paper} ${state.orientation === 'portrait' ? '縦' : '横'}（${paperW}×${paperH}mm）`;
+      document.getElementById('gridCountBadge').textContent =
+        `横${cols} × 縦${rows}マス（1マス ${cellW}mm）`;
+
+      // SVG要素の構築（すべてmm座標系で描くため100%実寸一致）
+      let svgParts = [];
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const baseX = c * unitW;
+          const baseY = r * unitH;
+
+          let mainX = baseX;
+          let mainY = baseY;
+
+          // 漢字練習帳・縦書き（右側にふりがな欄）
+          if (state.layoutType === 'kanji_v') {
+            const furiW = cellW * furiganaRatio;
+            const furiX = baseX + cellW;
+            svgParts.push(
+              `<rect x="${furiX}" y="${baseY}" width="${furiW}" height="${cellH}" fill="none" stroke="${palette.main}" stroke-width="0.22"/>`
+            );
+          }
+          // 漢字練習帳・横書き（上側にふりがな欄）
+          else if (state.layoutType === 'kanji_h') {
+            const furiH = cellH * furiganaRatio;
+            svgParts.push(
+              `<rect x="${baseX}" y="${baseY}" width="${cellW}" height="${furiH}" fill="none" stroke="${palette.main}" stroke-width="0.22"/>`
+            );
+            mainY = baseY + furiH;
+          }
+
+          // メインのマス枠
+          svgParts.push(
+            `<rect x="${mainX}" y="${mainY}" width="${cellW}" height="${cellH}" fill="none" stroke="${palette.main}" stroke-width="0.25"/>`
+          );
+
+          // 十字リーダー（低学年向け点線）
+          if (state.crossLeader) {
+            const midX = mainX + cellW / 2;
+            const midY = mainY + cellH / 2;
+            const dash = Math.max(0.5, cellW * 0.07);
+            svgParts.push(
+              `<line x1="${midX}" y1="${mainY}" x2="${midX}" y2="${mainY + cellH}" stroke="${palette.sub}" stroke-width="0.2" stroke-dasharray="${dash},${dash}"/>`,
+              `<line x1="${mainX}" y1="${midY}" x2="${mainX + cellW}" y2="${midY}" stroke="${palette.sub}" stroke-width="0.2" stroke-dasharray="${dash},${dash}"/>`
+            );
+          }
+        }
+      }
+
+      // 5マスごとの太線（ふつうの方眼モード時）
+      if (state.boldEvery5 && state.layoutType === 'grid') {
+        for (let c = 5; c < cols; c += 5) {
+          const x = c * cellW;
+          svgParts.push(
+            `<line x1="${x}" y1="0" x2="${x}" y2="${totalGridH}" stroke="${palette.bold}" stroke-width="0.48"/>`
+          );
+        }
+        for (let r = 5; r < rows; r += 5) {
+          const y = r * cellH;
+          svgParts.push(
+            `<line x1="0" y1="${y}" x2="${totalGridW}" y2="${y}" stroke="${palette.bold}" stroke-width="0.48"/>`
+          );
+        }
+      }
+
+      // 外枠を少しだけ強調して美しく締める
+      svgParts.push(
+        `<rect x="0" y="0" width="${totalGridW}" height="${totalGridH}" fill="none" stroke="${palette.bold}" stroke-width="0.42"/>`
+      );
+
+      // ヘッダー（年・組・番・なまえ）HTML
+      const headerHtml = state.showHeader
+        ? `<div style="height:${headerH}mm; color:${palette.text}; border-bottom: 0.35mm solid ${palette.main};" class="w-full flex items-end justify-between pb-1.5 mb-2 shrink-0">
+            <div class="font-black text-[13pt] tracking-tight truncate pr-2">${escapeHtml(state.sheetTitle)}</div>
+            <div class="text-[10.5pt] font-bold whitespace-nowrap tracking-wider">
+                年  組  番 なまえ（          ）
+            </div>
+          </div>`
+        : '';
+
+      // 下部 5cm実寸確認スケール SVG
+      const footerHtml = state.showScale
+        ? `<div style="height:${footerH}mm; color:${palette.text};" class="w-full flex items-end justify-between pt-1 shrink-0 text-[7.5pt] font-bold">
+            <span>※印刷時は倍率「100%（実際のサイズ）」で実寸通りになります</span>
+            <svg width="56mm" height="5.5mm" viewBox="0 0 56 5.5" shape-rendering="crispEdges">
+              <line x1="1" y1="4" x2="51" y2="4" stroke="${palette.bold}" stroke-width="0.3"/>
+              <line x1="1" y1="1.5" x2="1" y2="4" stroke="${palette.bold}" stroke-width="0.3"/>
+              <line x1="11" y1="2.5" x2="11" y2="4" stroke="${palette.bold}" stroke-width="0.25"/>
+              <line x1="21" y1="2.5" x2="21" y2="4" stroke="${palette.bold}" stroke-width="0.25"/>
+              <line x1="31" y1="2.5" x2="31" y2="4" stroke="${palette.bold}" stroke-width="0.25"/>
+              <line x1="41" y1="2.5" x2="41" y2="4" stroke="${palette.bold}" stroke-width="0.25"/>
+              <line x1="51" y1="1.5" x2="51" y2="4" stroke="${palette.bold}" stroke-width="0.3"/>
+              <text x="1" y="3" font-size="2.2" fill="${palette.text}" font-family="sans-serif">0</text>
+              <text x="45" y="3" font-size="2.2" fill="${palette.text}" font-family="sans-serif">5cm</text>
+            </svg>
+          </div>`
+        : '';
+
+      const sheet = document.getElementById('paperSheet');
+      sheet.style.width = `${paperW}mm`;
+      sheet.style.height = `${paperH}mm`;
+      sheet.style.padding = `${margin}mm`;
+
+      sheet.innerHTML = `
+        ${headerHtml}
+        <div class="flex-1 flex items-center justify-center overflow-hidden">
+          <svg width="${totalGridW}mm" height="${totalGridH}mm" viewBox="0 0 ${totalGridW} ${totalGridH}" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+            ${svgParts.join('')}
+          </svg>
+        </div>
+        ${footerHtml}
+      `;
+
+      applyPreviewScale();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // ==========================================
+    // 5. UIイベント・プリセット連動
+    // ==========================================
+    function syncUiButtons() {
+      // 用紙ボタン
+      document.querySelectorAll('.paper-btn').forEach(btn => {
+        if (btn.dataset.paper === state.paper) {
+          btn.className = 'paper-btn py-2 rounded-xl bg-emerald-600 text-white font-mono-tech font-black text-xs shadow-2xs transition';
+        } else {
+          btn.className = 'paper-btn py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-mono-tech font-black text-xs transition';
+        }
+      });
+
+      // 向きボタン
+      const pBtn = document.getElementById('orientPortraitBtn');
+      const lBtn = document.getElementById('orientLandscapeBtn');
+      if (state.orientation === 'portrait') {
+        pBtn.className = 'flex-1 py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+        lBtn.className = 'flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+      } else {
+        lBtn.className = 'flex-1 py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+        pBtn.className = 'flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+      }
+
+      // mm / マス数 タブ
+      const mmBtn = document.getElementById('modeMmBtn');
+      const cntBtn = document.getElementById('modeCountBtn');
+      if (state.sizeMode === 'mm') {
+        mmBtn.className = 'py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+        cntBtn.className = 'py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+        document.getElementById('mmControlPanel').classList.remove('hidden');
+        document.getElementById('countControlPanel').classList.add('hidden');
+      } else {
+        cntBtn.className = 'py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+        mmBtn.className = 'py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+        document.getElementById('countControlPanel').classList.remove('hidden');
+        document.getElementById('mmControlPanel').classList.add('hidden');
+      }
+
+      // mmチップ
+      document.querySelectorAll('.mm-chip').forEach(chip => {
+        if (parseFloat(chip.dataset.mm) === state.cellMm) {
+          chip.className = 'mm-chip px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 ring-2 ring-emerald-400 font-mono-tech font-black text-xs';
+        } else {
+          chip.className = 'mm-chip px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono-tech font-bold text-xs';
+        }
+      });
+
+      // カラーボタン
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        const c = btn.dataset.color;
+        if (c === state.color) {
+          const activeStyles = {
+            black: 'border-2 border-slate-800 bg-slate-800 text-white',
+            blue: 'border-2 border-sky-600 bg-sky-600 text-white',
+            green: 'border-2 border-emerald-600 bg-emerald-600 text-white'
+          };
+          btn.className = `color-btn py-2 rounded-xl ${activeStyles[c]} font-black text-xs transition flex items-center justify-center gap-1`;
+        } else {
+          const idleText = { black: 'text-slate-700', blue: 'text-sky-700', green: 'text-emerald-700' };
+          btn.className = `color-btn py-2 rounded-xl border border-slate-200 bg-white ${idleText[c]} font-black text-xs transition flex items-center justify-center gap-1`;
+        }
+      });
+
+      // フォーム要素の値同期
+      document.getElementById('cellSizeMmInput').value = state.cellMm;
+      document.getElementById('colsCountInput').value = state.colsCount;
+      document.getElementById('rowsCountInput').value = state.rowsCount;
+      document.getElementById('layoutTypeSelect').value = state.layoutType;
+      document.getElementById('crossLeaderCheck').checked = state.crossLeader;
+      document.getElementById('boldEvery5Check').checked = state.boldEvery5;
+      document.getElementById('lineIntensitySelect').value = state.intensity;
+      document.getElementById('showHeaderCheck').checked = state.showHeader;
+      document.getElementById('sheetTitleInput').value = state.sheetTitle;
+      document.getElementById('showScaleCheck').checked = state.showScale;
+      document.getElementById('marginSelect').value = String(state.marginMm);
+    }
+
+    function applyPreset(presetName) {
+      if (presetName === 'grade1') {
+        Object.assign(state, {
+          paper: 'A4', orientation: 'portrait', sizeMode: 'mm', cellMm: 18,
+          layoutType: 'grid', crossLeader: true, boldEvery5: false,
+          color: 'green', intensity: 'normal', showHeader: true, sheetTitle: 'こくご れんしゅう', showScale: false
+        });
+      } else if (presetName === 'kanji2') {
+        Object.assign(state, {
+          paper: 'A4', orientation: 'portrait', sizeMode: 'mm', cellMm: 15,
+          layoutType: 'kanji_v', crossLeader: true, boldEvery5: false,
+          color: 'green', intensity: 'normal', showHeader: true, sheetTitle: 'かんじ れんしゅう', showScale: false
+        });
+      } else if (presetName === 'math5') {
+        Object.assign(state, {
+          paper: 'A4', orientation: 'portrait', sizeMode: 'mm', cellMm: 5,
+          layoutType: 'grid', crossLeader: false, boldEvery5: true,
+          color: 'blue', intensity: 'normal', showHeader: true, sheetTitle: 'さんすう ほうがん', showScale: true
+        });
+      } else if (presetName === 'craft10') {
+        Object.assign(state, {
+          paper: 'B4', orientation: 'landscape', sizeMode: 'mm', cellMm: 10,
+          layoutType: 'grid', crossLeader: false, boldEvery5: true,
+          color: 'black', intensity: 'normal', showHeader: true, sheetTitle: 'こうさく せっけいず（1マス 1cm）', showScale: true
+        });
+      } else if (presetName === 'sakubun') {
+        Object.assign(state, {
+          paper: 'A4', orientation: 'landscape', sizeMode: 'count', colsCount: 20, rowsCount: 20,
+          layoutType: 'kanji_v', crossLeader: false, boldEvery5: false,
+          color: 'green', intensity: 'normal', showHeader: true, sheetTitle: 'さくぶん ようし', showScale: false
+        });
+      }
+      syncUiButtons();
+      renderSheet();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+
+      // プリセットチップ
+      document.querySelectorAll('.preset-chip').forEach(btn => {
+        btn.onclick = () => applyPreset(btn.dataset.preset);
+      });
+
+      // 用紙サイズ
+      document.querySelectorAll('.paper-btn').forEach(btn => {
+        btn.onclick = () => {
+          state.paper = btn.dataset.paper;
+          syncUiButtons();
+          renderSheet();
+        };
+      });
+
+      // 向き・余白
+      document.getElementById('orientPortraitBtn').onclick = () => {
+        state.orientation = 'portrait';
+        syncUiButtons();
+        renderSheet();
+      };
+      document.getElementById('orientLandscapeBtn').onclick = () => {
+        state.orientation = 'landscape';
+        syncUiButtons();
+        renderSheet();
+      };
+      document.getElementById('marginSelect').onchange = (e) => {
+        state.marginMm = parseInt(e.target.value, 10);
+        renderSheet();
+      };
+
+      // 指定モード切替
+      document.getElementById('modeMmBtn').onclick = () => {
+        state.sizeMode = 'mm';
+        syncUiButtons();
+        renderSheet();
+      };
+      document.getElementById('modeCountBtn').onclick = () => {
+        state.sizeMode = 'count';
+        syncUiButtons();
+        renderSheet();
+      };
+
+      // mmチップ・自由入力
+      document.querySelectorAll('.mm-chip').forEach(chip => {
+        chip.onclick = () => {
+          state.cellMm = parseFloat(chip.dataset.mm);
+          syncUiButtons();
+          renderSheet();
+        };
+      });
+      document.getElementById('cellSizeMmInput').oninput = (e) => {
+        const val = parseFloat(e.target.value);
+        if (!isNaN(val) && val >= 3 && val <= 50) {
+          state.cellMm = val;
+          syncUiButtons();
+          renderSheet();
+        }
+      };
+
+      // マス数入力
+      document.getElementById('colsCountInput').oninput = (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (!isNaN(val) && val >= 1 && val <= 80) {
+          state.colsCount = val;
+          renderSheet();
+        }
+      };
+      document.getElementById('rowsCountInput').oninput = (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (!isNaN(val) && val >= 1 && val <= 100) {
+          state.rowsCount = val;
+          renderSheet();
+        }
+      };
+
+      // レイアウト・補助線
+      document.getElementById('layoutTypeSelect').onchange = (e) => {
+        state.layoutType = e.target.value;
+        renderSheet();
+      };
+      document.getElementById('crossLeaderCheck').onchange = (e) => {
+        state.crossLeader = e.target.checked;
+        renderSheet();
+      };
+      document.getElementById('boldEvery5Check').onchange = (e) => {
+        state.boldEvery5 = e.target.checked;
+        renderSheet();
+      };
+
+      // カラー・濃さ
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.onclick = () => {
+          state.color = btn.dataset.color;
+          syncUiButtons();
+          renderSheet();
+        };
+      });
+      document.getElementById('lineIntensitySelect').onchange = (e) => {
+        state.intensity = e.target.value;
+        renderSheet();
+      };
+
+      // ヘッダー・タイトル・スケール
+      document.getElementById('showHeaderCheck').onchange = (e) => {
+        state.showHeader = e.target.checked;
+        renderSheet();
+      };
+      document.getElementById('sheetTitleInput').oninput = (e) => {
+        state.sheetTitle = e.target.value;
+        renderSheet();
+      };
+      document.getElementById('showScaleCheck').onchange = (e) => {
+        state.showScale = e.target.checked;
+        renderSheet();
+      };
+
+      // ズーム切替
+      const zoomFitBtn = document.getElementById('zoomFitBtn');
+      const zoom100Btn = document.getElementById('zoom100Btn');
+      zoomFitBtn.onclick = () => {
+        state.zoomMode = 'fit';
+        zoomFitBtn.className = 'px-2.5 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+        zoom100Btn.className = 'px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+        applyPreviewScale();
+      };
+      zoom100Btn.onclick = () => {
+        state.zoomMode = '100';
+        zoom100Btn.className = 'px-2.5 py-0.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+        zoomFitBtn.className = 'px-2.5 py-0.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+        applyPreviewScale();
+      };
+
+      // 印刷ボタン
+      document.getElementById('headerPrintBtn').onclick = () => window.print();
+
+      window.addEventListener('resize', applyPreviewScale);
+
+      syncUiButtons();
+      renderSheet();
+    });
+  </script>
+</body>
+</html>
