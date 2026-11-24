@@ -1,8 +1,32 @@
+原因を確認したところ、iPadで動かなかった理由は大きく2つあった。
+
+1. **HTML5ドラッグ（`draggable="true"`）がiPadOS非対応**: iPadでは指でドラッグすると画面スクロール扱いになり、移動イベントが発生しない。
+2. **タップ入れ替えと名前編集の衝突**: 席の中央（名前部分）をタップすると「名前入力ダイアログ」が優先して開いてしまうため、2つの席をタップして入れ替える操作が途中で止まっていた。
+
+---
+
+### 修正したポイント（iPad・電子黒板・PC完全対応）
+
+* **指に吸い付くPointer Eventsドラッグ実装**: `touch-action: none` と座標追跡（`pointermove` + `elementFromPoint`）に書き換えたため、iPadの指でもApple PencilでもPCマウスでも、半透明のカードが指に追従してそのまま別の席へドロップできる。
+* **タップ入れ替えの完全動作 ＆ 名前編集ボタン分離**:
+* 席のカード本体をタップすると「1人目を選択 → 2人目をタップして入れ替え」が確実に動作する。
+* 名前の個別編集は、各席の右上にある「✏️（鉛筆ボタン）」からいつでも開けるように分離した。
+* 1人目を選択中は、グリッド上部に「入れ替え先の席をタップしてください」の案内バーを表示する。
+
+
+
+---
+
+### 席替えメーカー（iPad・タッチ操作完全対応版）
+
+既存の席替えメーカーのHTMLファイルにそのまま上書き貼り付けしてほしい。
+
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>スマート席替えメーカー</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,7 +41,16 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
-    body { font-family: 'M PLUS Rounded 1c', sans-serif; }
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* タッチ操作時のブラウザ標準スクロールや長押しメニューを抑制 */
+    .touch-seat {
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
     @media print {
       .no-print { display: none !important; }
       .print-area { width: 100% !important; margin: 0 !important; padding: 0 !important; border: none !important; box-shadow: none !important; }
@@ -41,7 +74,7 @@
         <div class="flex items-center gap-2">
           <span class="text-2xl">🪑</span>
           <h1 class="text-xl font-black text-slate-900 tracking-tight">スマート席替えメーカー</h1>
-          <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full">教員支援</span>
+          <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full">iPad・PC対応</span>
         </div>
       </div>
 
@@ -67,7 +100,7 @@
         <h2 class="text-sm sm:text-base font-extrabold text-slate-800 flex items-center gap-2">
           <span class="text-indigo-600">📖</span> かんたん使い方ガイド（3ステップ）
         </h2>
-        <span class="text-[11px] text-slate-500 hidden sm:inline">先生が決めた席を、子どもたちにはその場で抽選しているように見せられます</span>
+        <span class="text-[11px] text-slate-500 hidden sm:inline">iPadでも「指ドラッグ」または「2つの席をタップ」で簡単に入れ替えできます</span>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -81,8 +114,8 @@
         <div class="bg-emerald-50/70 border border-emerald-100 p-3 rounded-xl flex items-start gap-2.5">
           <span class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
           <div>
-            <h3 class="text-xs font-bold text-emerald-950">席に配置＆固定・Excel保存</h3>
-            <p class="text-[11px] text-emerald-800 mt-0.5 leading-relaxed">「座席に配置」を押して配慮席を固定。Excel出力や印刷で手元資料を保存できます。</p>
+            <h3 class="text-xs font-bold text-emerald-950">席に配置＆入れ替え・固定</h3>
+            <p class="text-[11px] text-emerald-800 mt-0.5 leading-relaxed">席をドラッグするか、入れ替えたい2つの席を順にタップして微調整。鍵ボタンで固定できます。</p>
           </div>
         </div>
         <div class="bg-purple-50/70 border border-purple-100 p-3 rounded-xl flex items-start gap-2.5">
@@ -124,7 +157,7 @@
                   <button id="clearInputBtn" class="text-[11px] text-slate-400 hover:text-rose-600">クリア</button>
                 </div>
               </div>
-              <textarea id="rosterInput" rows="5" class="w-full text-xs sm:text-sm p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none font-mono resize-none" placeholder="1 佐藤&#10;2 鈴木&#10;3 高橋...&#10;（Excelの名簿列をそのまま貼り付けできます）"></textarea>
+              <textarea id="rosterInput" rows="5" class="w-full text-xs sm:text-sm p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none font-mono resize-none select-text" placeholder="1 佐藤&#10;2 鈴木&#10;3 高橋...&#10;（Excelの名簿列をそのまま貼り付けできます）"></textarea>
             </div>
             <button id="commitRosterBtn" class="mt-2.5 w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-black text-xs sm:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2">
               <i data-lucide="arrow-right-circle" class="w-4 h-4"></i>
@@ -250,6 +283,12 @@
         <p class="text-xs text-slate-500 mt-1" id="printDateText"></p>
       </div>
 
+      <!-- タップ入れ替え選択中の案内バナー（iPad・タッチ操作用） -->
+      <div id="swapGuideBanner" class="no-print hidden w-full max-w-2xl mb-4 px-4 py-2.5 rounded-2xl bg-indigo-600 text-white text-xs sm:text-sm font-black flex items-center justify-between shadow-md">
+        <span id="swapGuideText">選択中：入れ替え先の席をタップしてください</span>
+        <button id="cancelSwapSelectBtn" class="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-xs font-bold">解除</button>
+      </div>
+
       <!-- 上側教卓 -->
       <div id="podiumTop" class="w-full flex justify-center mb-6 sm:mb-8 transition-all">
         <div class="bg-amber-100/80 border-2 border-amber-300 text-amber-900 font-black px-12 sm:px-20 py-2.5 rounded-2xl shadow-sm text-sm sm:text-base flex items-center gap-2">
@@ -285,11 +324,162 @@
       roster: [],
       seats: [],
       selectedSeatId: null,
-      draggedSeatId: null,
       animDuration: 4000,
       soundEnabled: true,
       isAnimating: false,
     };
+
+    // ==========================================
+    // Pointer Events による iPad・PC両対応ドラッグ管理
+    // ==========================================
+    const pointerDrag = {
+      active: false,
+      isDragging: false,
+      sourceSeatId: null,
+      hoverSeatId: null,
+      startX: 0,
+      startY: 0,
+      ghostEl: null,
+      sourceEl: null,
+      pointerId: null
+    };
+
+    function cleanupPointerDrag() {
+      if (pointerDrag.ghostEl) {
+        pointerDrag.ghostEl.remove();
+        pointerDrag.ghostEl = null;
+      }
+      if (pointerDrag.sourceEl) {
+        pointerDrag.sourceEl.classList.remove('opacity-40');
+        pointerDrag.sourceEl = null;
+      }
+      document.querySelectorAll('.seat-drop-hover').forEach(el => {
+        el.classList.remove('seat-drop-hover', 'border-emerald-500', 'ring-4', 'ring-emerald-200', 'bg-emerald-50');
+      });
+      pointerDrag.active = false;
+      pointerDrag.isDragging = false;
+      pointerDrag.sourceSeatId = null;
+      pointerDrag.hoverSeatId = null;
+      pointerDrag.pointerId = null;
+    }
+
+    function attachPointerInteraction(el, seat) {
+      el.classList.add('touch-seat', 'cursor-grab');
+
+      el.addEventListener('pointerdown', (e) => {
+        // ボタン（固定・通路・名前編集）のタップ時はドラッグ・選択を発動しない
+        if (e.target.closest('button')) return;
+        // マウスの右クリック等は無視
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+        pointerDrag.active = true;
+        pointerDrag.isDragging = false;
+        pointerDrag.sourceSeatId = seat.id;
+        pointerDrag.startX = e.clientX;
+        pointerDrag.startY = e.clientY;
+        pointerDrag.sourceEl = el;
+        pointerDrag.pointerId = e.pointerId;
+      });
+    }
+
+    window.addEventListener('pointermove', (e) => {
+      if (!pointerDrag.active || e.pointerId !== pointerDrag.pointerId) return;
+
+      const dx = e.clientX - pointerDrag.startX;
+      const dy = e.clientY - pointerDrag.startY;
+      const dist = Math.hypot(dx, dy);
+
+      // 8px以上動いたらドラッグ開始とみなす（それ未満の移動はタップ扱い）
+      if (!pointerDrag.isDragging && dist > 8) {
+        pointerDrag.isDragging = true;
+        state.selectedSeatId = null; // ドラッグ開始時はタップ選択を解除
+        updateSwapGuideBanner();
+
+        const seat = state.seats.find(s => s.id === pointerDrag.sourceSeatId);
+        const label = seat && seat.studentName ? seat.studentName : `座席 #${pointerDrag.sourceSeatId}`;
+
+        // 指に追従するフローティングカードを生成
+        const ghost = document.createElement('div');
+        ghost.className = 'fixed z-50 pointer-events-none px-5 py-3 rounded-2xl bg-indigo-600 text-white font-black text-sm sm:text-base shadow-2xl border-2 border-white transform -translate-x-1/2 -translate-y-1/2';
+        ghost.textContent = label;
+        document.body.appendChild(ghost);
+        pointerDrag.ghostEl = ghost;
+
+        if (pointerDrag.sourceEl) {
+          pointerDrag.sourceEl.classList.add('opacity-40');
+        }
+      }
+
+      if (pointerDrag.isDragging && pointerDrag.ghostEl) {
+        pointerDrag.ghostEl.style.left = `${e.clientX}px`;
+        pointerDrag.ghostEl.style.top = `${e.clientY}px`;
+
+        // 指の下にある座席カードを検出してハイライト
+        const underEl = document.elementFromPoint(e.clientX, e.clientY);
+        const targetSeatEl = underEl ? underEl.closest('[data-seat-card="true"]') : null;
+        const targetId = targetSeatEl ? parseInt(targetSeatEl.dataset.id, 10) : null;
+
+        if (pointerDrag.hoverSeatId !== targetId) {
+          document.querySelectorAll('.seat-drop-hover').forEach(el => {
+            el.classList.remove('seat-drop-hover', 'border-emerald-500', 'ring-4', 'ring-emerald-200', 'bg-emerald-50');
+          });
+          pointerDrag.hoverSeatId = targetId;
+
+          if (targetSeatEl && targetId && targetId !== pointerDrag.sourceSeatId) {
+            targetSeatEl.classList.add('seat-drop-hover', 'border-emerald-500', 'ring-4', 'ring-emerald-200', 'bg-emerald-50');
+          }
+        }
+      }
+    });
+
+    window.addEventListener('pointerup', (e) => {
+      if (!pointerDrag.active || e.pointerId !== pointerDrag.pointerId) return;
+
+      const sourceId = pointerDrag.sourceSeatId;
+      const wasDragging = pointerDrag.isDragging;
+      const dropTargetId = pointerDrag.hoverSeatId;
+
+      cleanupPointerDrag();
+
+      if (wasDragging) {
+        // ドラッグ完了：ドロップ先が別の有効な席なら入れ替え
+        if (dropTargetId && dropTargetId !== sourceId) {
+          swapSeats(sourceId, dropTargetId);
+        }
+      } else {
+        // タップ完了：選択・入れ替え処理
+        handleSeatTap(sourceId);
+      }
+    });
+
+    window.addEventListener('pointercancel', () => {
+      if (pointerDrag.active) cleanupPointerDrag();
+    });
+
+    function handleSeatTap(seatId) {
+      if (state.selectedSeatId === null) {
+        state.selectedSeatId = seatId;
+      } else if (state.selectedSeatId === seatId) {
+        state.selectedSeatId = null;
+      } else {
+        swapSeats(state.selectedSeatId, seatId);
+        state.selectedSeatId = null;
+      }
+      renderGrid();
+    }
+
+    function updateSwapGuideBanner() {
+      const banner = document.getElementById('swapGuideBanner');
+      const textEl = document.getElementById('swapGuideText');
+      if (state.mode !== 'teacher' || state.selectedSeatId === null) {
+        banner.classList.add('hidden');
+        return;
+      }
+      const seat = state.seats.find(s => s.id === state.selectedSeatId);
+      const nameLabel = seat && seat.studentName ? `「${seat.studentName}」の席` : `座席 #${state.selectedSeatId}`;
+      textEl.textContent = `${nameLabel}を選択中：入れ替え先の席をタップしてください`;
+      banner.classList.remove('hidden');
+    }
 
     // 名前文字数に応じた動的フォントサイズ調整
     function getDynamicNameSize(name) {
@@ -399,6 +589,7 @@
       state.rows = newRows;
       state.cols = newCols;
       state.seats = newSeats;
+      state.selectedSeatId = null;
       document.getElementById('rowsDisplay').textContent = newRows;
       document.getElementById('colsDisplay').textContent = newCols;
       renderGrid();
@@ -465,6 +656,7 @@
         seat.studentName = idx < assignNames.length ? assignNames[idx++] : '';
       });
 
+      state.selectedSeatId = null;
       renderGrid();
       saveToStorage();
       showToast(shuffle ? '座席にランダム配置しました！' : '座席に順番通り配置しました！');
@@ -482,6 +674,7 @@
         [names[i], names[j]] = [names[j], names[i]];
       }
       targets.forEach((seat, idx) => seat.studentName = names[idx]);
+      state.selectedSeatId = null;
       renderGrid();
       saveToStorage();
       showToast('固定席以外を再抽選しました！');
@@ -535,6 +728,8 @@
       document.getElementById('podiumTop').classList.toggle('hidden', state.podiumPos !== 'top');
       document.getElementById('podiumBottom').classList.toggle('hidden', state.podiumPos !== 'bottom');
 
+      updateSwapGuideBanner();
+
       state.seats.forEach(seat => {
         const el = document.createElement('div');
         el.dataset.id = seat.id;
@@ -551,38 +746,23 @@
         }
 
         const isSelected = state.selectedSeatId === seat.id;
+        el.dataset.seatCard = 'true';
         el.className = `seat-print relative aspect-[4/3] rounded-2xl p-2 sm:p-3 flex flex-col justify-between transition-all border-2 ${
-          isSelected ? 'border-indigo-600 ring-4 ring-indigo-200 bg-indigo-50 shadow-md' : 'border-slate-200 bg-white hover:border-slate-400 shadow-sm'
+          isSelected ? 'border-indigo-600 ring-4 ring-indigo-200 bg-indigo-50 shadow-md scale-[1.02]' : 'border-slate-200 bg-white hover:border-slate-400 shadow-sm'
         }`;
 
         if (state.mode === 'teacher') {
-          el.draggable = true;
-          el.ondragstart = (e) => { state.draggedSeatId = seat.id; e.dataTransfer.setData('text/plain', seat.id); el.classList.add('opacity-40'); };
-          el.ondragend = () => el.classList.remove('opacity-40');
-          el.ondragover = (e) => e.preventDefault();
-          el.ondrop = (e) => {
-            e.preventDefault();
-            if (state.draggedSeatId && state.draggedSeatId !== seat.id) swapSeats(state.draggedSeatId, seat.id);
-          };
-
-          el.onclick = (e) => {
-            if (e.target.closest('button')) return;
-            if (state.selectedSeatId === null) {
-              state.selectedSeatId = seat.id;
-            } else if (state.selectedSeatId === seat.id) {
-              state.selectedSeatId = null;
-            } else {
-              swapSeats(state.selectedSeatId, seat.id);
-              state.selectedSeatId = null;
-            }
-            renderGrid();
-          };
+          // iPad・PC両対応のタッチドラッグ＆タップ入れ替えを付与
+          attachPointerInteraction(el, seat);
 
           const header = document.createElement('div');
           header.className = 'no-print flex items-center justify-between text-slate-400 text-xs w-full';
           header.innerHTML = `
             <span class="text-[10px] font-bold text-slate-300">#${seat.id}</span>
-            <div class="flex items-center gap-1">
+            <div class="flex items-center gap-0.5 sm:gap-1">
+              <button class="edit-btn p-1 rounded hover:bg-slate-100 text-slate-300 hover:text-indigo-600" title="名前を直接入力・編集">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
               <button class="lock-btn p-1 rounded hover:bg-slate-100 ${seat.isLocked ? 'text-amber-500 font-bold' : 'text-slate-300'}" title="${seat.isLocked ? '固定解除' : '固定'}">
                 <i data-lucide="${seat.isLocked ? 'lock' : 'unlock'}" class="w-3.5 h-3.5"></i>
               </button>
@@ -591,17 +771,29 @@
               </button>
             </div>
           `;
-          header.querySelector('.lock-btn').onclick = (e) => { e.stopPropagation(); seat.isLocked = !seat.isLocked; renderGrid(); saveToStorage(); };
-          header.querySelector('.aisle-btn').onclick = (e) => { e.stopPropagation(); seat.isAisle = true; seat.studentName = ''; renderGrid(); saveToStorage(); };
-
-          const body = document.createElement('div');
-          body.className = 'my-auto text-center w-full';
-          body.innerHTML = `<div class="${getDynamicNameSize(seat.studentName)} text-slate-800 px-1 cursor-text leading-tight" title="クリックして編集">${seat.studentName || '<span class="text-slate-300 font-medium text-xs">（空席）</span>'}</div>`;
-          body.onclick = (e) => {
+          header.querySelector('.edit-btn').onclick = (e) => {
             e.stopPropagation();
             const n = prompt(`座席 #${seat.id} の名前を入力:`, seat.studentName);
             if (n !== null) { seat.studentName = n.trim(); renderGrid(); saveToStorage(); }
           };
+          header.querySelector('.lock-btn').onclick = (e) => {
+            e.stopPropagation();
+            seat.isLocked = !seat.isLocked;
+            renderGrid();
+            saveToStorage();
+          };
+          header.querySelector('.aisle-btn').onclick = (e) => {
+            e.stopPropagation();
+            if (state.selectedSeatId === seat.id) state.selectedSeatId = null;
+            seat.isAisle = true;
+            seat.studentName = '';
+            renderGrid();
+            saveToStorage();
+          };
+
+          const body = document.createElement('div');
+          body.className = 'my-auto text-center w-full pointer-events-none';
+          body.innerHTML = `<div class="${getDynamicNameSize(seat.studentName)} text-slate-800 px-1 leading-tight">${seat.studentName || '<span class="text-slate-300 font-medium text-xs">（空席）</span>'}</div>`;
 
           el.appendChild(header);
           el.appendChild(body);
@@ -704,12 +896,18 @@
 
       studentBtn.onclick = () => {
         state.mode = 'student';
+        state.selectedSeatId = null;
         studentBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1.5 bg-white text-purple-700 shadow-sm';
         teacherBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
         teacherPanel.classList.add('hidden');
         studentBar.classList.remove('hidden');
         guideSection.classList.add('hidden');
         state.seats.forEach(s => s.isRevealed = false);
+        renderGrid();
+      };
+
+      document.getElementById('cancelSwapSelectBtn').onclick = () => {
+        state.selectedSeatId = null;
         renderGrid();
       };
 
@@ -753,6 +951,7 @@
         if (confirm('すべての座席データ・名簿を初期状態に戻しますか？')) {
           localStorage.removeItem('sekigae_app_state');
           state.roster = [];
+          state.selectedSeatId = null;
           state.seats = generateSeats(state.rows, state.cols);
           document.getElementById('rosterInput').value = '';
           renderRosterTags();
@@ -796,3 +995,5 @@
   </script>
 </body>
 </html>
+
+```
