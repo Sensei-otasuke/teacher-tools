@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>スマートくじ引きメーカー | センセイボックス</title>
-  <meta name="description" content="教室の発表順決め・班決め・お楽しみ会を盛り上げる無料くじ引きアプリ。出席番号の一括生成、重複なしモード、ドラムロール＆シンバル演出に対応。">
-  <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/kuji/" />
+  <title>教室くじ引き＆グループ分けメーカー | センセイボックス</title>
+  <meta name="description" content="欠席者ワンタップ除外、複数人同時抽選、グループ自動分け、ドラムロール演出、テレビ投影専用「発表画面のみモード」を搭載した先生向け無料Webツール。">
   <link rel="icon" href="../logo.png" type="image/png">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,190 +14,343 @@
   <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Canvas Confetti (紙吹雪演出) -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
-    body { font-family: 'M PLUS Rounded 1c', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
-    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-mono-tech {
+      font-family: 'Chivo Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
     .tech-bg {
       background-image: radial-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px);
       background-size: 24px 24px;
     }
 
-    @keyframes winnerPop {
-      0% { transform: scale(0.6); opacity: 0; }
-      70% { transform: scale(1.08); }
+    @keyframes popIn {
+      0% { transform: scale(0.65); opacity: 0; }
+      70% { transform: scale(1.06); opacity: 1; }
       100% { transform: scale(1); opacity: 1; }
     }
-    .winner-pop {
-      animation: winnerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    .animate-pop-in {
+      animation: popIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
-    @keyframes rollingPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.03); }
+    /* 発表画面のみ（テレビ投影モード） */
+    body.presentation-mode header,
+    body.presentation-mode #settingsColumn {
+      display: none !important;
     }
-    .rolling-active {
-      animation: rollingPulse 0.15s infinite;
+    body.presentation-mode main {
+      max-width: 100% !important;
+      padding: 1.25rem !important;
+      display: flex !important;
+    }
+    body.presentation-mode #stageColumn {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    body.presentation-mode #stageCard {
+      min-height: calc(100vh - 2.5rem) !important;
+      border-width: 3px !important;
+    }
+    body.presentation-mode #presentationExitBar {
+      display: flex !important;
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-orange-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-white">
 
   <!-- ヘッダー -->
   <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      
+      <!-- 左：戻る ＆ タイトル -->
+      <div class="flex items-center gap-2.5">
         <a href="../" class="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition" title="ポータルへ戻る">
           <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </a>
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-orange-100 border border-orange-200 flex items-center justify-center text-xl">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-xl">
             🎯
           </div>
           <div>
             <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-              <span>スマートくじ引きメーカー</span>
-              <span class="hidden sm:inline text-[10px] font-mono-tech font-bold bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-full">ドラムロール演出付</span>
+              <span>教室くじ引きメーカー</span>
+              <span class="hidden md:inline text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">欠席除外・班分け・発表画面対応</span>
             </h1>
-            <p class="text-[10px] text-slate-400 font-bold hidden sm:block">発表順・班決め・お楽しみ会を盛り上げる抽選ツール</p>
           </div>
         </div>
       </div>
 
-      <!-- 右側コントロール（効果音ON/OFF・全画面） -->
-      <div class="flex items-center gap-2">
-        <button id="soundToggleBtn" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center gap-1.5">
-          <i data-lucide="volume-2" class="w-4 h-4 text-orange-600" id="soundIcon"></i>
-          <span id="soundLabel">効果音 ON</span>
+      <!-- 中央：モード切替（くじ引き / グループ分け） -->
+      <div class="inline-flex rounded-2xl bg-slate-100 p-1 border border-slate-200/80 shadow-inner">
+        <button id="modeLotteryBtn" class="px-3.5 sm:px-5 py-1.5 rounded-xl bg-white text-amber-700 font-black text-xs sm:text-sm shadow-xs transition flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>くじ引き・指名</span>
         </button>
-
-        <button id="fullscreenBtn" class="p-2 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="全画面表示">
-          <i data-lucide="maximize" class="w-4 h-4"></i>
+        <button id="modeGroupBtn" class="px-3.5 sm:px-5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 font-black text-xs sm:text-sm transition flex items-center gap-1.5">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>グループ（班）分け</span>
         </button>
       </div>
+
+      <!-- 右：参観日プライバシー・効果音・発表画面のみ -->
+      <div class="flex items-center gap-2">
+        <!-- 参観日プライバシーモード（名前を隠す） -->
+        <button id="privacyToggleBtn" class="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold transition flex items-center gap-1" title="名簿モード時、名前を隠して番号だけで表示します">
+          <i data-lucide="eye" id="privacyIcon" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span class="hidden sm:inline" id="privacyLabel">名前表示</span>
+        </button>
+
+        <!-- 効果音切替 -->
+        <button id="soundToggleBtn" class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-amber-600 transition" title="ドラムロール音 ON/OFF">
+          <i data-lucide="volume-2" id="soundIcon" class="w-4 h-4"></i>
+        </button>
+
+        <!-- 発表画面のみボタン -->
+        <button id="enterPresentationBtn" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-98 text-white font-black text-xs sm:text-sm shadow-xs transition flex items-center gap-1.5">
+          <i data-lucide="tv" class="w-4 h-4 text-amber-400"></i>
+          <span>発表画面のみ</span>
+        </button>
+      </div>
+
     </div>
   </header>
 
   <!-- メインエリア -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 tech-bg">
 
-    <!-- 左カラム：くじの中身設定 (4カラム) -->
-    <div class="lg:col-span-4 flex flex-col gap-4">
-      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col gap-4">
+    <!-- ========================================== -->
+    <!-- 左カラム：設定パネル（発表画面モード時は完全に隠れる） -->
+    <!-- ========================================== -->
+    <div id="settingsColumn" class="lg:col-span-5 flex flex-col gap-4">
+      
+      <!-- 1. メンバー・くじ内容の設定 -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
-            <i data-lucide="list-plus" class="w-4 h-4 text-orange-500"></i>
-            <span>くじの項目リスト</span>
+            <span class="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center font-mono-tech">1</span>
+            <span>対象メンバー・くじの内容</span>
           </h2>
-          <span id="remainingBadge" class="text-[11px] font-bold bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-0.5 rounded-full">
-            残り 30 件
-          </span>
         </div>
 
-        <!-- 出席番号 一括作成ショートカット -->
-        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-            <span>1〜</span>
-            <input id="numCountInput" type="number" min="2" max="200" value="30" class="w-14 p-1 text-center font-mono-tech font-black bg-white border border-slate-300 rounded-lg text-slate-900 focus:border-orange-500 focus:outline-none">
-            <span>番まで</span>
-          </div>
-          <button id="generateNumBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold text-xs rounded-xl transition">
-            数字を一括作成
-          </button>
+        <!-- 入力タイプ切替タブ -->
+        <div class="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-black">
+          <button data-source="number" class="source-tab py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs transition">出席番号</button>
+          <button data-source="roster" class="source-tab py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition">児童名簿</button>
+          <button data-source="custom" class="source-tab py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition">お題・係くじ</button>
         </div>
 
-        <!-- サンプルプリセット -->
-        <div class="flex flex-wrap gap-1.5">
-          <button data-preset="han" class="preset-chip text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-700 text-slate-600 transition">1〜6班</button>
-          <button data-preset="topic" class="preset-chip text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-700 text-slate-600 transition">スピーチお題</button>
-          <button data-preset="atari" class="preset-chip text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-700 text-slate-600 transition">あたり・はずれ</button>
-        </div>
-
-        <!-- テキスト入力エリア -->
-        <div class="relative">
-          <textarea id="itemsInput" rows="7" placeholder="1行に1つずつ、数字や名前・言葉を入力してください" class="w-full p-3 text-sm font-bold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-orange-500 focus:outline-none leading-relaxed resize-y select-text"></textarea>
-        </div>
-
-        <!-- 抽選ルール設定 -->
-        <div class="space-y-2.5 pt-1 border-t border-slate-100">
-          <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition">
-            <div>
-              <span class="text-xs font-black text-slate-800 block">一度出た項目を除外する</span>
-              <span class="text-[10px] text-slate-400 font-bold">発表順決め・全員当てる時はON</span>
+        <!-- A. 出席番号設定（欠席者ワンタップ除外） -->
+        <div id="sourceNumberPanel" class="space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <label class="text-xs font-bold text-slate-600">クラスの人数（1番〜）</label>
+            <div class="flex items-center gap-1.5">
+              <input id="maxNumberInput" type="number" min="2" max="60" value="32" class="w-20 p-1.5 text-center font-mono-tech font-black text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-amber-500 focus:outline-none">
+              <span class="text-xs font-bold text-slate-500">番まで</span>
             </div>
-            <input id="noRepeatCheck" type="checkbox" checked class="w-5 h-5 accent-orange-500 rounded cursor-pointer">
-          </label>
-
-          <div class="flex items-center justify-between p-2">
-            <div>
-              <span class="text-xs font-black text-slate-800 block">停止のタイミング</span>
-              <span class="text-[10px] text-slate-400 font-bold">自動停止（約2.5秒）か手動ストップ</span>
-            </div>
-            <select id="stopModeSelect" class="p-1.5 text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl focus:outline-none">
-              <option value="auto" selected>自動で止まる</option>
-              <option value="manual">ボタンで止める</option>
-            </select>
           </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[11px] font-bold text-slate-500">欠席者の番号を押すと除外できます（グレー＝お休み）</span>
+              <button id="clearAbsentBtn" class="text-[11px] font-bold text-amber-700 hover:underline">全員出席に戻す</button>
+            </div>
+            <div id="numberGrid" class="grid grid-cols-8 gap-1.5 max-h-44 overflow-y-auto p-1">
+              <!-- JSで1〜Nの番号タイルを生成 -->
+            </div>
+          </div>
+        </div>
+
+        <!-- B. 児童名簿設定（自動記憶・欠席除外対応） -->
+        <div id="sourceRosterPanel" class="hidden space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500">1行に1人ずつ入力（自動でブラウザに記憶されます）</span>
+            <button id="sampleRosterBtn" class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">見本を入れる</button>
+          </div>
+          <textarea id="rosterTextarea" rows="5" placeholder="例：&#10;あおき はると&#10;いとう めい&#10;うえだ れん" class="w-full p-3 text-xs font-bold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-amber-500 focus:outline-none leading-relaxed select-text"></textarea>
+          <div class="flex items-center justify-between text-[11px]">
+            <span id="rosterCountLabel" class="font-bold text-slate-500">登録人数：0人</span>
+            <button id="toggleRosterCheckListBtn" class="font-bold text-amber-700 hover:underline">欠席者チェックを開く ▼</button>
+          </div>
+          <div id="rosterAbsentCheckList" class="hidden max-h-32 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-wrap gap-1.5">
+            <!-- JSで名簿チェックボタン生成 -->
+          </div>
+        </div>
+
+        <!-- C. カスタムお題・係くじ -->
+        <div id="sourceCustomPanel" class="hidden space-y-2.5">
+          <div class="flex flex-wrap gap-1.5">
+            <button data-preset="reward" class="custom-preset-btn text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-lg">🎁 お楽しみくじ</button>
+            <button data-preset="seat" class="custom-preset-btn text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">🪑 席替え優先くじ</button>
+            <button data-preset="role" class="custom-preset-btn text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">🧹 今日のラッキー係</button>
+          </div>
+          <textarea id="customTextarea" rows="5" placeholder="くじの中身を1行ずつ入力してください" class="w-full p-3 text-xs font-bold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-amber-500 focus:outline-none leading-relaxed select-text"></textarea>
         </div>
       </div>
+
+      <!-- 2. 抽選ルール / グループ分けルール -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs space-y-3.5">
+        <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+          <span class="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center font-mono-tech">2</span>
+          <span id="ruleSectionTitle">引き方・演出の設定</span>
+        </h2>
+
+        <!-- くじ引きモード用ルール -->
+        <div id="lotteryRulesBox" class="space-y-3">
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">一度に引く人数</label>
+              <select id="drawCountSelect" class="w-full p-2 text-xs font-black bg-slate-50 border border-slate-200 rounded-xl focus:border-amber-500 focus:outline-none">
+                <option value="1" selected>1人ずつ引く</option>
+                <option value="2">2人同時に引く</option>
+                <option value="3">3人同時に引く</option>
+                <option value="4">4人同時に引く</option>
+                <option value="5">5人同時に引く</option>
+                <option value="6">6人同時に引く</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">発表の演出</label>
+              <select id="animationSpeedSelect" class="w-full p-2 text-xs font-black bg-slate-50 border border-slate-200 rounded-xl focus:border-amber-500 focus:outline-none">
+                <option value="dramatic" selected>ドラムロール（約2秒）</option>
+                <option value="quick">サクッと演出（約0.8秒）</option>
+                <option value="instant">演出なし（即表示）</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-1">
+            <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+              <input id="noRepeatCheck" type="checkbox" checked class="w-4 h-4 accent-amber-500 rounded">
+              <span>一度当たった人は除外する（重複なし）</span>
+            </label>
+            <button id="resetDrawnHistoryBtn" class="text-[11px] font-bold text-rose-500 hover:underline">履歴リセット</button>
+          </div>
+        </div>
+
+        <!-- グループ分けモード用ルール -->
+        <div id="groupRulesBox" class="hidden space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">いくつのグループ（班）に分けますか？</label>
+            <div class="grid grid-cols-4 gap-1.5">
+              <button data-gcount="2" class="gcount-btn py-2 rounded-xl bg-slate-100 text-slate-700 font-black text-xs transition">2班</button>
+              <button data-gcount="4" class="gcount-btn py-2 rounded-xl bg-slate-100 text-slate-700 font-black text-xs transition">4班</button>
+              <button data-gcount="6" class="gcount-btn py-2 rounded-xl bg-amber-100 text-amber-800 ring-2 ring-amber-400 font-black text-xs transition">6班</button>
+              <button data-gcount="8" class="gcount-btn py-2 rounded-xl bg-slate-100 text-slate-700 font-black text-xs transition">8班</button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold text-slate-600">または班の数を直接指定：</span>
+            <div class="flex items-center gap-1.5">
+              <input id="customGroupCountInput" type="number" min="2" max="20" value="6" class="w-16 p-1.5 text-center font-mono-tech font-black text-sm bg-slate-50 border border-slate-200 rounded-xl">
+              <span class="text-xs font-bold text-slate-500">グループ</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 当選済み履歴ミニボックス -->
+      <div id="historyCard" class="bg-white rounded-3xl border border-slate-200/90 p-4 shadow-xs">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-black text-slate-700">これまで当たった履歴（残り <span id="remainingPoolCount" class="text-amber-600 font-mono-tech">32</span> 件）</span>
+        </div>
+        <div id="drawnHistoryBadges" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto text-xs">
+          <span class="text-[11px] text-slate-400 font-bold">まだくじを引いていません</span>
+        </div>
+      </div>
+
     </div>
 
-    <!-- 中央カラム：巨大抽選ステージ (5カラム) -->
-    <div class="lg:col-span-5 flex flex-col gap-4">
-      <div class="bg-white rounded-3xl border-2 border-orange-200/90 p-6 sm:p-8 shadow-sm flex-1 flex flex-col items-center justify-between min-h-[440px] relative overflow-hidden">
+    <!-- ========================================== -->
+    <!-- 右カラム：発表ステージ（発表画面モード時は画面全体になる） -->
+    <!-- ========================================== -->
+    <div id="stageColumn" class="lg:col-span-7 flex flex-col">
+      <div id="stageCard" class="bg-white rounded-3xl border-2 border-slate-200/90 p-5 sm:p-8 shadow-sm flex-1 flex flex-col justify-between min-h-[540px] relative">
         
-        <!-- 上部ラベル -->
-        <div id="stageStatusTag" class="px-3.5 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-xs tracking-wider">
-          READY TO DRAW
-        </div>
-
-        <!-- メイン表示ボックス -->
-        <div id="rouletteBox" class="my-auto w-full py-10 px-4 rounded-3xl bg-gradient-to-b from-slate-50 to-orange-50/40 border border-slate-200/80 flex flex-col items-center justify-center text-center min-h-[220px]">
-          <div id="rouletteDisplay" class="text-5xl sm:text-7xl font-black text-slate-900 tracking-tight break-all leading-tight">
-            ？
+        <!-- 発表画面モード専用の最小限トップバー -->
+        <div id="presentationExitBar" class="hidden items-center justify-between pb-3 mb-2 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-black text-xs">📺 発表モード</span>
+            <span id="presentationRemainingText" class="text-xs font-bold text-slate-400">残り 32 件</span>
           </div>
-          <p id="rouletteSubText" class="text-xs font-bold text-slate-400 mt-3">
-            ボタンを押して抽選スタート！
-          </p>
-        </div>
-
-        <!-- 抽選アクションボタン -->
-        <div class="w-full space-y-2.5 pt-4">
-          <button id="drawBtn" class="w-full py-4 sm:py-5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-98 text-white font-black text-xl sm:text-2xl rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5">
-            <i data-lucide="sparkles" class="w-6 h-6" id="drawBtnIcon"></i>
-            <span id="drawBtnText">くじを引く！</span>
-          </button>
-
-          <p class="text-center text-[11px] font-bold text-slate-400 font-mono-tech">
-            [Space] キーでも操作できます
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- 右カラム：当選履歴 (3カラム) -->
-    <div class="lg:col-span-3 flex flex-col gap-4">
-      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex-1 flex flex-col justify-between min-h-[440px]">
-        <div>
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-            <h2 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
-              <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
-              <span>当選履歴</span>
-            </h2>
-            <button id="resetHistoryBtn" class="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition flex items-center gap-1">
-              <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-              <span>リセット</span>
+          <div class="flex items-center gap-2">
+            <button id="presPrivacyBtn" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+              名前表示切替
+            </button>
+            <button id="exitPresentationBtn" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-black text-xs transition flex items-center gap-1">
+              <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+              <span>設定に戻る</span>
             </button>
           </div>
+        </div>
 
-          <div id="historyList" class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-            <div id="historyEmpty" class="text-center text-slate-400 py-16 text-xs font-bold">
-              まだ抽選されていません
+        <!-- 上部：タイトル入力（テレビに大きく映る見出し） -->
+        <div class="flex items-center justify-between gap-2">
+          <input id="stageHeadingInput" type="text" value="ドキドキ！くじ引きタイム" class="w-full text-center text-lg sm:text-2xl font-black text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-200 focus:border-amber-500 focus:outline-none py-1 transition select-text">
+        </div>
+
+        <!-- 中央：くじ結果 ＆ グループ分け結果表示エリア -->
+        <div class="my-auto py-6 flex flex-col items-center justify-center w-full">
+          
+          <!-- A. くじ引き結果ステージ -->
+          <div id="lotteryResultStage" class="w-full flex flex-col items-center justify-center">
+            <div id="lotteryPlaceholder" class="text-center space-y-2 py-10">
+              <div class="text-6xl sm:text-7xl mb-3">🎲</div>
+              <p class="text-lg sm:text-2xl font-black text-slate-400">下のボタンを押してスタート！</p>
+            </div>
+
+            <!-- 1人抽選時の特大表示 -->
+            <div id="singleWinnerBox" class="hidden text-center w-full py-4">
+              <span id="winnerSubLabel" class="inline-block px-4 py-1 rounded-full bg-amber-100 text-amber-800 font-black text-xs sm:text-sm mb-3">
+                当選！
+              </span>
+              <div id="singleWinnerText" class="font-black text-slate-900 tracking-tight leading-tight text-6xl sm:text-8xl md:text-9xl break-words">
+                15番
+              </div>
+            </div>
+
+            <!-- 複数人同時抽選時のカードグリッド -->
+            <div id="multiWinnerGrid" class="hidden w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+              <!-- JSで当選カードを並べる -->
             </div>
           </div>
+
+          <!-- B. グループ（班）分け結果ステージ -->
+          <div id="groupResultStage" class="hidden w-full">
+            <div id="groupPlaceholder" class="text-center space-y-2 py-10">
+              <div class="text-6xl sm:text-7xl mb-3">👥</div>
+              <p class="text-lg sm:text-2xl font-black text-slate-400">「グループ分けを実行！」を押すと班が決まります</p>
+            </div>
+
+            <div id="groupCardsGrid" class="hidden w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+              <!-- JSで1班〜N班のカードを生成 -->
+            </div>
+          </div>
+
         </div>
+
+        <!-- 下部：メインアクションボタン -->
+        <div class="pt-3 flex flex-col items-center gap-2">
+          <div class="w-full max-w-xl flex items-center gap-3">
+            <button id="mainActionBtn" class="flex-1 py-4 sm:py-5 bg-amber-500 hover:bg-amber-600 active:scale-98 text-white font-black text-xl sm:text-2xl rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5">
+              <i data-lucide="sparkles" class="w-6 h-6"></i>
+              <span id="mainActionBtnText">くじを引く！</span>
+            </button>
+
+            <button id="stageResetBtn" class="py-4 sm:py-5 px-4 sm:px-6 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-600 font-black text-sm sm:text-base rounded-2xl border border-slate-200 transition" title="最初の状態に戻す">
+              リセット
+            </button>
+          </div>
+          <p class="text-[11px] font-bold text-slate-400 font-mono-tech">[Space] または [Enter] キーでも引けます</p>
+        </div>
+
       </div>
     </div>
 
@@ -206,37 +358,13 @@
 
   <script>
     // ==========================================
-    // 1. サウンドエンジン（../sound/ 優先 + Web Audio ドラムロール＆シンバル合成）
+    // 1. Web Audio API 効果音エンジン（ドラムロール ＆ ファンファーレ）
     // ==========================================
-    class LotteryAudio {
+    class LotterySoundEngine {
       constructor() {
-        this.enabled = true;
         this.ctx = null;
+        this.enabled = true;
         this.rollInterval = null;
-        this.drumAudio = null;
-        this.cymbalAudio = null;
-
-        this.tryLoadExternalAudio();
-      }
-
-      tryLoadExternalAudio() {
-        const drumPaths = ['../sound/drumroll.mp3', '../sound/drum.mp3'];
-        const cymbalPaths = ['../sound/cymbal.mp3', '../sound/jan.mp3', '../sound/roll_end.mp3'];
-
-        drumPaths.forEach(src => {
-          const a = new Audio(src);
-          a.loop = true;
-          a.addEventListener('canplaythrough', () => {
-            if (!this.drumAudio) this.drumAudio = a;
-          }, { once: true });
-        });
-
-        cymbalPaths.forEach(src => {
-          const a = new Audio(src);
-          a.addEventListener('canplaythrough', () => {
-            if (!this.cymbalAudio) this.cymbalAudio = a;
-          }, { once: true });
-        });
       }
 
       unlock() {
@@ -250,366 +378,569 @@
       }
 
       startDrumRoll() {
+        this.stopDrumRoll();
         if (!this.enabled) return;
         this.unlock();
-        this.stopDrumRoll();
-
-        if (this.drumAudio) {
-          this.drumAudio.currentTime = 0;
-          this.drumAudio.play().catch(() => {});
-          return;
-        }
 
         this.rollInterval = setInterval(() => {
-          if (!this.ctx) return;
           const now = this.ctx.currentTime;
-          const bufferSize = this.ctx.sampleRate * 0.045;
-          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) {
-            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
-          }
-
-          const noise = this.ctx.createBufferSource();
-          noise.buffer = buffer;
-
-          const filter = this.ctx.createBiquadFilter();
-          filter.type = 'bandpass';
-          filter.frequency.value = 950 + Math.random() * 250;
-          filter.Q.value = 1.2;
-
+          const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-          gain.gain.setValueAtTime(0.22, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.045);
-
-          noise.connect(filter);
-          filter.connect(gain);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(160 + Math.random() * 40, now);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+          osc.connect(gain);
           gain.connect(this.ctx.destination);
-          noise.start(now);
-        }, 42);
+          osc.start(now);
+          osc.stop(now + 0.055);
+        }, 65);
       }
 
       stopDrumRoll() {
-        if (this.drumAudio) {
-          this.drumAudio.pause();
-          this.drumAudio.currentTime = 0;
-        }
         if (this.rollInterval) {
           clearInterval(this.rollInterval);
           this.rollInterval = null;
         }
       }
 
-      playCymbal() {
+      playFanfare() {
         this.stopDrumRoll();
         if (!this.enabled) return;
         this.unlock();
 
-        if (this.cymbalAudio) {
-          this.cymbalAudio.currentTime = 0;
-          this.cymbalAudio.play().catch(() => {});
-          return;
-        }
-
         const now = this.ctx.currentTime;
-        const duration = 1.6;
-        const bufferSize = this.ctx.sampleRate * duration;
-        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.45));
-        }
-
-        const noise = this.ctx.createBufferSource();
-        noise.buffer = buffer;
-
-        const highpass = this.ctx.createBiquadFilter();
-        highpass.type = 'highpass';
-        highpass.frequency.value = 3200;
-
-        const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.45, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-        noise.connect(highpass);
-        highpass.connect(gain);
-        gain.connect(this.ctx.destination);
-        noise.start(now);
-
-        [523.25, 659.25, 783.99, 1046.50].forEach(freq => {
+        // ジャン！ジャジャン！（ド・ミ・ソ・高いド）
+        const notes = [
+          { freq: 523.25, time: 0.0, dur: 0.14 },
+          { freq: 659.25, time: 0.12, dur: 0.14 },
+          { freq: 783.99, time: 0.24, dur: 0.14 },
+          { freq: 1046.50, time: 0.36, dur: 0.65 }
+        ];
+        notes.forEach(n => {
           const osc = this.ctx.createOscillator();
-          const oGain = this.ctx.createGain();
+          const gain = this.ctx.createGain();
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, now);
-          oGain.gain.setValueAtTime(0.1, now);
-          oGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
-          osc.connect(oGain);
-          oGain.connect(this.ctx.destination);
-          osc.start(now);
-          osc.stop(now + 0.9);
+          osc.frequency.setValueAtTime(n.freq, now + n.time);
+          gain.gain.setValueAtTime(0.28, now + n.time);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + n.time + n.dur);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + n.time);
+          osc.stop(now + n.time + n.dur);
         });
       }
     }
 
-    const audio = new LotteryAudio();
+    const sound = new LotterySoundEngine();
 
     // ==========================================
-    // 2. くじ引きロジック ＆ 状態管理
+    // 2. 状態管理 ＆ ローカルストレージ記憶
     // ==========================================
-    const itemsInput = document.getElementById('itemsInput');
-    const noRepeatCheck = document.getElementById('noRepeatCheck');
-    const stopModeSelect = document.getElementById('stopModeSelect');
-    const remainingBadge = document.getElementById('remainingBadge');
-    const rouletteDisplay = document.getElementById('rouletteDisplay');
-    const rouletteSubText = document.getElementById('rouletteSubText');
-    const stageStatusTag = document.getElementById('stageStatusTag');
-    const drawBtn = document.getElementById('drawBtn');
-    const drawBtnText = document.getElementById('drawBtnText');
-    const historyList = document.getElementById('historyList');
-    const historyEmpty = document.getElementById('historyEmpty');
+    const ROSTER_STORAGE_KEY = 'senseibox_lottery_roster_v1';
+    const CUSTOM_STORAGE_KEY = 'senseibox_lottery_custom_v1';
 
-    let drawnHistory = [];
-    let isRolling = false;
-    let rollTimer = null;
-    let autoStopTimeout = null;
+    let appMode = 'lottery'; // 'lottery' | 'group'
+    let sourceType = 'number'; // 'number' | 'roster' | 'custom'
+    let isPrivacyMode = false; // true = 名簿でも番号表示にする
+    let isSpinning = false;
 
-    function setNumberItems(count) {
-      const arr = [];
-      for (let i = 1; i <= count; i++) arr.push(String(i));
-      itemsInput.value = arr.join('\n');
-      resetHistory();
-    }
+    let absentNumbers = new Set(); // 出席番号の欠席者 Set<number>
+    let absentRosterIndices = new Set(); // 名簿の欠席者 Set<number>
+    let drawnIds = new Set(); // 当選済みID Set<string>
 
-    function getAvailableCandidates() {
-      const allItems = itemsInput.value
-        .split('\n')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
+    const CUSTOM_PRESETS = {
+      reward: "給食おかわり優先券\n席替えリクエスト権\n好きなBGMリクエスト権\n先生とじゃんけん勝負\n宿題1つパス券\n今日のリーダー任命",
+      seat: "1番目に席を選べる権\n2番目に席を選べる権\n3番目に席を選べる権\n窓側の列から選べる権\n廊下側の列から選べる権\n一番後ろの列から選べる権",
+      role: "黒板消しマスター\n配りもの隊長\n号令リーダー\n電気・カーテン係\nパソコン準備係\n整列チェック係"
+    };
 
-      if (!noRepeatCheck.checked) {
-        return allItems;
+    // ==========================================
+    // 3. 候補プール生成ロジック
+    // ==========================================
+    function getAllActiveCandidates() {
+      if (sourceType === 'number') {
+        const max = Math.max(2, Math.min(60, parseInt(document.getElementById('maxNumberInput').value, 10) || 32));
+        const list = [];
+        for (let i = 1; i <= max; i++) {
+          if (!absentNumbers.has(i)) {
+            list.push({
+              id: `num_${i}`,
+              display: `${i}番`,
+              privateDisplay: `${i}番`
+            });
+          }
+        }
+        return list;
       }
 
-      const usedCounts = {};
-      drawnHistory.forEach(item => {
-        usedCounts[item] = (usedCounts[item] || 0) + 1;
-      });
+      if (sourceType === 'roster') {
+        const lines = document.getElementById('rosterTextarea').value
+          .split('\n')
+          .map(s => s.trim())
+          .filter(Boolean);
+        const list = [];
+        lines.forEach((name, idx) => {
+          if (!absentRosterIndices.has(idx)) {
+            list.push({
+              id: `ros_${idx}_${name}`,
+              display: name,
+              privateDisplay: `${idx + 1}番`
+            });
+          }
+        });
+        return list;
+      }
 
-      const available = [];
-      allItems.forEach(item => {
-        if (usedCounts[item] > 0) {
-          usedCounts[item]--;
-        } else {
-          available.push(item);
-        }
-      });
-      return available;
+      // custom
+      const lines = document.getElementById('customTextarea').value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean);
+      return lines.map((item, idx) => ({
+        id: `cus_${idx}_${item}`,
+        display: item,
+        privateDisplay: item
+      }));
     }
 
-    function updateRemainingCount() {
-      const candidates = getAvailableCandidates();
-      remainingBadge.textContent = `残り ${candidates.length} 件`;
+    function getAvailableLotteryPool() {
+      const all = getAllActiveCandidates();
+      const noRepeat = document.getElementById('noRepeatCheck').checked;
+      if (!noRepeat) return all;
+      return all.filter(item => !drawnIds.has(item.id));
     }
 
-    function startLottery() {
-      const candidates = getAvailableCandidates();
-      if (candidates.length === 0) {
-        alert('抽選できる項目が残っていません！\n「リセット」を押すか、項目を追加してください。');
+    function formatCandidateText(item) {
+      return isPrivacyMode ? item.privateDisplay : item.display;
+    }
+
+    function updateRemainingCounts() {
+      const pool = getAvailableLotteryPool();
+      document.getElementById('remainingPoolCount').textContent = pool.length;
+      document.getElementById('presentationRemainingText').textContent = `残り ${pool.length} 件`;
+    }
+
+    // ==========================================
+    // 4. 出席番号タイル ＆ 名簿欠席チェック描画
+    // ==========================================
+    function renderNumberGrid() {
+      const max = Math.max(2, Math.min(60, parseInt(document.getElementById('maxNumberInput').value, 10) || 32));
+      const grid = document.getElementById('numberGrid');
+      grid.innerHTML = '';
+
+      for (let i = 1; i <= max; i++) {
+        const isAbsent = absentNumbers.has(i);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = i;
+        btn.className = isAbsent
+          ? 'py-1.5 rounded-lg bg-slate-200 text-slate-400 line-through font-mono-tech font-bold text-xs transition'
+          : 'py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-mono-tech font-black text-xs transition';
+        btn.onclick = () => {
+          if (absentNumbers.has(i)) absentNumbers.delete(i);
+          else absentNumbers.add(i);
+          renderNumberGrid();
+          updateRemainingCounts();
+        };
+        grid.appendChild(btn);
+      }
+      updateRemainingCounts();
+    }
+
+    function renderRosterCheckList() {
+      const lines = document.getElementById('rosterTextarea').value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean);
+      document.getElementById('rosterCountLabel').textContent = `登録人数：${lines.length}人（欠席 ${absentRosterIndices.size}人）`;
+
+      const container = document.getElementById('rosterAbsentCheckList');
+      container.innerHTML = '';
+      lines.forEach((name, idx) => {
+        const isAbsent = absentRosterIndices.has(idx);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = `${idx + 1}.${name}`;
+        btn.className = isAbsent
+          ? 'px-2 py-1 rounded-lg bg-slate-200 text-slate-400 line-through text-[11px] font-bold'
+          : 'px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-[11px] font-bold hover:border-amber-400';
+        btn.onclick = () => {
+          if (absentRosterIndices.has(idx)) absentRosterIndices.delete(idx);
+          else absentRosterIndices.add(idx);
+          renderRosterCheckList();
+          updateRemainingCounts();
+        };
+        container.appendChild(btn);
+      });
+      updateRemainingCounts();
+    }
+
+    // ==========================================
+    // 5. 抽選実行（ドラムロール演出 ＆ 複数人同時選出）
+    // ==========================================
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function runLottery() {
+      if (isSpinning) return;
+      const pool = getAvailableLotteryPool();
+      if (pool.length === 0) {
+        alert('くじの候補が0件です。「履歴リセット」を押すか、欠席設定を確認してください。');
         return;
       }
 
-      isRolling = true;
-      audio.startDrumRoll();
+      const drawCount = Math.min(pool.length, parseInt(document.getElementById('drawCountSelect').value, 10) || 1);
+      const speedMode = document.getElementById('animationSpeedSelect').value;
 
-      stageStatusTag.textContent = 'DRAWING...';
-      stageStatusTag.className = 'px-3.5 py-1 rounded-full bg-orange-100 text-orange-700 font-black text-xs tracking-wider animate-pulse';
-      rouletteDisplay.classList.remove('winner-pop', 'text-orange-600');
-      rouletteDisplay.classList.add('rolling-active', 'text-slate-800');
-      rouletteSubText.textContent = 'ドキドキ…';
+      const winners = shuffleArray(pool).slice(0, drawCount);
 
-      if (stopModeSelect.value === 'manual') {
-        drawBtnText.textContent = 'ストップ！';
-        drawBtn.className = 'w-full py-4 sm:py-5 bg-rose-600 hover:bg-rose-700 active:scale-98 text-white font-black text-xl sm:text-2xl rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5';
-      } else {
-        drawBtnText.textContent = '抽選中...';
-        drawBtn.disabled = true;
-        drawBtn.classList.add('opacity-80');
+      const placeholder = document.getElementById('lotteryPlaceholder');
+      const singleBox = document.getElementById('singleWinnerBox');
+      const singleText = document.getElementById('singleWinnerText');
+      const winnerSubLabel = document.getElementById('winnerSubLabel');
+      const multiGrid = document.getElementById('multiWinnerGrid');
+
+      placeholder.classList.add('hidden');
+
+      const finishDraw = () => {
+        isSpinning = false;
+        sound.playFanfare();
+
+        winners.forEach(w => drawnIds.add(w.id));
+        renderDrawnHistory();
+        updateRemainingCounts();
+
+        if (drawCount === 1) {
+          multiGrid.classList.add('hidden');
+          singleBox.classList.remove('hidden');
+          winnerSubLabel.textContent = '🎉 当選！';
+          singleText.textContent = formatCandidateText(winners[0]);
+          singleText.classList.remove('animate-pop-in');
+          void singleText.offsetWidth;
+          singleText.classList.add('animate-pop-in');
+        } else {
+          singleBox.classList.add('hidden');
+          multiGrid.classList.remove('hidden');
+          multiGrid.innerHTML = '';
+          winners.forEach((w, idx) => {
+            const card = document.createElement('div');
+            card.className = 'p-5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-center shadow-xs animate-pop-in';
+            card.innerHTML = `
+              <span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-mono-tech font-black text-xs mb-2">${idx + 1}人目</span>
+              <div class="text-2xl sm:text-4xl font-black text-slate-900 break-words">${escapeHtml(formatCandidateText(w))}</div>
+            `;
+            multiGrid.appendChild(card);
+          });
+        }
+      };
+
+      if (speedMode === 'instant') {
+        finishDraw();
+        return;
       }
 
-      const maxLen = Math.max(...candidates.map(c => c.length));
-      if (maxLen >= 8) {
-        rouletteDisplay.className = 'text-3xl sm:text-5xl font-black text-slate-800 tracking-tight break-all leading-tight rolling-active';
-      } else {
-        rouletteDisplay.className = 'text-5xl sm:text-7xl font-black text-slate-800 tracking-tight break-all leading-tight rolling-active';
-      }
+      // スロット回転演出
+      isSpinning = true;
+      sound.startDrumRoll();
+      multiGrid.classList.add('hidden');
+      singleBox.classList.remove('hidden');
+      winnerSubLabel.textContent = '抽選中...';
 
-      rollTimer = setInterval(() => {
-        const randItem = candidates[Math.floor(Math.random() * candidates.length)];
-        rouletteDisplay.textContent = randItem;
-      }, 55);
+      const duration = speedMode === 'quick' ? 800 : 1900;
+      const spinTimer = setInterval(() => {
+        const randItem = pool[Math.floor(Math.random() * pool.length)];
+        singleText.textContent = formatCandidateText(randItem);
+      }, 60);
 
-      if (stopModeSelect.value === 'auto') {
-        autoStopTimeout = setTimeout(() => {
-          stopLottery();
-        }, 2400);
-      }
+      setTimeout(() => {
+        clearInterval(spinTimer);
+        finishDraw();
+      }, duration);
     }
 
-    function stopLottery() {
-      if (!isRolling) return;
-      isRolling = false;
-      clearInterval(rollTimer);
-      clearTimeout(autoStopTimeout);
+    function renderDrawnHistory() {
+      const container = document.getElementById('drawnHistoryBadges');
+      if (drawnIds.size === 0) {
+        container.innerHTML = '<span class="text-[11px] text-slate-400 font-bold">まだくじを引いていません</span>';
+        return;
+      }
+      const allMap = new Map(getAllActiveCandidates().map(c => [c.id, c]));
+      container.innerHTML = '';
+      drawnIds.forEach(id => {
+        const item = allMap.get(id);
+        const label = item ? formatCandidateText(item) : id.replace(/^num_|^ros_\d+_|^cus_\d+_/, '');
+        const badge = document.createElement('span');
+        badge.className = 'px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold text-[11px]';
+        badge.textContent = label;
+        container.appendChild(badge);
+      });
+    }
 
-      const candidates = getAvailableCandidates();
-      const winner = candidates[Math.floor(Math.random() * candidates.length)];
-
-      audio.playCymbal();
-      if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 75,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
+    // ==========================================
+    // 6. グループ（班）自動分け実行
+    // ==========================================
+    function runGrouping() {
+      const candidates = getAllActiveCandidates();
+      if (candidates.length < 2) {
+        alert('グループ分けするには2人以上のメンバーが必要です。');
+        return;
       }
 
-      rouletteDisplay.classList.remove('rolling-active', 'text-slate-800');
-      rouletteDisplay.textContent = winner;
-      void rouletteDisplay.offsetWidth;
-      rouletteDisplay.classList.add('winner-pop', 'text-orange-600');
+      const groupCount = Math.max(2, Math.min(20, parseInt(document.getElementById('customGroupCountInput').value, 10) || 6));
+      const shuffled = shuffleArray(candidates);
+      const groups = Array.from({ length: groupCount }, () => []);
 
-      stageStatusTag.textContent = 'WINNER!';
-      stageStatusTag.className = 'px-3.5 py-1 rounded-full bg-amber-400 text-slate-950 font-black text-xs tracking-wider';
-      rouletteSubText.textContent = `${drawnHistory.length + 1}番目の当選！`;
+      shuffled.forEach((member, idx) => {
+        groups[idx % groupCount].push(member);
+      });
 
-      drawBtn.disabled = false;
-      drawBtn.className = 'w-full py-4 sm:py-5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-98 text-white font-black text-xl sm:text-2xl rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5';
-      drawBtnText.textContent = '次のくじを引く！';
+      sound.playFanfare();
 
-      drawnHistory.push(winner);
-      addHistoryCard(drawnHistory.length, winner);
-      updateRemainingCount();
+      document.getElementById('groupPlaceholder').classList.add('hidden');
+      const grid = document.getElementById('groupCardsGrid');
+      grid.classList.remove('hidden');
+      grid.innerHTML = '';
+
+      const colors = [
+        'border-rose-300 bg-rose-50/60',
+        'border-sky-300 bg-sky-50/60',
+        'border-emerald-300 bg-emerald-50/60',
+        'border-amber-300 bg-amber-50/60',
+        'border-violet-300 bg-violet-50/60',
+        'border-pink-300 bg-pink-50/60'
+      ];
+      const badgeColors = [
+        'bg-rose-500',
+        'bg-sky-600',
+        'bg-emerald-600',
+        'bg-amber-500',
+        'bg-violet-600',
+        'bg-pink-500'
+      ];
+
+      groups.forEach((members, gIdx) => {
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-2xl border-2 ${colors[gIdx % colors.length]} shadow-2xs animate-pop-in`;
+        const memberHtml = members
+          .map(m => `<span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200/80 font-black text-sm sm:text-base text-slate-800 shadow-2xs">${escapeHtml(formatCandidateText(m))}</span>`)
+          .join('');
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="px-3 py-0.5 rounded-full ${badgeColors[gIdx % badgeColors.length]} text-white font-black text-xs sm:text-sm">${gIdx + 1}班（グループ）</span>
+            <span class="text-xs font-bold text-slate-500">${members.length}人</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            ${memberHtml}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
     }
 
-    function addHistoryCard(order, text) {
-      historyEmpty.classList.add('hidden');
-      const card = document.createElement('div');
-      card.className = 'flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 winner-pop';
-      card.innerHTML = `
-        <div class="flex items-center gap-2.5 min-w-0">
-          <span class="w-6 h-6 rounded-lg bg-orange-500 text-white font-mono-tech font-black text-xs flex items-center justify-center shrink-0">${order}</span>
-          <span class="text-sm font-black text-slate-800 truncate">${escapeHtml(text)}</span>
-        </div>
-      `;
-      historyList.prepend(card);
-    }
-
-    function resetHistory() {
-      if (isRolling) {
-        isRolling = false;
-        clearInterval(rollTimer);
-        clearTimeout(autoStopTimeout);
-        audio.stopDrumRoll();
-      }
-      drawnHistory = [];
-      historyList.innerHTML = '';
-      historyList.appendChild(historyEmpty);
-      historyEmpty.classList.remove('hidden');
-
-      rouletteDisplay.className = 'text-5xl sm:text-7xl font-black text-slate-900 tracking-tight break-all leading-tight';
-      rouletteDisplay.textContent = '？';
-      stageStatusTag.textContent = 'READY TO DRAW';
-      stageStatusTag.className = 'px-3.5 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-xs tracking-wider';
-      rouletteSubText.textContent = 'ボタンを押して抽選スタート！';
-      drawBtn.disabled = false;
-      drawBtnText.textContent = 'くじを引く！';
-      drawBtn.className = 'w-full py-4 sm:py-5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-98 text-white font-black text-xl sm:text-2xl rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5';
-
-      updateRemainingCount();
-    }
-
+    // ==========================================
+    // 7. UIイベント・モード切替・発表画面モード
+    // ==========================================
     function escapeHtml(str) {
       return str.replace(/[&<>"']/g, m => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       }[m]));
     }
 
-    // ==========================================
-    // 3. イベントリスナー設定
-    // ==========================================
+    function switchAppMode(newMode) {
+      appMode = newMode;
+      const modeLotteryBtn = document.getElementById('modeLotteryBtn');
+      const modeGroupBtn = document.getElementById('modeGroupBtn');
+
+      if (appMode === 'lottery') {
+        modeLotteryBtn.className = 'px-3.5 sm:px-5 py-1.5 rounded-xl bg-white text-amber-700 font-black text-xs sm:text-sm shadow-xs transition flex items-center gap-1.5';
+        modeGroupBtn.className = 'px-3.5 sm:px-5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 font-black text-xs sm:text-sm transition flex items-center gap-1.5';
+
+        document.getElementById('lotteryRulesBox').classList.remove('hidden');
+        document.getElementById('groupRulesBox').classList.add('hidden');
+        document.getElementById('historyCard').classList.remove('hidden');
+        document.getElementById('lotteryResultStage').classList.remove('hidden');
+        document.getElementById('groupResultStage').classList.add('hidden');
+        document.getElementById('ruleSectionTitle').textContent = '引き方・演出の設定';
+        document.getElementById('stageHeadingInput').value = 'ドキドキ！くじ引きタイム';
+        document.getElementById('mainActionBtnText').textContent = 'くじを引く！';
+      } else {
+        modeGroupBtn.className = 'px-3.5 sm:px-5 py-1.5 rounded-xl bg-white text-emerald-700 font-black text-xs sm:text-sm shadow-xs transition flex items-center gap-1.5';
+        modeLotteryBtn.className = 'px-3.5 sm:px-5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 font-black text-xs sm:text-sm transition flex items-center gap-1.5';
+
+        document.getElementById('groupRulesBox').classList.remove('hidden');
+        document.getElementById('lotteryRulesBox').classList.add('hidden');
+        document.getElementById('historyCard').classList.add('hidden');
+        document.getElementById('groupResultStage').classList.remove('hidden');
+        document.getElementById('lotteryResultStage').classList.add('hidden');
+        document.getElementById('ruleSectionTitle').textContent = 'グループ分けの設定';
+        document.getElementById('stageHeadingInput').value = 'グループ（班）発表！';
+        document.getElementById('mainActionBtnText').textContent = 'グループ分けを実行！';
+      }
+    }
+
+    function togglePrivacyMode() {
+      isPrivacyMode = !isPrivacyMode;
+      const label = document.getElementById('privacyLabel');
+      const icon = document.getElementById('privacyIcon');
+      const btn = document.getElementById('privacyToggleBtn');
+
+      if (isPrivacyMode) {
+        label.textContent = '番号のみ（隠す）';
+        icon.setAttribute('data-lucide', 'eye-off');
+        btn.className = 'px-2.5 py-1.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 text-xs font-black transition flex items-center gap-1';
+      } else {
+        label.textContent = '名前表示';
+        icon.setAttribute('data-lucide', 'eye');
+        btn.className = 'px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold transition flex items-center gap-1';
+      }
+      lucide.createIcons();
+      renderDrawnHistory();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      setNumberItems(30);
       lucide.createIcons();
 
-      drawBtn.onclick = () => {
-        if (isRolling) {
-          if (stopModeSelect.value === 'manual') stopLottery();
-        } else {
-          startLottery();
-        }
-      };
+      // 保存済み名簿・カスタムくじの復元
+      const savedRoster = localStorage.getItem(ROSTER_STORAGE_KEY);
+      if (savedRoster) document.getElementById('rosterTextarea').value = savedRoster;
+      const savedCustom = localStorage.getItem(CUSTOM_STORAGE_KEY);
+      document.getElementById('customTextarea').value = savedCustom || CUSTOM_PRESETS.reward;
 
-      window.addEventListener('keydown', (e) => {
-        if (document.activeElement === itemsInput || document.activeElement.tagName === 'INPUT') return;
-        if (e.code === 'Space') {
-          e.preventDefault();
-          if (isRolling) {
-            if (stopModeSelect.value === 'manual') stopLottery();
-          } else {
-            startLottery();
-          }
-        }
-      });
+      renderNumberGrid();
+      renderRosterCheckList();
 
-      document.getElementById('generateNumBtn').onclick = () => {
-        const num = Math.max(2, Math.min(200, parseInt(document.getElementById('numCountInput').value, 10) || 30));
-        setNumberItems(num);
-      };
+      // モード切替
+      document.getElementById('modeLotteryBtn').onclick = () => switchAppMode('lottery');
+      document.getElementById('modeGroupBtn').onclick = () => switchAppMode('group');
 
-      document.querySelectorAll('.preset-chip').forEach(btn => {
-        btn.onclick = () => {
-          const type = btn.dataset.preset;
-          if (type === 'han') {
-            itemsInput.value = '1班\n2班\n3班\n4班\n5班\n6班';
-          } else if (type === 'topic') {
-            itemsInput.value = '好きな食べ物\n休日の過ごし方\n最近うれしかったこと\nおすすめの遊び\n将来の夢\n好きな教科';
-          } else if (type === 'atari') {
-            itemsInput.value = '大あたり！\nあたり\nはずれ\nはずれ\nはずれ';
-          }
-          resetHistory();
+      // 入力ソースタブ切替
+      document.querySelectorAll('.source-tab').forEach(tab => {
+        tab.onclick = () => {
+          sourceType = tab.dataset.source;
+          document.querySelectorAll('.source-tab').forEach(t => {
+            t.className = 'source-tab py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
+          });
+          tab.className = 'source-tab py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs transition';
+
+          document.getElementById('sourceNumberPanel').classList.toggle('hidden', sourceType !== 'number');
+          document.getElementById('sourceRosterPanel').classList.toggle('hidden', sourceType !== 'roster');
+          document.getElementById('sourceCustomPanel').classList.toggle('hidden', sourceType !== 'custom');
+          updateRemainingCounts();
         };
       });
 
-      itemsInput.addEventListener('input', updateRemainingCount);
-      noRepeatCheck.addEventListener('change', updateRemainingCount);
+      // 出席番号・欠席クリア
+      document.getElementById('maxNumberInput').onchange = () => {
+        absentNumbers.clear();
+        renderNumberGrid();
+      };
+      document.getElementById('clearAbsentBtn').onclick = () => {
+        absentNumbers.clear();
+        renderNumberGrid();
+      };
 
-      document.getElementById('resetHistoryBtn').onclick = resetHistory;
+      // 児童名簿入力・記憶
+      document.getElementById('rosterTextarea').addEventListener('input', (e) => {
+        localStorage.setItem(ROSTER_STORAGE_KEY, e.target.value);
+        absentRosterIndices.clear();
+        renderRosterCheckList();
+      });
+      document.getElementById('sampleRosterBtn').onclick = () => {
+        const sample = "あおき はると\nいとう めい\nうえだ れん\nえぐち ひなた\nおおた そうた\nかとう あおい\nきむら ゆうと\nくぼた さくら";
+        document.getElementById('rosterTextarea').value = sample;
+        localStorage.setItem(ROSTER_STORAGE_KEY, sample);
+        absentRosterIndices.clear();
+        renderRosterCheckList();
+      };
+      document.getElementById('toggleRosterCheckListBtn').onclick = () => {
+        document.getElementById('rosterAbsentCheckList').classList.toggle('hidden');
+      };
 
-      const soundBtn = document.getElementById('soundToggleBtn');
-      const soundLabel = document.getElementById('soundLabel');
-      const soundIcon = document.getElementById('soundIcon');
-      soundBtn.onclick = () => {
-        audio.enabled = !audio.enabled;
-        if (audio.enabled) {
-          soundLabel.textContent = '効果音 ON';
-          soundIcon.setAttribute('data-lucide', 'volume-2');
-          soundIcon.className = 'w-4 h-4 text-orange-600';
-        } else {
-          audio.stopDrumRoll();
-          soundLabel.textContent = '消音中';
-          soundIcon.setAttribute('data-lucide', 'volume-x');
-          soundIcon.className = 'w-4 h-4 text-slate-400';
-        }
+      // カスタムくじプリセット
+      document.querySelectorAll('.custom-preset-btn').forEach(btn => {
+        btn.onclick = () => {
+          const val = CUSTOM_PRESETS[btn.dataset.preset];
+          document.getElementById('customTextarea').value = val;
+          localStorage.setItem(CUSTOM_STORAGE_KEY, val);
+          updateRemainingCounts();
+        };
+      });
+      document.getElementById('customTextarea').addEventListener('input', (e) => {
+        localStorage.setItem(CUSTOM_STORAGE_KEY, e.target.value);
+        updateRemainingCounts();
+      });
+
+      // グループ数ボタン
+      document.querySelectorAll('.gcount-btn').forEach(btn => {
+        btn.onclick = () => {
+          document.getElementById('customGroupCountInput').value = btn.dataset.gcount;
+          document.querySelectorAll('.gcount-btn').forEach(b => {
+            b.className = 'gcount-btn py-2 rounded-xl bg-slate-100 text-slate-700 font-black text-xs transition';
+          });
+          btn.className = 'gcount-btn py-2 rounded-xl bg-amber-100 text-amber-800 ring-2 ring-amber-400 font-black text-xs transition';
+        };
+      });
+
+      // 発表画面のみ（テレビ投影モード）の出入り
+      document.getElementById('enterPresentationBtn').onclick = () => {
+        document.body.classList.add('presentation-mode');
+      };
+      document.getElementById('exitPresentationBtn').onclick = () => {
+        document.body.classList.remove('presentation-mode');
+      };
+      document.getElementById('presPrivacyBtn').onclick = togglePrivacyMode;
+
+      // プライバシー・効果音
+      document.getElementById('privacyToggleBtn').onclick = togglePrivacyMode;
+      document.getElementById('soundToggleBtn').onclick = () => {
+        sound.enabled = !sound.enabled;
+        const icon = document.getElementById('soundIcon');
+        icon.setAttribute('data-lucide', sound.enabled ? 'volume-2' : 'volume-x');
         lucide.createIcons();
       };
 
-      document.getElementById('fullscreenBtn').onclick = () => {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-          document.exitFullscreen().catch(() => {});
-        }
+      // メイン実行・リセット
+      document.getElementById('mainActionBtn').onclick = () => {
+        if (appMode === 'lottery') runLottery();
+        else runGrouping();
       };
+
+      document.getElementById('resetDrawnHistoryBtn').onclick = () => {
+        drawnIds.clear();
+        renderDrawnHistory();
+        updateRemainingCounts();
+      };
+
+      document.getElementById('stageResetBtn').onclick = () => {
+        drawnIds.clear();
+        renderDrawnHistory();
+        updateRemainingCounts();
+        document.getElementById('singleWinnerBox').classList.add('hidden');
+        document.getElementById('multiWinnerGrid').classList.add('hidden');
+        document.getElementById('lotteryPlaceholder').classList.remove('hidden');
+        document.getElementById('groupCardsGrid').classList.add('hidden');
+        document.getElementById('groupPlaceholder').classList.remove('hidden');
+      };
+
+      // キーボードショートカット
+      window.addEventListener('keydown', (e) => {
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT') return;
+        if (e.code === 'Space' || e.code === 'Enter') {
+          e.preventDefault();
+          if (appMode === 'lottery') runLottery();
+          else runGrouping();
+        } else if (e.code === 'Escape' && document.body.classList.contains('presentation-mode')) {
+          document.body.classList.remove('presentation-mode');
+        }
+      });
     });
   </script>
 </body>
