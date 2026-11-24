@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://sensei-otasuke.github.io/teacher-tools/</loc></url>
-  <url><loc>https://sensei-otasuke.github.io/teacher-tools/sekigae/</loc></url>
-  <url><loc>https://sensei-otasuke.github.io/teacher-tools/ruby/</loc></url>
-  <url><loc>https://sensei-otasuke.github.io/teacher-tools/kuji/</loc></url>
-  <url><loc>https://sensei-otasuke.github.io/teacher-tools/quiz/</loc></url>
-  <url><loc>https://sensei-otasuke.github.io/teacher-tools/toban/</loc></url>
-  <url><loc>https://sensei-otasuke.github.io/teacher-tools/sound/</loc></url>
-  <url><loc>https://sensei-otasuke.github.io/teacher-tools/timer/</loc></url>
-  <url><loc>https://sensei-otasuke.github.io/teacher-tools/kanji/</loc></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/</loc><priority>1.0</priority></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/sekigae/</loc><priority>0.9</priority></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/ruby/</loc><priority>0.9</priority></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/grid/</loc><priority>0.9</priority></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/kuji/</loc><priority>0.8</priority></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/quiz/</loc><priority>0.8</priority></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/toban/</loc><priority>0.8</priority></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/sound/</loc><priority>0.8</priority></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/timer/</loc><priority>0.8</priority></url>
+  <url><loc>https://sensei-otasuke.github.io/teacher-tools/kanji/</loc><priority>0.8</priority></url>
 </urlset>
