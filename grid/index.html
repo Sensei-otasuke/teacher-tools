@@ -28,6 +28,7 @@
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
   }
   </script>
+
   <link rel="icon" href="../logo.png" type="image/png">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -240,7 +241,7 @@
               <span>十字リーダー（点線）</span>
             </label>
 
-            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer font-bold text-slate-700">
+            <label id="boldEvery5Label" class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer font-bold text-slate-700 transition">
               <input id="boldEvery5Check" type="checkbox" class="w-4 h-4 accent-emerald-600 rounded">
               <span>5マスごとに太線</span>
             </label>
@@ -420,13 +421,12 @@
 
       const scale = Math.min(1, availW / sheetPxW);
       sheet.style.transform = `scale(${scale})`;
-      // transform:scale で縮めた分の余白詰まり補正
       const reducedHeight = sheetPxH * (1 - scale);
       sheet.style.marginBottom = `-${reducedHeight}px`;
     }
 
     // ==========================================
-    // 4. SVGベクター方眼・マス目レンダリングエンジン
+    // 4. SVGベクター方眼・マス目レンダリングエンジン（線の重複ゼロ設計）
     // ==========================================
     function renderSheet() {
       syncPrintPageRule();
@@ -470,7 +470,6 @@
           rows = Math.max(1, Math.floor(availH / cellH));
         }
       } else {
-        // マス数指定モード（正方形を維持しつつ用紙に最大フィット）
         cols = Math.max(1, state.colsCount);
         rows = Math.max(1, state.rowsCount);
 
@@ -489,12 +488,11 @@
         document.getElementById('calculatedMmInfo').textContent = `自動計算された1マスのサイズ：${cellW.toFixed(1)} mm`;
       }
 
-      // 描画全体の幅と高さ（mm）
       const unitW = state.layoutType === 'kanji_v' ? cellW * (1 + furiganaRatio) : cellW;
       const unitH = state.layoutType === 'kanji_h' ? cellH * (1 + furiganaRatio) : cellH;
 
-      const totalGridW = cols * unitW;
-      const totalGridH = rows * unitH;
+      const totalGridW = +(cols * unitW).toFixed(3);
+      const totalGridH = +(rows * unitH).toFixed(3);
 
       // バッジ更新
       document.getElementById('paperSpecBadge').textContent =
@@ -502,79 +500,82 @@
       document.getElementById('gridCountBadge').textContent =
         `横${cols} × 縦${rows}マス（1マス ${cellW}mm）`;
 
-      // SVG要素の構築（すべてmm座標系で描くため100%実寸一致）
-      let svgParts = [];
+      // 線が2重に重ならないよう、縦線・横線を1本ずつ独立描画
+      const svgParts = [];
 
+      // 1. 縦線（内側の境界線のみ）
+      for (let c = 0; c < cols; c++) {
+        const baseX = c * unitW;
+        if (c > 0) {
+          const x = +baseX.toFixed(3);
+          const isBold = state.boldEvery5 && state.layoutType === 'grid' && c % 5 === 0;
+          svgParts.push(
+            `<line x1="${x}" y1="0" x2="${x}" y2="${totalGridH}" stroke="${isBold ? palette.bold : palette.main}" stroke-width="${isBold ? '0.45' : '0.24'}"/>`
+          );
+        }
+        // 漢字練習帳・縦書きの「マスとふりがな列」の境界線
+        if (state.layoutType === 'kanji_v') {
+          const sepX = +(baseX + cellW).toFixed(3);
+          svgParts.push(
+            `<line x1="${sepX}" y1="0" x2="${sepX}" y2="${totalGridH}" stroke="${palette.main}" stroke-width="0.24"/>`
+          );
+        }
+      }
+
+      // 2. 横線（内側の境界線のみ）
       for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const baseX = c * unitW;
-          const baseY = r * unitH;
-
-          let mainX = baseX;
-          let mainY = baseY;
-
-          // 漢字練習帳・縦書き（右側にふりがな欄）
-          if (state.layoutType === 'kanji_v') {
-            const furiW = cellW * furiganaRatio;
-            const furiX = baseX + cellW;
-            svgParts.push(
-              `<rect x="${furiX}" y="${baseY}" width="${furiW}" height="${cellH}" fill="none" stroke="${palette.main}" stroke-width="0.22"/>`
-            );
-          }
-          // 漢字練習帳・横書き（上側にふりがな欄）
-          else if (state.layoutType === 'kanji_h') {
-            const furiH = cellH * furiganaRatio;
-            svgParts.push(
-              `<rect x="${baseX}" y="${baseY}" width="${cellW}" height="${furiH}" fill="none" stroke="${palette.main}" stroke-width="0.22"/>`
-            );
-            mainY = baseY + furiH;
-          }
-
-          // メインのマス枠
+        const baseY = r * unitH;
+        if (r > 0) {
+          const y = +baseY.toFixed(3);
+          const isBold = state.boldEvery5 && state.layoutType === 'grid' && r % 5 === 0;
           svgParts.push(
-            `<rect x="${mainX}" y="${mainY}" width="${cellW}" height="${cellH}" fill="none" stroke="${palette.main}" stroke-width="0.25"/>`
+            `<line x1="0" y1="${y}" x2="${totalGridW}" y2="${y}" stroke="${isBold ? palette.bold : palette.main}" stroke-width="${isBold ? '0.45' : '0.24'}"/>`
           );
+        }
+        // 漢字練習帳・横書きの「ふりがな行とマス」の境界線
+        if (state.layoutType === 'kanji_h') {
+          const sepY = +(baseY + cellH * furiganaRatio).toFixed(3);
+          svgParts.push(
+            `<line x1="0" y1="${sepY}" x2="${totalGridW}" y2="${sepY}" stroke="${palette.main}" stroke-width="0.24"/>`
+          );
+        }
+      }
 
-          // 十字リーダー（低学年向け点線）
-          if (state.crossLeader) {
-            const midX = mainX + cellW / 2;
-            const midY = mainY + cellH / 2;
-            const dash = Math.max(0.5, cellW * 0.07);
+      // 3. 十字リーダー（低学年向け点線）
+      if (state.crossLeader) {
+        const dash = +(Math.max(0.5, cellW * 0.07)).toFixed(2);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const mainX = c * unitW;
+            const mainY = state.layoutType === 'kanji_h' ? r * unitH + cellH * furiganaRatio : r * unitH;
+            const midX = +(mainX + cellW / 2).toFixed(3);
+            const midY = +(mainY + cellH / 2).toFixed(3);
+            const x1 = +mainX.toFixed(3);
+            const x2 = +(mainX + cellW).toFixed(3);
+            const y1 = +mainY.toFixed(3);
+            const y2 = +(mainY + cellH).toFixed(3);
             svgParts.push(
-              `<line x1="${midX}" y1="${mainY}" x2="${midX}" y2="${mainY + cellH}" stroke="${palette.sub}" stroke-width="0.2" stroke-dasharray="${dash},${dash}"/>`,
-              `<line x1="${mainX}" y1="${midY}" x2="${mainX + cellW}" y2="${midY}" stroke="${palette.sub}" stroke-width="0.2" stroke-dasharray="${dash},${dash}"/>`
+              `<line x1="${midX}" y1="${y1}" x2="${midX}" y2="${y2}" stroke="${palette.sub}" stroke-width="0.2" stroke-dasharray="${dash},${dash}"/>`,
+              `<line x1="${x1}" y1="${midY}" x2="${x2}" y2="${midY}" stroke="${palette.sub}" stroke-width="0.2" stroke-dasharray="${dash},${dash}"/>`
             );
           }
         }
       }
 
-      // 5マスごとの太線（ふつうの方眼モード時）
-      if (state.boldEvery5 && state.layoutType === 'grid') {
-        for (let c = 5; c < cols; c += 5) {
-          const x = c * cellW;
-          svgParts.push(
-            `<line x1="${x}" y1="0" x2="${x}" y2="${totalGridH}" stroke="${palette.bold}" stroke-width="0.48"/>`
-          );
-        }
-        for (let r = 5; r < rows; r += 5) {
-          const y = r * cellH;
-          svgParts.push(
-            `<line x1="0" y1="${y}" x2="${totalGridW}" y2="${y}" stroke="${palette.bold}" stroke-width="0.48"/>`
-          );
-        }
-      }
-
-      // 外枠を少しだけ強調して美しく締める
+      // 4. 外枠を1つのrectで綺麗に閉じる
       svgParts.push(
-        `<rect x="0" y="0" width="${totalGridW}" height="${totalGridH}" fill="none" stroke="${palette.bold}" stroke-width="0.42"/>`
+        `<rect x="0" y="0" width="${totalGridW}" height="${totalGridH}" fill="none" stroke="${palette.bold}" stroke-width="0.4"/>`
       );
 
-      // ヘッダー（年・組・番・なまえ）HTML
+      // ヘッダー（年・組・番・なまえ）HTML（記入スペースを十分に確保）
       const headerHtml = state.showHeader
         ? `<div style="height:${headerH}mm; color:${palette.text}; border-bottom: 0.35mm solid ${palette.main};" class="w-full flex items-end justify-between pb-1.5 mb-2 shrink-0">
-            <div class="font-black text-[13pt] tracking-tight truncate pr-2">${escapeHtml(state.sheetTitle)}</div>
-            <div class="text-[10.5pt] font-bold whitespace-nowrap tracking-wider">
-                年  組  番 なまえ（          ）
+            <div class="font-black text-[13pt] tracking-tight truncate pr-3">${escapeHtml(state.sheetTitle)}</div>
+            <div class="text-[10.5pt] font-bold whitespace-nowrap flex items-baseline">
+              <span class="inline-block w-[8mm]"></span><span>年</span>
+              <span class="inline-block w-[8mm]"></span><span>組</span>
+              <span class="inline-block w-[8mm]"></span><span>番</span>
+              <span class="ml-3">なまえ（</span><span class="inline-block w-[36mm]"></span><span>）</span>
             </div>
           </div>`
         : '';
@@ -583,7 +584,7 @@
       const footerHtml = state.showScale
         ? `<div style="height:${footerH}mm; color:${palette.text};" class="w-full flex items-end justify-between pt-1 shrink-0 text-[7.5pt] font-bold">
             <span>※印刷時は倍率「100%（実際のサイズ）」で実寸通りになります</span>
-            <svg width="56mm" height="5.5mm" viewBox="0 0 56 5.5" shape-rendering="crispEdges">
+            <svg width="56mm" height="5.5mm" viewBox="0 0 56 5.5" xmlns="http://www.w3.org/2000/svg">
               <line x1="1" y1="4" x2="51" y2="4" stroke="${palette.bold}" stroke-width="0.3"/>
               <line x1="1" y1="1.5" x2="1" y2="4" stroke="${palette.bold}" stroke-width="0.3"/>
               <line x1="11" y1="2.5" x2="11" y2="4" stroke="${palette.bold}" stroke-width="0.25"/>
@@ -602,10 +603,11 @@
       sheet.style.height = `${paperH}mm`;
       sheet.style.padding = `${margin}mm`;
 
+      // crispEdgesを外し、アンチエイリアス＋単一線描画で全倍率において均一な線幅を実現
       sheet.innerHTML = `
         ${headerHtml}
         <div class="flex-1 flex items-center justify-center overflow-hidden">
-          <svg width="${totalGridW}mm" height="${totalGridH}mm" viewBox="0 0 ${totalGridW} ${totalGridH}" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+          <svg width="${totalGridW}mm" height="${totalGridH}mm" viewBox="0 0 ${totalGridW} ${totalGridH}" xmlns="http://www.w3.org/2000/svg">
             ${svgParts.join('')}
           </svg>
         </div>
@@ -684,6 +686,14 @@
           btn.className = `color-btn py-2 rounded-xl border border-slate-200 bg-white ${idleText[c]} font-black text-xs transition flex items-center justify-center gap-1`;
         }
       });
+
+      // 5マス太線の有効/無効制御（ふつうの方眼のみ有効）
+      const boldCheck = document.getElementById('boldEvery5Check');
+      const boldLabel = document.getElementById('boldEvery5Label');
+      const isGrid = state.layoutType === 'grid';
+      boldCheck.disabled = !isGrid;
+      boldLabel.classList.toggle('opacity-40', !isGrid);
+      boldLabel.classList.toggle('cursor-not-allowed', !isGrid);
 
       // フォーム要素の値同期
       document.getElementById('cellSizeMmInput').value = state.cellMm;
@@ -816,6 +826,7 @@
       // レイアウト・補助線
       document.getElementById('layoutTypeSelect').onchange = (e) => {
         state.layoutType = e.target.value;
+        syncUiButtons();
         renderSheet();
       };
       document.getElementById('crossLeaderCheck').onchange = (e) => {
@@ -879,6 +890,5 @@
       renderSheet();
     });
   </script>
-<section style="max-width:880px;margin:56px auto 0;padding:32px 24px 40px;border-top:2px solid #e5e7eb;font-family:inherit;line-height:1.9;color:#374151;font-size:15px;"><h2 style="font-size:22px;font-weight:800;color:#1f2937;margin:0 0 16px;">方眼・マス目プリントメーカーの使い方と特徴</h2><p>方眼・マス目プリントメーカーは、方眼用紙やマス目プリントをブラウザからそのまま実寸で印刷できる無料の作成ツールです。A4・A3・B5・B4の用紙に対応し、ミリ単位の指定とマス数指定の両方に対応。市販の方眼紙を切らしてしまったときや、授業に合わせたサイズのマス目が欲しいときにすぐ作れます。</p><h3 style="font-size:17px;font-weight:800;color:#1f2937;margin:28px 0 8px;">使い方</h3><ol style="margin:0;padding-left:22px;"><li>用紙のサイズ（A4・A3・B5・B4）と向きを選びます。</li><li>マス目のサイズをミリ単位で指定するか、縦横のマス数で指定します。低学年向けの十字リーダー入りや、ふりがな欄つきの漢字練習帳レイアウトも選べます。</li><li>線の色（黒・青・緑）と、名前欄の有無などを設定します。</li><li>プレビューで確認して印刷します。実寸で印刷するために、プリンター設定で拡大・縮小を「なし（100%）」にしてください。</li></ol><h3 style="font-size:17px;font-weight:800;color:#1f2937;margin:28px 0 8px;">こんな場面で使えます</h3><ul style="margin:0;padding-left:22px;"><li>算数の作図やグラフの練習プリントを作りたいとき</li><li>漢字練習用のマス目プリントを、学年に合わせた大きさで作りたいとき</li><li>ノートの方眼を切らしたときの代用や、自由研究の記録用紙に</li></ul><h3 style="font-size:17px;font-weight:800;color:#1f2937;margin:28px 0 8px;">よくある質問</h3><dl style="margin:0;"><dt style="font-weight:700;color:#1f2937;margin-top:14px;">Q. 本当に実寸で印刷されますか？</dt><dd style="margin:4px 0 0 0;">A. ブラウザとプリンターの設定が100%（拡大・縮小なし）のときに実寸になります。印刷ダイアログで「ページに合わせる」を選ぶと縮小されてしまうのでご注意ください。</dd><dt style="font-weight:700;color:#1f2937;margin-top:14px;">Q. 登録や料金は必要ですか？</dt><dd style="margin:4px 0 0 0;">A. 不要です。無料で、登録なしに何枚でも作れます。</dd><dt style="font-weight:700;color:#1f2937;margin-top:14px;">Q. どんな用紙サイズに対応していますか？</dt><dd style="margin:4px 0 0 0;">A. A4・A3・B5・B4に対応しています。プリンターが対応する用紙をお選びください。</dd></dl><p style="margin-top:24px;">センセイボックスは、現役の小学校教員が開発した無料の教室支援Webツール集です。すべてのツールが登録不要・インストール不要で、個人情報をサーバーに送信しません。</p></section>
 </body>
 </html>
