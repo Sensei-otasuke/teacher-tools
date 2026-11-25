@@ -35,7 +35,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Yuji+Syuku&family=Klee+One:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Klee+One:wght@600&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -155,7 +155,7 @@
           <button data-preset="shisha_trace" class="preset-chip px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-bold text-[11px] transition">なぞり書き＋自力視写</button>
           <button data-preset="shisha_mid" class="preset-chip px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-bold text-[11px] transition">3・4年 視写(15マス)</button>
           <button data-preset="note_kokugo" class="preset-chip px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-bold text-[11px] transition">国語ノート見本(めあて枠)</button>
-          <button data-preset="shisha_horiz" class="preset-chip px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-bold text-[11px] transition">横書き視写(英語・ローマ字)</button>
+          <button data-preset="shisha_horiz" class="preset-chip px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-bold text-[11px] transition">横書き視写</button>
         </div>
       </div>
 
@@ -180,8 +180,8 @@
             <button id="clearTextBtn" class="text-[11px] font-bold text-slate-400 hover:text-rose-600 transition">クリア</button>
           </div>
           <textarea id="sourceTextInput" rows="5" placeholder="ここにお手本の文章を入力してください。" class="w-full p-3 text-sm font-kyokasho font-semibold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-indigo-500 focus:outline-none leading-relaxed"></textarea>
-          <div id="overflowWarningBox" class="hidden text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-            <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0"></i>
+          <div id="overflowWarningBox" class="hidden text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl flex items-start gap-1.5">
+            <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
             <span id="overflowWarningText">1行のマス数を超えている行があります。</span>
           </div>
         </div>
@@ -198,7 +198,7 @@
             <button data-insert="≪１マスあける≫" class="insert-tag-btn px-2 py-1 rounded-lg bg-white border border-amber-200 text-amber-800 font-bold hover:bg-amber-50 transition">≪吹き出しメモ≫</button>
           </div>
           <p class="text-[10px] text-slate-400 font-bold leading-snug">
-            ※ <code>漢字(かんじ)</code> でルビ自動配置、<code>【めあて】</code> で色枠強調、<code>≪メモ≫</code> で指導吹き出しを表示します。
+            ※ カッコ内が<b>ひらがな・カタカナのみ</b>のときルビになり、<code>（水）</code> や <code>(1)</code> はそのまま本文マスに入ります。
           </p>
         </div>
       </div>
@@ -423,27 +423,26 @@
     };
 
     // ==========================================
-    // 3. テキストパーサー（ルビ・枠強調・吹き出し・縦書き約物処理）
+    // 3. テキストパーサー（厳密ルビ判定・枠強調・吹き出し・縦書き約物処理）
     // ==========================================
-    // 縦書き時に回転や位置補正が必要な文字
     const ROTATE_90_CHARS = new Set(['ー', '―', '…', '〜', '～', '（', '）', '(', ')', '「', '」', '『', '』', '【', '】', '［', '］', '＜', '＞', '＝', '=']);
     const TOP_RIGHT_PUNCT = new Set(['、', '。', '，', '．', ',', '.']);
     const SMALL_KANA = new Set(['っ', 'ゃ', 'ゅ', 'ょ', 'ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ', 'ゎ', 'ッ', 'ャ', 'ュ', 'ョ', 'ァ', 'ィ', 'ゥ', 'ェ', 'ォ', 'ヮ']);
+    // カッコの中身がひらがな・カタカナ（伸ばし棒・中黒・空白含む）のみならルビとみなす
+    const RUBY_ONLY_REGEX = /^[ぁ-んァ-ヶー・\s　]+$/;
 
     function parseLineToCells(lineText) {
-      // 行末の ≪メモ≫ を吹き出しとして抽出
+      // 行末などの ≪メモ≫ を吹き出しとして抽出
       let callout = '';
       let cleanLine = lineText.replace(/≪([^≫]+)≫/g, (_, memo) => {
         callout = memo.trim();
         return '';
       });
 
-      // 【めあて】などの強調タグを検出（タグ自体は枠表示にして中身の文字を展開）
-      // 例: "【めあて】漢字(かんじ)を正しく書こう。" -> 「めあて」を枠囲みマーカー付きで展開
       const tokens = [];
       let i = 0;
       while (i < cleanLine.length) {
-        // 【...】タグチェック
+        // 【...】タグチェック（ノート見本用の枠強調）
         if (cleanLine[i] === '【') {
           const closeIdx = cleanLine.indexOf('】', i + 1);
           if (closeIdx !== -1 && closeIdx - i <= 8) {
@@ -453,9 +452,7 @@
               tokens.push({
                 char: label[k],
                 ruby: '',
-                badge: badgeColor,
-                badgePos: k === 0 ? 'start' : (k === label.length - 1 ? 'end' : 'mid'),
-                badgeSingle: label.length === 1
+                badge: badgeColor
               });
             }
             i = closeIdx + 1;
@@ -463,33 +460,35 @@
           }
         }
 
-        // 漢字(ふりがな) チェック（直前の1〜4文字の漢字・カタカナ列にルビを振る）
+        // カッコ書きチェック：ふりがな欄ON かつ 中身がひらがな・カタカナのみの場合だけルビにする
+        // ※（水）や (1) や（例）などはそのまま通常のカッコ文字として1マスずつ展開する
         if (cleanLine[i] === '(' || cleanLine[i] === '（') {
           const closeChar = cleanLine[i] === '(' ? ')' : '）';
           const closeIdx = cleanLine.indexOf(closeChar, i + 1);
           if (closeIdx !== -1 && tokens.length > 0 && closeIdx - i <= 15) {
-            const rubyStr = cleanLine.slice(i + 1, closeIdx);
-            // 直前の連続する漢字（またはアルファベット）を遡る
-            let targetCount = 0;
-            for (let b = tokens.length - 1; b >= 0 && targetCount < 5; b--) {
-              const ch = tokens[b].char;
-              if (/[\u4E00-\u9FFF々ヶ〆]/.test(ch)) {
-                targetCount++;
-              } else {
-                break;
+            const innerStr = cleanLine.slice(i + 1, closeIdx);
+            if (state.hasFurigana && RUBY_ONLY_REGEX.test(innerStr)) {
+              const rubyStr = innerStr.replace(/[\s　]/g, '');
+              let targetCount = 0;
+              for (let b = tokens.length - 1; b >= 0 && targetCount < 5; b--) {
+                const ch = tokens[b].char;
+                if (/[\u4E00-\u9FFF々ヶ〆]/.test(ch)) {
+                  targetCount++;
+                } else {
+                  break;
+                }
               }
-            }
-            if (targetCount === 0) targetCount = 1; // 漢字以外なら直前1文字に割り当て
+              if (targetCount === 0) targetCount = 1;
 
-            const startIdx = tokens.length - targetCount;
-            // ルビ文字を各対象マスへ均等配分
-            for (let t = 0; t < targetCount; t++) {
-              const rStart = Math.floor((t * rubyStr.length) / targetCount);
-              const rEnd = Math.floor(((t + 1) * rubyStr.length) / targetCount);
-              tokens[startIdx + t].ruby = rubyStr.slice(rStart, rEnd);
+              const startIdx = tokens.length - targetCount;
+              for (let t = 0; t < targetCount; t++) {
+                const rStart = Math.floor((t * rubyStr.length) / targetCount);
+                const rEnd = Math.floor(((t + 1) * rubyStr.length) / targetCount);
+                tokens[startIdx + t].ruby = rubyStr.slice(rStart, rEnd);
+              }
+              i = closeIdx + 1;
+              continue;
             }
-            i = closeIdx + 1;
-            continue;
           }
         }
 
@@ -553,12 +552,15 @@
       const furiganaRatio = state.hasFurigana ? 0.36 : 0;
       const isVertical = state.direction === 'vertical';
 
-      // 入力テキストを行単位にパース
       const rawLines = state.rawText.split('\n');
       const parsedLines = rawLines.map(parseLineToCells);
 
-      // 出力行リストを構築（見本＋空欄 / なぞり＋空欄 / 見本のみ）
-      // rowType: 'model' | 'trace' | 'blank'
+      // 必要な総行数計算
+      const requiredLines = state.shishaMode === 'model_only'
+        ? parsedLines.length
+        : parsedLines.length * 2;
+
+      // 出力行リスト構築
       const renderRows = [];
       let totalTargetLines = state.linesCount;
 
@@ -569,7 +571,6 @@
             renderRows.push({ type: 'model', cells: p.cells, callout: p.callout });
           }
         } else {
-          // 2行1セット（見本 or なぞり ＋ 空欄）
           const pairType = state.shishaMode === 'trace_blank' ? 'trace' : 'model';
           let srcIdx = 0;
           while (renderRows.length < totalTargetLines) {
@@ -593,18 +594,16 @@
         numLines = Math.max(2, state.linesCount);
 
         if (isVertical) {
-          // 縦書き：1行は縦に charsPerLine マス、横に numLines 列（各列にふりがな欄）
           const maxCellH = availH / charsPerLine;
           const maxCellW = availW / (numLines * (1 + furiganaRatio));
           cellSize = Math.max(5, Math.floor(Math.min(maxCellW, maxCellH) * 10) / 10);
         } else {
-          // 横書き：1行は横に charsPerLine マス、縦に numLines 行（各行にふりがな欄）
           const maxCellW = availW / charsPerLine;
           const maxCellH = availH / (numLines * (1 + furiganaRatio));
           cellSize = Math.max(5, Math.floor(Math.min(maxCellW, maxCellH) * 10) / 10);
         }
         document.getElementById('calculatedMmInfo').textContent =
-          `自動計算された1マスのサイズ：${cellSize.toFixed(1)} mm`;
+          `自動計算された1マスのサイズ：${cellSize.toFixed(1)} mm（現在の文章に必要な行数：${requiredLines}行）`;
       } else {
         cellSize = Math.max(5, Math.min(40, state.cellMm));
         if (isVertical) {
@@ -615,7 +614,6 @@
           numLines = Math.max(2, Math.floor(availH / (cellSize * (1 + furiganaRatio))));
         }
 
-        // mm指定時は計算された numLines 分の renderRows を再生成
         renderRows.length = 0;
         if (state.shishaMode === 'model_only') {
           for (let i = 0; i < numLines; i++) {
@@ -636,18 +634,25 @@
         }
       }
 
-      // 文字数オーバーチェック（警告表示）
+      // 文字数オーバー・行数不足チェック（警告表示）
+      const warnings = [];
       const overflowLines = [];
       parsedLines.forEach((p, idx) => {
         if (p.cells.length > charsPerLine) {
           overflowLines.push(`${idx + 1}行目（${p.cells.length}字）`);
         }
       });
-      const warnBox = document.getElementById('overflowWarningBox');
       if (overflowLines.length > 0) {
+        warnings.push(`1行のマス数（${charsPerLine}字）を超えています：${overflowLines.join('、')}`);
+      }
+      if (requiredLines > numLines) {
+        warnings.push(`全体の行数（現在${numLines}行）が足りず、後ろの文章が切れています（${requiredLines}行以上にしてください）`);
+      }
+
+      const warnBox = document.getElementById('overflowWarningBox');
+      if (warnings.length > 0) {
         warnBox.classList.remove('hidden');
-        document.getElementById('overflowWarningText').textContent =
-          `1行のマス数（${charsPerLine}字）を超えています：${overflowLines.join('、')}`;
+        document.getElementById('overflowWarningText').textContent = warnings.join(' ／ ');
       } else {
         warnBox.classList.add('hidden');
       }
@@ -672,7 +677,6 @@
       // 枠線の独立描画（2重線太り防止）
       // ==========================================
       if (isVertical) {
-        // 縦書き：右から左へ列（lineIdx = 0 が一番右の列）
         for (let l = 0; l < numLines; l++) {
           const colLeftX = (numLines - 1 - l) * unitTrack;
           if (l < numLines - 1) {
@@ -688,7 +692,6 @@
             );
           }
         }
-        // 横のマス仕切り線
         for (let c = 1; c < charsPerLine; c++) {
           const y = +(c * cellSize).toFixed(3);
           svgParts.push(
@@ -696,7 +699,6 @@
           );
         }
       } else {
-        // 横書き：上から下へ行（lineIdx = 0 が一番上の行）
         for (let l = 0; l < numLines; l++) {
           const rowTopY = l * unitTrack;
           if (l > 0) {
@@ -712,7 +714,6 @@
             );
           }
         }
-        // 縦のマス仕切り線
         for (let c = 1; c < charsPerLine; c++) {
           const x = +(c * cellSize).toFixed(3);
           svgParts.push(
@@ -754,7 +755,6 @@
       for (let l = 0; l < numLines; l++) {
         const rowData = renderRows[l];
         if (!rowData || rowData.type === 'blank') continue;
-        if (state.hideModelText) continue;
 
         const isTrace = rowData.type === 'trace';
         const textFill = isTrace ? traceColor : palette.text;
@@ -769,7 +769,7 @@
             ? c * cellSize
             : l * unitTrack + (state.hasFurigana ? cellSize * furiganaRatio : 0);
 
-          // 【めあて】などの強調枠マーカー
+          // 【めあて】などの強調枠マーカー（見本隠しモードでも指導枠は残す）
           if (item.badge) {
             const strokeCol = item.badge === 'blue' ? '#0284c7' : (item.badge === 'emerald' ? '#059669' : '#e11d48');
             const fillBg = item.badge === 'blue' ? '#f0f9ff' : (item.badge === 'emerald' ? '#ecfdf5' : '#fff1f2');
@@ -778,6 +778,8 @@
               `<rect x="${+(cellX + inset).toFixed(3)}" y="${+(cellY + inset).toFixed(3)}" width="${+(cellSize - inset * 2).toFixed(3)}" height="${+(cellSize - inset * 2).toFixed(3)}" rx="0.8" fill="${fillBg}" stroke="${strokeCol}" stroke-width="0.45"/>`
             );
           }
+
+          if (state.hideModelText) continue;
 
           // 文字描画（空白はスキップ）
           if (item.char && item.char !== ' ' && item.char !== '　') {
@@ -789,15 +791,15 @@
             if (isVertical) {
               if (TOP_RIGHT_PUNCT.has(item.char)) {
                 // 句読点はマスの右上へ配置
-                cx = cellX + cellSize * 0.74;
-                cy = cellY + cellSize * 0.28;
+                cx = cellX + cellSize * 0.72;
+                cy = cellY + cellSize * 0.30;
               } else if (SMALL_KANA.has(item.char)) {
                 // 促音・拗音はやや右上寄り・小さめ
-                cx = cellX + cellSize * 0.62;
-                cy = cellY + cellSize * 0.44;
+                cx = cellX + cellSize * 0.60;
+                cy = cellY + cellSize * 0.45;
                 charFontSize = +(fontSize * 0.85).toFixed(2);
               } else if (ROTATE_90_CHARS.has(item.char)) {
-                // 長音符・カッコ類は90度回転
+                // 長音符・カッコ類はマス中央を軸に90度回転
                 transformAttr = ` transform="rotate(90 ${cx.toFixed(3)} ${cy.toFixed(3)})"`;
               }
             }
@@ -835,26 +837,35 @@
           }
         }
 
-        // ≪吹き出しメモ≫ 描画（ノート見本用の指導コメント）
+        // ≪吹き出しメモ≫ 描画（1文字ずつ座標計算し、どのOS・フォントでも枠中央にピタッと収める）
         if (rowData.callout) {
-          const memoText = rowData.callout;
+          const memoChars = Array.from(rowData.callout);
+          const mLen = memoChars.length;
           if (isVertical) {
+            const stepY = 2.9;
+            const boxW = 4.6;
+            const boxH = mLen * stepY + 2.4;
             const memoX = (numLines - 1 - l) * unitTrack + unitTrack / 2;
-            const memoY = Math.min(totalGridH - 2, (maxCells + 0.4) * cellSize);
+            const memoY = Math.min(totalGridH - boxH - 0.5, (maxCells + 0.35) * cellSize);
+            const charTags = memoChars.map((mc, idx) => {
+              const cy = +(1.2 + (idx + 0.5) * stepY).toFixed(3);
+              const rot = ROTATE_90_CHARS.has(mc) ? ` transform="rotate(90 0 ${cy})"` : '';
+              return `<text x="0" y="${cy}" fill="#b45309" font-size="2.5" font-weight="700" text-anchor="middle" dominant-baseline="central"${rot}>${escapeXml(mc)}</text>`;
+            }).join('');
             svgParts.push(
               `<g transform="translate(${memoX.toFixed(3)}, ${memoY.toFixed(3)})">
-                <rect x="-2.4" y="0" width="4.8" height="${(memoText.length * 2.8 + 2.4).toFixed(2)}" rx="1.2" fill="#fffbeb" stroke="#d97706" stroke-width="0.3"/>
-                <text x="0" y="1.4" fill="#b45309" font-size="2.5" font-weight="700" text-anchor="middle" style="writing-mode: vertical-rl;">${escapeXml(memoText)}</text>
+                <rect x="${(-boxW / 2).toFixed(2)}" y="0" width="${boxW}" height="${boxH.toFixed(2)}" rx="1.2" fill="#fffbeb" stroke="#d97706" stroke-width="0.32"/>
+                ${charTags}
               </g>`
             );
           } else {
-            const memoX = Math.min(totalGridW - 22, (maxCells + 0.3) * cellSize);
+            const boxW = Math.max(14, mLen * 2.7 + 3);
+            const memoX = Math.min(totalGridW - boxW - 0.5, (maxCells + 0.3) * cellSize);
             const memoY = l * unitTrack + unitTrack / 2;
-            const boxW = Math.max(14, memoText.length * 2.7 + 3);
             svgParts.push(
               `<g transform="translate(${memoX.toFixed(3)}, ${memoY.toFixed(3)})">
-                <rect x="0" y="-2.4" width="${boxW.toFixed(2)}" height="4.8" rx="1.2" fill="#fffbeb" stroke="#d97706" stroke-width="0.3"/>
-                <text x="${(boxW / 2).toFixed(2)}" y="0" fill="#b45309" font-size="2.5" font-weight="700" text-anchor="middle" dominant-baseline="central">${escapeXml(memoText)}</text>
+                <rect x="0" y="-2.4" width="${boxW.toFixed(2)}" height="4.8" rx="1.2" fill="#fffbeb" stroke="#d97706" stroke-width="0.32"/>
+                <text x="${(boxW / 2).toFixed(2)}" y="0" fill="#b45309" font-size="2.5" font-weight="700" text-anchor="middle" dominant-baseline="central">${escapeXml(rowData.callout)}</text>
               </g>`
             );
           }
@@ -916,7 +927,6 @@
     // 6. UIイベント・プリセット連動
     // ==========================================
     function syncUiButtons() {
-      // 視写モードボタン
       document.querySelectorAll('.shisha-mode-btn').forEach(btn => {
         if (btn.dataset.mode === state.shishaMode) {
           btn.className = 'shisha-mode-btn py-1.5 px-1 rounded-lg bg-white text-slate-900 shadow-2xs transition';
@@ -925,7 +935,6 @@
         }
       });
 
-      // 用紙ボタン
       document.querySelectorAll('.paper-btn').forEach(btn => {
         if (btn.dataset.paper === state.paper) {
           btn.className = 'paper-btn py-2 rounded-xl bg-indigo-600 text-white font-mono-tech font-black text-xs shadow-2xs transition';
@@ -934,7 +943,6 @@
         }
       });
 
-      // 用紙向き
       const pBtn = document.getElementById('orientPortraitBtn');
       const lBtn = document.getElementById('orientLandscapeBtn');
       if (state.orientation === 'portrait') {
@@ -945,7 +953,6 @@
         pBtn.className = 'flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition';
       }
 
-      // 書字方向
       const vBtn = document.getElementById('dirVerticalBtn');
       const hBtn = document.getElementById('dirHorizontalBtn');
       if (state.direction === 'vertical') {
@@ -960,7 +967,6 @@
         document.getElementById('linesCountLabel').textContent = '全体の行数（縦の段数）';
       }
 
-      // マス指定モード
       const cntBtn = document.getElementById('modeCountBtn');
       const mmBtn = document.getElementById('modeMmBtn');
       if (state.sizeMode === 'count') {
@@ -975,7 +981,6 @@
         document.getElementById('countControlPanel').classList.add('hidden');
       }
 
-      // mmチップ
       document.querySelectorAll('.mm-chip').forEach(chip => {
         if (parseFloat(chip.dataset.mm) === state.cellMm) {
           chip.className = 'mm-chip px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-800 ring-2 ring-indigo-400 font-mono-tech font-black text-xs';
@@ -984,7 +989,6 @@
         }
       });
 
-      // カラーボタン
       document.querySelectorAll('.color-btn').forEach(btn => {
         const c = btn.dataset.color;
         if (c === state.color) {
@@ -1000,7 +1004,6 @@
         }
       });
 
-      // 見本隠しボタン
       const hideBtn = document.getElementById('toggleHideModelBtn');
       if (state.hideModelText) {
         hideBtn.className = 'px-2.5 py-1 rounded-xl bg-amber-500 text-white font-black text-[11px] transition flex items-center gap-1';
@@ -1011,7 +1014,6 @@
       }
       lucide.createIcons();
 
-      // フォーム値同期
       document.getElementById('sourceTextInput').value = state.rawText;
       document.getElementById('charsPerLineInput').value = state.charsPerLine;
       document.getElementById('linesCountInput').value = state.linesCount;
@@ -1067,12 +1069,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
 
-      // プリセット
       document.querySelectorAll('.preset-chip').forEach(btn => {
         btn.onclick = () => applyPreset(btn.dataset.preset);
       });
 
-      // 出力パターン
       document.querySelectorAll('.shisha-mode-btn').forEach(btn => {
         btn.onclick = () => {
           state.shishaMode = btn.dataset.mode;
@@ -1081,7 +1081,6 @@
         };
       });
 
-      // テキスト入力＆クリア
       const textArea = document.getElementById('sourceTextInput');
       textArea.oninput = (e) => {
         state.rawText = e.target.value;
@@ -1093,7 +1092,6 @@
         renderSheet();
       };
 
-      // ワンクリックタグ挿入
       document.querySelectorAll('.insert-tag-btn').forEach(btn => {
         btn.onclick = () => {
           const tag = btn.dataset.insert;
@@ -1108,7 +1106,6 @@
         };
       });
 
-      // 用紙サイズ・向き・書字方向
       document.querySelectorAll('.paper-btn').forEach(btn => {
         btn.onclick = () => {
           state.paper = btn.dataset.paper;
@@ -1137,7 +1134,6 @@
         renderSheet();
       };
 
-      // マス指定モード
       document.getElementById('modeCountBtn').onclick = () => {
         state.sizeMode = 'count';
         syncUiButtons();
@@ -1149,7 +1145,6 @@
         renderSheet();
       };
 
-      // マス数入力
       document.getElementById('charsPerLineInput').oninput = (e) => {
         const val = parseInt(e.target.value, 10);
         if (!isNaN(val) && val >= 4 && val <= 40) {
@@ -1165,7 +1160,6 @@
         }
       };
 
-      // mm指定入力
       document.querySelectorAll('.mm-chip').forEach(chip => {
         chip.onclick = () => {
           state.cellMm = parseFloat(chip.dataset.mm);
@@ -1182,7 +1176,6 @@
         }
       };
 
-      // オプション
       document.getElementById('furiganaColCheck').onchange = (e) => {
         state.hasFurigana = e.target.checked;
         renderSheet();
@@ -1192,7 +1185,6 @@
         renderSheet();
       };
 
-      // カラー・濃さ・ヘッダー
       document.querySelectorAll('.color-btn').forEach(btn => {
         btn.onclick = () => {
           state.color = btn.dataset.color;
@@ -1213,14 +1205,12 @@
         renderSheet();
       };
 
-      // 見本隠しトグル
       document.getElementById('toggleHideModelBtn').onclick = () => {
         state.hideModelText = !state.hideModelText;
         syncUiButtons();
         renderSheet();
       };
 
-      // ズーム切替
       const zoomFitBtn = document.getElementById('zoomFitBtn');
       const zoom100Btn = document.getElementById('zoom100Btn');
       zoomFitBtn.onclick = () => {
@@ -1236,7 +1226,6 @@
         applyPreviewScale();
       };
 
-      // 印刷
       document.getElementById('headerPrintBtn').onclick = () => window.print();
 
       window.addEventListener('resize', applyPreviewScale);
