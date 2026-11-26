@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- テスト用ページのため検索インデックスを防止（本番index.htmlへ移行時は "index, follow" に変更） -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/" />
+  <title>センセイボックス｜登録不要・無料で使える小学校の先生向けWebツール10選</title>
+  <meta name="description" content="小学校・特別支援の現場ですぐ使える無料Webツール集「センセイボックス」。視写＆ノート見本メーカー、方眼・マス目プリント、一括ルビ振り、漢字プリント、席替え、くじ引き、授業タイマー、効果音ポン出し、クイズ早押し、当番表まで登録不要・インストール不要で即利用可能。">
+  <meta name="keywords" content="小学校 先生 便利サイト, 教員 無料 ツール, 視写 プリント 作成, 方眼紙 印刷, ルビ振り 一括, 席替え アプリ, 授業 タイマー, センセイボックス">
+
+  <meta property="og:title" content="センセイボックス｜先生の「あと5分」をつくる10の無料Webツール">
+  <meta property="og:description" content="登録不要・インストール不要。ブラウザを開くだけでプリント作成から電子黒板の授業演出、学級事務まで即解決する教員向けWebツールポータル。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sensei-otasuke.github.io/teacher-tools/">
+  <meta property="og:image" content="https://sensei-otasuke.github.io/teacher-tools/logo.png">
+  <meta property="og:site_name" content="センセイボックス">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "センセイボックス",
+    "url": "https://sensei-otasuke.github.io/teacher-tools/",
+    "description": "小学校の先生のための登録不要・無料Webツール集（視写＆ノート見本、方眼紙、ルビ振り、漢字プリント、席替え、くじ引き、タイマー、効果音、クイズ、当番表）。"
+  }
+  </script>
+
+  <link rel="icon" href="./logo.png" type="image/png">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background-color: #f8fafc;
+      background-image:
+        radial-gradient(at 12% 8%, rgba(99, 102, 241, 0.08) 0px, transparent 48%),
+        radial-gradient(at 88% 14%, rgba(16, 185, 129, 0.07) 0px, transparent 45%),
+        linear-gradient(to right, rgba(148, 163, 184, 0.09) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.09) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
+
+    /* Bento カードの洗練されたホバー挙動 */
+    .bento-card {
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .bento-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 34px -10px rgba(15, 23, 42, 0.10), 0 6px 14px -4px rgba(15, 23, 42, 0.05);
+    }
+
+    /* ロボットアイコンの軽やかな浮遊アニメーション */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(2deg); }
+    }
+    .robot-float {
+      animation: floatSlow 3.6s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white">
+
+  <!-- 上部テストモード通知バー（本番移行時は削除OK） -->
+  <div class="bg-slate-900 text-slate-200 text-[11px] font-bold py-1.5 px-4 text-center flex items-center justify-center gap-2">
+    <span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono-tech font-black text-[10px]">TEST PREVIEW</span>
+    <span>新トップページ（10アプリ・Bento Grid版）プレビュー中</span>
+    <a href="./index.html" class="underline text-indigo-300 hover:text-white ml-1">現在の本番ページを見る →</a>
+  </div>
+
+  <!-- ヘッダー -->
+  <header class="bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <a href="./" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-200/80 shadow-xs flex items-center justify-center overflow-hidden p-1 group-hover:scale-105 transition">
+          <img src="./logo.png" alt="センセイボックス ロボットロゴ" class="w-full h-full object-contain">
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-lg font-black tracking-tight text-slate-900">センセイボックス</span>
+            <span class="text-[10px] font-mono-tech font-black bg-indigo-600 text-white px-2 py-0.5 rounded-full">10 TOOLS</span>
+          </div>
+          <p class="text-[10px] font-bold text-slate-400 hidden sm:block">登録不要・広告なし・ブラウザ完結の教員支援ツール集</p>
+        </div>
+      </a>
+
+      <!-- クイック検索ボックス（PC・タブレット表示） -->
+      <div class="flex items-center gap-2.5">
+        <div class="relative hidden md:block w-60">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input id="toolSearchInput" type="text" placeholder="ツール名・用途で探す..." class="w-full pl-9 pr-3 py-1.5 text-xs font-bold bg-slate-100/90 border border-slate-200/80 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none transition">
+        </div>
+        <div class="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-3 py-1.5 rounded-xl">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>完全無料・データ送信なし</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-8 pb-16 space-y-8">
+
+    <!-- ヒーローセクション -->
+    <section class="relative bg-white/90 backdrop-blur-xs rounded-[2rem] border border-slate-200/90 p-6 sm:p-9 shadow-xs overflow-hidden">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-3 text-center md:text-left max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-black">
+            <span>🏫 小学校・特別支援の現場発 Webアプリ集</span>
+          </div>
+          <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+            先生の<span class="text-indigo-600">「あと5分」</span>をつくる<br class="sm:hidden">10の道具箱
+          </h1>
+          <p class="text-xs sm:text-sm font-bold text-slate-500 leading-relaxed">
+            ログインもインストールも不要。職員室PC・iPad・Chromebookから開いてすぐ使える、プリント作成・電子黒板演出・学級経営ツールをまとめました。
+          </p>
+        </div>
+
+        <!-- ロボットマスコット＆最新リリース案内カード -->
+        <div class="shrink-0 flex items-center gap-4 bg-gradient-to-br from-slate-50 to-indigo-50/70 border border-indigo-100 rounded-3xl p-4 sm:p-5">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white border border-indigo-100 shadow-sm p-2 flex items-center justify-center robot-float">
+            <img src="./logo.png" alt="センセイボックス マスコット" class="w-full h-full object-contain">
+          </div>
+          <div class="space-y-1">
+            <span class="inline-block text-[10px] font-mono-tech font-black bg-emerald-500 text-white px-2 py-0.5 rounded-md">NEW RELEASE</span>
+            <p class="text-xs sm:text-sm font-black text-slate-900">視写＆ノート見本メーカー</p>
+            <p class="text-[11px] font-bold text-slate-500">縦書き句読点・ルビ・めあて枠対応！</p>
+            <a href="./shisha/" class="inline-flex items-center gap-1 text-xs font-black text-indigo-600 hover:text-indigo-800 pt-0.5">
+              <span>今すぐ使ってみる</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 機能カテゴリーフィルタータブ ＋ モバイル検索 -->
+      <div class="mt-7 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div id="categoryTabs" class="flex flex-wrap items-center gap-1.5">
+          <button data-cat="all" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs transition flex items-center gap-1.5">
+            <span>すべて</span>
+            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">10</span>
+          </button>
+          <button data-cat="print" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
+            <span>🖨️ プリント・教材作成</span>
+            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">4</span>
+          </button>
+          <button data-cat="class" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
+            <span>🖥️ 授業・電子黒板</span>
+            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
+          </button>
+          <button data-cat="admin" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
+            <span>📋 学級経営・事務</span>
+            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
+          </button>
+        </div>
+
+        <!-- スマホ用検索入力 -->
+        <div class="relative md:hidden">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input id="mobileSearchInput" type="text" placeholder="ツール名・キーワードで検索..." class="w-full pl-9 pr-3 py-2 text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none">
+        </div>
+      </div>
+    </section>
+
+    <!-- ピン留め（お気に入り）セクション（1つ以上ピン留め時のみ自動表示） -->
+    <section id="pinnedSection" class="hidden space-y-3">
+      <div class="flex items-center gap-2 px-1">
+        <span class="text-amber-500 text-base">★</span>
+        <h2 class="text-sm font-black text-slate-800">よく使うツール（ピン留め中）</h2>
+      </div>
+      <div id="pinnedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- JSでピン留めカードを複製表示 -->
+      </div>
+    </section>
+
+    <!-- メイン Bento Grid（10アプリ一覧） -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <h2 id="currentCategoryHeading" class="text-sm font-black text-slate-700 flex items-center gap-2">
+          <span>すべてのツール（10個）</span>
+        </h2>
+        <span class="text-[11px] font-bold text-slate-400">★マークで上部に固定できます</span>
+      </div>
+
+      <div id="toolsBentoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
+
+        <!-- 1. 視写＆ノート見本メーカー（大型ヒーローBentoカード：6カラム） -->
+        <article data-id="shisha" data-cat="print" data-keywords="視写 ししゃ ノート 見本 縦書き 横書き なぞり書き めあて 国語 印刷" class="tool-card bento-card lg:col-span-6 bg-white rounded-3xl border-2 border-indigo-500/80 p-6 shadow-xs flex flex-col justify-between relative overflow-hidden group">
+          <div class="absolute top-0 right-0 bg-indigo-600 text-white font-mono-tech font-black text-[10px] px-3.5 py-1 rounded-bl-2xl tracking-wider">
+            NEW!
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-3 pr-10">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-2xl shrink-0">
+                  ✍️
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
+                  <h3 class="text-lg font-black text-slate-900 mt-0.5 group-hover:text-indigo-600 transition">視写＆ノート見本メーカー</h3>
+                </div>
+              </div>
+              <button data-pin="shisha" class="pin-btn p-2 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              文章を入れるだけで「見本＋空欄」「なぞり書き」の視写プリントや、赤枠・吹き出しつきのノート書き方見本を実寸印刷。縦書きの句読点・ふりがなも自動配置。
+            </p>
+          </div>
+
+          <!-- ミニUIビジュアルプレビュー -->
+          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+              <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">縦・横対応</span>
+              <span class="px-2 py-1 rounded-lg bg-slate-100">なぞり書き</span>
+              <span class="px-2 py-1 rounded-lg bg-slate-100">A4/B5実寸</span>
+            </div>
+            <a href="./shisha/" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-xs transition flex items-center gap-1 shrink-0">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+        <!-- 2. 方眼・マス目プリントメーカー（大型ヒーローBentoカード：6カラム） -->
+        <article data-id="grid" data-cat="print" data-keywords="方眼紙 マス目 原稿用紙 漢字練習 5mm 10mm 算数 国語 印刷" class="tool-card bento-card lg:col-span-6 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between relative group">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-2xl shrink-0">
+                  📏
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
+                  <h3 class="text-lg font-black text-slate-900 mt-0.5 group-hover:text-emerald-700 transition">方眼・マス目プリントメーカー</h3>
+                </div>
+              </div>
+              <button data-pin="grid" class="pin-btn p-2 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              5mm方眼・10mm方眼・漢字練習マス・原稿用紙・100マス計算シートをミリ単位で精密作成。A4・A3・B5・B4の全サイズで実寸100%印刷が可能。
+            </p>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+              <span class="px-2 py-1 rounded-lg bg-slate-100">mm実寸指定</span>
+              <span class="px-2 py-1 rounded-lg bg-slate-100">十字リーダー</span>
+              <span class="px-2 py-1 rounded-lg bg-slate-100">100マス計算</span>
+            </div>
+            <a href="./grid/" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-black text-xs shadow-xs transition flex items-center gap-1 shrink-0">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+        <!-- 3. 一括ルビ振りメーカー（4カラム） -->
+        <article data-id="ruby" data-cat="print" data-keywords="ルビ ふりがな 振り仮名 漢字 プリント 配布物 特別支援 外国人児童" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-xl shrink-0">
+                  🔤
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-sky-700 transition">一括ルビ振りメーカー</h3>
+                </div>
+              </div>
+              <button data-pin="ruby" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              長文を貼り付けるだけで漢字に自動でふりがなを付与。学年別の習熟度や支援配慮に合わせたプリント作成が数秒で完了。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">HTML・印刷・コピー対応</span>
+            <a href="./ruby/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-sky-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+        <!-- 4. 漢字プリントメーカー（4カラム） -->
+        <article data-id="kanji" data-cat="print" data-keywords="漢字 テスト プリント 小テスト 読み 書き 練習" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-xl shrink-0">
+                  🀄
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-amber-700 transition">漢字プリントメーカー</h3>
+                </div>
+              </div>
+              <button data-pin="kanji" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              出題したい漢字と問題文を入力するだけで、読み・書き小テストや確認プリントを自動レイアウト。朝学習や宿題プリントに最適。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">問題・解答自動生成</span>
+            <a href="./kanji/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-amber-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+        <!-- 5. 授業タイマー（4カラム） -->
+        <article data-id="timer" data-cat="class" data-keywords="タイマー 時計 カウントダウン 電子黒板 グループ活動 テスト時間" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-xl shrink-0">
+                  ⏱️
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md">授業・電子黒板</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-rose-600 transition">授業タイマー</h3>
+                </div>
+              </div>
+              <button data-pin="timer" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              電子黒板や大型モニターで見やすい大画面タイマー。残り時間の視覚バーとチャイム音で、児童が自分で時間を意識して動ける。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">大画面・プログレスバー</span>
+            <a href="./timer/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-rose-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+        <!-- 6. 効果音ポン出し（4カラム） -->
+        <article data-id="sound" data-cat="class" data-keywords="効果音 ポン出し ピンポン ブブー ドラムロール 拍手 お楽しみ会 授業" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-xl shrink-0">
+                  🔊
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-violet-700 bg-violet-50 px-2 py-0.5 rounded-md">授業・電子黒板</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-violet-700 transition">効果音ポン出し</h3>
+                </div>
+              </div>
+              <button data-pin="sound" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              正解ピンポン・不正解ブブー・ドラムロール・拍手・チャイムをワンタップ再生。クイズ大会や学級レク、授業のメリハリづけに。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">即時再生・音源不要</span>
+            <a href="./sound/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-violet-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+        <!-- 7. クイズ・早押し（4カラム） -->
+        <article data-id="quiz" data-cat="class" data-keywords="クイズ 早押し 対戦 班対抗 お楽しみ会 授業 復習" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center text-xl shrink-0">
+                  🚨
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-orange-700 bg-orange-50 px-2 py-0.5 rounded-md">授業・電子黒板</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-orange-600 transition">クイズ・早押しツール</h3>
+                </div>
+              </div>
+              <button data-pin="quiz" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              1台のiPadやPCを囲んで使える早押しボタン＆得点カウンター。単元の復習クイズや学期末のお楽しみ会が一気に盛り上がる。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">複数人同時タッチ対応</span>
+            <a href="./quiz/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-orange-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+        <!-- 8. 席替えメーカー（4カラム） -->
+        <article data-id="sekigae" data-cat="admin" data-keywords="席替え 座席表 クラス 配慮 固定 印刷 ランダム" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-xl shrink-0">
+                  🪑
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">学級経営・事務</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-teal-700 transition">席替えメーカー</h3>
+                </div>
+              </div>
+              <button data-pin="sekigae" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              視力配慮（前列固定）や離したいペア設定にも対応した座席表作成ツール。黒板側・教卓側視点の切替や掲示用印刷もワンクリック。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">固定席・配慮条件対応</span>
+            <a href="./sekigae/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-teal-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+        <!-- 9. くじ引き・グループ分け（4カラム） -->
+        <article data-id="kuji" data-cat="admin" data-keywords="くじ引き グループ分け 班決め ルーレット 順番決め 発表順" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-pink-50 border border-pink-200 flex items-center justify-center text-xl shrink-0">
+                  🎲
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md">学級経営・事務</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-pink-600 transition">くじ引き・グループ分け</h3>
+                </div>
+              </div>
+              <button data-pin="kuji" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              発表順の抽選や、修学旅行・校外学習・授業の班分けを一瞬で公平に決定。男女バランスや人数指定での自動グループ編成も可能。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">公平抽選・班自動編成</span>
+            <a href="./kuji/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-pink-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+        <!-- 10. 当番表メーカー（4カラム） -->
+        <article data-id="toban" data-cat="admin" data-keywords="当番表 給食当番 掃除当番 係活動 掲示物 印刷 ローテーション" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-xl shrink-0">
+                  🧹
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-md">学級経営・事務</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-cyan-700 transition">当番表メーカー</h3>
+                </div>
+              </div>
+              <button data-pin="toban" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <i data-lucide="star" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              給食当番・掃除当番・日直ローテーション表を自動作成。教室の背面黒板やロッカー横にそのまま貼れる見やすいレイアウトで印刷。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">教室掲示用フォーマット</span>
+            <a href="./toban/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-cyan-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- 検索ヒット0件時のメッセージ -->
+      <div id="emptySearchState" class="hidden bg-white rounded-3xl border border-slate-200 p-10 text-center space-y-2">
+        <p class="text-sm font-black text-slate-700">一致するツールが見つかりませんでした</p>
+        <p class="text-xs font-bold text-slate-400">別のキーワードで検索するか、「すべて」タブに戻してください。</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- フッター -->
+  <footer class="bg-white border-t border-slate-200/80 py-8 px-4 sm:px-6 mt-auto">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <img src="./logo.png" alt="センセイボックス" class="w-8 h-8 object-contain">
+        <div>
+          <p class="text-xs font-black text-slate-800">センセイボックス（Sensei Box）</p>
+          <p class="text-[11px] font-bold text-slate-400">入力された児童名やテキストはすべてお使いの端末内のみで処理され、外部サーバーへ送信されません。</p>
+        </div>
+      </div>
+      <div class="text-[11px] font-mono-tech font-bold text-slate-400">
+        &copy; 2026 Sensei Box
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const PIN_STORAGE_KEY = 'sensei_box_pinned_tools_v1';
+    let currentCategory = 'all';
+    let searchQuery = '';
+    let pinnedIds = [];
+
+    function loadPins() {
+      try {
+        const saved = localStorage.getItem(PIN_STORAGE_KEY);
+        pinnedIds = saved ? JSON.parse(saved) : [];
+      } catch (e) {
+        pinnedIds = [];
+      }
+    }
+
+    function savePins() {
+      try {
+        localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(pinnedIds));
+      } catch (e) {}
+    }
+
+    function togglePin(toolId) {
+      if (pinnedIds.includes(toolId)) {
+        pinnedIds = pinnedIds.filter(id => id !== toolId);
+      } else {
+        pinnedIds.push(toolId);
+      }
+      savePins();
+      renderPinsAndFilter();
+    }
+
+    function renderPinsAndFilter() {
+      const allCards = Array.from(document.querySelectorAll('#toolsBentoGrid .tool-card'));
+      const pinnedSection = document.getElementById('pinnedSection');
+      const pinnedGrid = document.getElementById('pinnedGrid');
+      const emptyState = document.getElementById('emptySearchState');
+
+      // 1. ピン留めボタンの見た目更新
+      document.querySelectorAll('.pin-btn').forEach(btn => {
+        const id = btn.dataset.pin;
+        const isPinned = pinnedIds.includes(id);
+        if (isPinned) {
+          btn.className = 'pin-btn p-2 rounded-xl text-amber-500 bg-amber-50 hover:bg-amber-100 transition';
+          btn.innerHTML = '<i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>';
+        } else {
+          btn.className = 'pin-btn p-2 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition';
+          btn.innerHTML = '<i data-lucide="star" class="w-4 h-4"></i>';
+        }
+      });
+
+      // 2. ピン留めエリアの描画
+      pinnedGrid.innerHTML = '';
+      if (pinnedIds.length > 0) {
+        pinnedSection.classList.remove('hidden');
+        pinnedIds.forEach(id => {
+          const orig = allCards.find(c => c.dataset.id === id);
+          if (!orig) return;
+          const title = orig.querySelector('h3').textContent;
+          const href = orig.querySelector('a').getAttribute('href');
+          const icon = orig.querySelector('.rounded-2xl').textContent.trim();
+
+          const miniCard = document.createElement('div');
+          miniCard.className = 'bg-white rounded-2xl border border-amber-200/90 p-3.5 shadow-2xs flex items-center justify-between gap-2 hover:border-amber-400 transition';
+          miniCard.innerHTML = `
+            <a href="${href}" class="flex items-center gap-2.5 min-w-0 flex-1">
+              <span class="text-xl shrink-0">${icon}</span>
+              <span class="text-xs font-black text-slate-900 truncate">${title}</span>
+            </a>
+            <button data-unpin="${id}" class="text-[11px] font-bold text-slate-400 hover:text-rose-500 px-1.5 py-1 rounded-lg transition" title="ピン解除">✕</button>
+          `;
+          pinnedGrid.appendChild(miniCard);
+        });
+
+        pinnedGrid.querySelectorAll('[data-unpin]').forEach(btn => {
+          btn.onclick = () => togglePin(btn.dataset.unpin);
+        });
+      } else {
+        pinnedSection.classList.add('hidden');
+      }
+
+      // 3. カテゴリー＆検索フィルタリング
+      const q = searchQuery.trim().toLowerCase();
+      let visibleCount = 0;
+
+      allCards.forEach(card => {
+        const cat = card.dataset.cat;
+        const text = (card.textContent + ' ' + (card.dataset.keywords || '')).toLowerCase();
+        const matchCat = currentCategory === 'all' || cat === currentCategory;
+        const matchQuery = !q || text.includes(q);
+
+        if (matchCat && matchQuery) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      const headingMap = {
+        all: `すべてのツール（${visibleCount}個）`,
+        print: `🖨️ プリント・教材作成（${visibleCount}個）`,
+        class: `🖥️ 授業・電子黒板（${visibleCount}個）`,
+        admin: `📋 学級経営・事務（${visibleCount}個）`
+      };
+      document.getElementById('currentCategoryHeading').textContent = headingMap[currentCategory] || `ツール一覧（${visibleCount}個）`;
+
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      lucide.createIcons();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPins();
+
+      // カテゴリータブ
+      document.querySelectorAll('.cat-tab').forEach(tab => {
+        tab.onclick = () => {
+          currentCategory = tab.dataset.cat;
+          document.querySelectorAll('.cat-tab').forEach(t => {
+            const countBadge = t.querySelector('span:last-child');
+            if (t.dataset.cat === currentCategory) {
+              t.className = 'cat-tab px-3.5 py-2 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs transition flex items-center gap-1.5';
+              if (countBadge) countBadge.className = 'font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white';
+            } else {
+              t.className = 'cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5';
+              if (countBadge) countBadge.className = 'font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600';
+            }
+          });
+          renderPinsAndFilter();
+        };
+      });
+
+      // ピン留めボタン
+      document.querySelectorAll('.pin-btn').forEach(btn => {
+        btn.onclick = () => togglePin(btn.dataset.pin);
+      });
+
+      // PC＆モバイル検索連動
+      const pcSearch = document.getElementById('toolSearchInput');
+      const mobSearch = document.getElementById('mobileSearchInput');
+      if (pcSearch) {
+        pcSearch.oninput = (e) => {
+          searchQuery = e.target.value;
+          if (mobSearch) mobSearch.value = searchQuery;
+          renderPinsAndFilter();
+        };
+      }
+      if (mobSearch) {
+        mobSearch.oninput = (e) => {
+          searchQuery = e.target.value;
+          if (pcSearch) pcSearch.value = searchQuery;
+          renderPinsAndFilter();
+        };
+      }
+
+      renderPinsAndFilter();
+    });
+  </script>
+</body>
+</html>
