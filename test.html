@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- テスト用ページのため検索インデックスを防止（本番index.htmlへ移行時は "index, follow" に変更） -->
   <meta name="robots" content="noindex, nofollow">
+  <meta name="google-site-verification" content="srsAyNcZ5tESYeG_jbmVL-l-hGoYNPTbrPBLM5AMXsI" />
   <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/" />
-  <title>センセイボックス｜登録不要・無料で使える小学校の先生向けWebツール10選</title>
+  <title>センセイボックス｜登録不要・無料で使える小学校の先生向けWeb道具箱</title>
   <meta name="description" content="小学校・特別支援の現場ですぐ使える無料Webツール集「センセイボックス」。視写＆ノート見本メーカー、方眼・マス目プリント、一括ルビ振り、漢字プリント、席替え、くじ引き、授業タイマー、効果音ポン出し、クイズ早押し、当番表まで登録不要・インストール不要で即利用可能。">
   <meta name="keywords" content="小学校 先生 便利サイト, 教員 無料 ツール, 視写 プリント 作成, 方眼紙 印刷, ルビ振り 一括, 席替え アプリ, 授業 タイマー, センセイボックス">
 
-  <meta property="og:title" content="センセイボックス｜先生の「あと5分」をつくる10の無料Webツール">
-  <meta property="og:description" content="登録不要・インストール不要。ブラウザを開くだけでプリント作成から電子黒板の授業演出、学級経営まで即解決する教員向けWebツールポータル。">
+  <meta property="og:title" content="センセイボックス｜準備0秒、授業が回る。現場生まれのWeb道具箱">
+  <meta property="og:description" content="職員室PCでも、iPadでも、児童用端末でも。インストール不要で毎日使える教員向け無料Webツール集。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://sensei-otasuke.github.io/teacher-tools/">
   <meta property="og:image" content="https://sensei-otasuke.github.io/teacher-tools/logo.png">
@@ -75,39 +76,48 @@
   <!-- 上部テストモード通知バー（本番移行時は削除OK） -->
   <div class="bg-slate-900 text-slate-200 text-[11px] font-bold py-1.5 px-4 text-center flex flex-wrap items-center justify-center gap-2">
     <span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono-tech font-black text-[10px]">TEST PREVIEW</span>
-    <span>新トップページ（10アプリ・Bento Grid版）プレビュー中</span>
+    <span>新トップページ（Bento Grid版）プレビュー中</span>
     <a href="./index.html" class="underline text-indigo-300 hover:text-white ml-1">現在の本番ページを見る →</a>
   </div>
 
   <!-- ヘッダー -->
   <header class="bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-      <a href="./" class="flex items-center gap-3 group">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <a href="./" class="flex items-center gap-3 group shrink-0">
         <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-200/80 shadow-xs flex items-center justify-center overflow-hidden p-1 group-hover:scale-105 transition">
           <img src="./logo.png" alt="センセイボックス ロボットロゴ" class="w-full h-full object-contain">
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-lg font-black tracking-tight text-slate-900">センセイボックス</span>
-            <span class="text-[10px] font-mono-tech font-black bg-indigo-600 text-white px-2 py-0.5 rounded-full">10 TOOLS</span>
+            <span class="text-base sm:text-lg font-black tracking-tight text-slate-900">センセイボックス</span>
+            <span class="hidden sm:inline-block text-[10px] font-mono-tech font-black bg-indigo-600 text-white px-2 py-0.5 rounded-full">ALL FREE</span>
           </div>
-          <p class="text-[10px] font-bold text-slate-400 hidden sm:block">登録不要・広告なし・ブラウザ完結の教員支援ツール集</p>
+          <p class="text-[10px] font-bold text-slate-400 hidden md:block">登録不要・インストール不要・ブラウザ完結の教員支援ツール集</p>
         </div>
       </a>
 
-      <!-- クイック検索ボックス（PC・タブレット表示） -->
-      <div class="flex items-center gap-2.5">
-        <div class="relative hidden md:block w-64">
+      <!-- 右側アクション：検索 ＋ Instagram ＋ 要望フォーム -->
+      <div class="flex items-center gap-2">
+        <!-- クイック検索ボックス（PC表示） -->
+        <div class="relative hidden lg:block w-52">
           <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input id="toolSearchInput" type="text" placeholder="ツール名・用途で探す..." class="w-full pl-9 pr-8 py-1.5 text-xs font-bold bg-slate-100/90 border border-slate-200/80 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none transition">
+          <input id="toolSearchInput" type="text" placeholder="ツール名で検索..." class="w-full pl-9 pr-8 py-1.5 text-xs font-bold bg-slate-100/90 border border-slate-200/80 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none transition">
           <button id="pcSearchClearBtn" type="button" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full" title="検索をクリア">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </button>
         </div>
-        <div class="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-3 py-1.5 rounded-xl">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>完全無料・データ送信なし</span>
-        </div>
+
+        <!-- 公式Instagramリンク -->
+        <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 hover:opacity-90 text-white font-black text-xs shadow-2xs transition" title="公式Instagram（@sensei_box_ict）">
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          <span class="hidden sm:inline">Instagram</span>
+        </a>
+
+        <!-- ご意見・新アプリ募集フォーム -->
+        <a href="https://forms.gle/vTiT5qM165xjWcpa7" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200/90 font-black text-xs transition" title="ご意見・作ってほしいアプリ募集フォーム">
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>ご意見・要望</span>
+        </a>
       </div>
     </div>
   </header>
@@ -123,10 +133,11 @@
             <span>🏫 小学校・特別支援の現場発 Webアプリ集</span>
           </div>
           <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-            先生の<span class="text-indigo-600">「あと5分」</span>をつくる<br class="sm:hidden">10の道具箱
+            準備0秒、授業が回る。<br>
+            <span class="text-indigo-600">現場生まれのWeb道具箱</span>
           </h1>
           <p class="text-xs sm:text-sm font-bold text-slate-500 leading-relaxed">
-            ログインもインストールも不要。職員室PC・iPad・児童用端末から開いてすぐ使える、プリント作成・電子黒板演出・学級経営ツールをまとめました。
+            職員室PCでも、iPadでも、児童用端末でも。インストール不要で毎日使える教員向けツールボックス。
           </p>
         </div>
 
@@ -147,29 +158,29 @@
         </a>
       </div>
 
-      <!-- 機能カテゴリーフィルタータブ ＋ モバイル検索 -->
+      <!-- 機能カテゴリーフィルタータブ ＋ モバイル・タブレット検索 -->
       <div class="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div id="categoryTabs" class="flex flex-wrap items-center gap-1.5">
           <button data-cat="all" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs transition flex items-center gap-1.5">
             <span>すべて</span>
-            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white">10</span>
+            <span class="cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white">10</span>
           </button>
           <button data-cat="print" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
             <span>🖨️ プリント・教材作成</span>
-            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">4</span>
+            <span class="cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">4</span>
           </button>
           <button data-cat="class" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
             <span>🖥️ 授業・電子黒板</span>
-            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
+            <span class="cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
           </button>
           <button data-cat="admin" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
             <span>📋 学級経営・クラス</span>
-            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
+            <span class="cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
           </button>
         </div>
 
-        <!-- スマホ用検索入力 -->
-        <div class="relative md:hidden">
+        <!-- スマホ・タブレット用検索入力 -->
+        <div class="relative lg:hidden">
           <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           <input id="mobileSearchInput" type="text" placeholder="ツール名・キーワードで検索..." class="w-full pl-9 pr-8 py-2 text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none">
           <button id="mobSearchClearBtn" type="button" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full" title="検索をクリア">
@@ -190,7 +201,7 @@
       </div>
     </section>
 
-    <!-- メイン Bento Grid（10アプリ一覧） -->
+    <!-- メイン Bento Grid（アプリ一覧） -->
     <section class="space-y-3">
       <div class="flex items-center justify-between px-1">
         <h2 id="currentCategoryHeading" class="text-sm font-black text-slate-700">
@@ -409,7 +420,7 @@
           </div>
         </article>
 
-        <!-- 7. クイズ・早押しツール（児童用端末・iPad・PC対応＆同種端末注意書き反映） -->
+        <!-- 7. クイズ・早押しツール -->
         <article data-id="quiz" data-cat="class" data-keywords="クイズ 早押し 対戦 班対抗 お楽しみ会 授業 復習 児童用端末 iPad PC" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-2.5">
             <div class="flex items-start justify-between gap-2">
@@ -549,20 +560,63 @@
       </div>
     </section>
 
+    <!-- リクエスト募集＆公式Instagram案内セクション -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+      <!-- 新ツール・改善リクエスト募集カード -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between gap-4">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-[11px] font-black">
+            <span>💡 現場の声をカタチに</span>
+          </div>
+          <h2 class="text-base sm:text-lg font-black text-slate-900">「こんなアプリがあったらいいのに」募集中！</h2>
+          <p class="text-xs font-bold text-slate-500 leading-relaxed">
+            「このプリントを作るのが毎回大変」「既存のツールのここを直してほしい」など、現場のリアルなアイデアをお気軽にお送りください。順次アップデート・新規開発します。
+          </p>
+        </div>
+        <div>
+          <a href="https://forms.gle/vTiT5qM165xjWcpa7" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-black text-xs shadow-xs transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>ご意見・リクエストフォームを開く</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 公式Instagram案内カード -->
+      <div class="bg-gradient-to-br from-rose-50/70 via-white to-purple-50/70 rounded-3xl border border-pink-200/80 p-6 shadow-xs flex flex-col justify-between gap-4">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-100/80 text-pink-800 text-[11px] font-black">
+            <span>📱 最新アップデート配信中</span>
+          </div>
+          <h2 class="text-base sm:text-lg font-black text-slate-900">公式Instagram（@sensei_box_ict）</h2>
+          <p class="text-xs font-bold text-slate-500 leading-relaxed">
+            新しいWebツールの公開お知らせや、授業・学級経営での具体的な活用アイデアをわかりやすく発信しています。フォローやDMでの感想もお待ちしています！
+          </p>
+        </div>
+        <div>
+          <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:opacity-90 text-white font-black text-xs shadow-xs transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            <span>Instagramをフォローする</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- フッター -->
   <footer class="bg-white border-t border-slate-200/80 py-8 px-4 sm:px-6 mt-auto">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <img src="./logo.png" alt="センセイボックス" class="w-8 h-8 object-contain">
+        <img src="./logo.png" alt="センセイボックス" class="w-8 h-8 object-contain shrink-0">
         <div>
           <p class="text-xs font-black text-slate-800">センセイボックス（Sensei Box）</p>
           <p class="text-[11px] font-bold text-slate-400">入力された児童名やテキストはすべてお使いの端末内のみで処理され、外部サーバーへ送信されません。</p>
         </div>
       </div>
-      <div class="text-[11px] font-mono-tech font-bold text-slate-400">
-        &copy; 2026 Sensei Box
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-slate-500">
+        <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="hover:text-pink-600 transition">公式Instagram</a>
+        <a href="https://forms.gle/vTiT5qM165xjWcpa7" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition">ご意見・要望フォーム</a>
+        <span class="font-mono-tech text-[11px] text-slate-400">&copy; 2026 Sensei Box</span>
       </div>
     </div>
   </footer>
@@ -599,6 +653,20 @@
       }
       savePins();
       renderPinsAndFilter();
+    }
+
+    function updateCategoryCounts() {
+      const allCards = Array.from(document.querySelectorAll('#toolsBentoGrid .tool-card'));
+      const counts = { all: allCards.length, print: 0, class: 0, admin: 0 };
+      allCards.forEach(c => {
+        if (counts[c.dataset.cat] !== undefined) counts[c.dataset.cat]++;
+      });
+      document.querySelectorAll('.cat-tab').forEach(tab => {
+        const badge = tab.querySelector('.cat-count');
+        if (badge && counts[tab.dataset.cat] !== undefined) {
+          badge.textContent = counts[tab.dataset.cat];
+        }
+      });
     }
 
     function renderPinsAndFilter() {
@@ -669,17 +737,13 @@
         }
       });
 
-      // 表示カード数に応じてカラム幅を美しく再配分
       visibleCards.forEach(card => {
         card.classList.remove('lg:col-span-6', 'lg:col-span-4');
         if (currentCategory === 'all' && !q) {
-          // 全体表示時は上位2つが6カラム、残り8つが4カラムの非対称Bento Grid
           card.classList.add(card.dataset.featured === 'true' ? 'lg:col-span-6' : 'lg:col-span-4');
         } else if (visibleCards.length === 4 || visibleCards.length === 2) {
-          // 4個または2個表示時は左右2列均等（6カラムずつ）で歯抜けなし
           card.classList.add('lg:col-span-6');
         } else {
-          // 3個や1個表示時は4カラム（3列均等）
           card.classList.add('lg:col-span-4');
         }
       });
@@ -698,7 +762,6 @@
         emptyState.classList.add('hidden');
       }
 
-      // クリアボタン表示制御
       const pcClear = document.getElementById('pcSearchClearBtn');
       const mobClear = document.getElementById('mobSearchClearBtn');
       if (pcClear) pcClear.classList.toggle('hidden', !searchQuery);
@@ -707,26 +770,27 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       loadPins();
+      updateCategoryCounts();
 
       // カテゴリータブ
       document.querySelectorAll('.cat-tab').forEach(tab => {
         tab.onclick = () => {
           currentCategory = tab.dataset.cat;
           document.querySelectorAll('.cat-tab').forEach(t => {
-            const countBadge = t.querySelector('span:last-child');
+            const countBadge = t.querySelector('.cat-count');
             if (t.dataset.cat === currentCategory) {
               t.className = 'cat-tab px-3.5 py-2 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs transition flex items-center gap-1.5';
-              if (countBadge) countBadge.className = 'font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white';
+              if (countBadge) countBadge.className = 'cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white';
             } else {
               t.className = 'cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5';
-              if (countBadge) countBadge.className = 'font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600';
+              if (countBadge) countBadge.className = 'cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600';
             }
           });
           renderPinsAndFilter();
         };
       });
 
-      // ピン留めボタン（カード全体のリンク遷移を止めてピン切替のみ実行）
+      // ピン留めボタン
       document.querySelectorAll('.pin-btn').forEach(btn => {
         btn.onclick = (e) => {
           e.preventDefault();
