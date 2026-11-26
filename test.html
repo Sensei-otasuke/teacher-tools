@@ -11,7 +11,7 @@
   <meta name="keywords" content="小学校 先生 便利サイト, 教員 無料 ツール, 視写 プリント 作成, 方眼紙 印刷, ルビ振り 一括, 席替え アプリ, 授業 タイマー, センセイボックス">
 
   <meta property="og:title" content="センセイボックス｜先生の「あと5分」をつくる10の無料Webツール">
-  <meta property="og:description" content="登録不要・インストール不要。ブラウザを開くだけでプリント作成から電子黒板の授業演出、学級事務まで即解決する教員向けWebツールポータル。">
+  <meta property="og:description" content="登録不要・インストール不要。ブラウザを開くだけでプリント作成から電子黒板の授業演出、学級経営まで即解決する教員向けWebツールポータル。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://sensei-otasuke.github.io/teacher-tools/">
   <meta property="og:image" content="https://sensei-otasuke.github.io/teacher-tools/logo.png">
@@ -34,23 +34,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
     body {
       font-family: 'M PLUS Rounded 1c', sans-serif;
       background-color: #f8fafc;
       background-image:
-        radial-gradient(at 12% 8%, rgba(99, 102, 241, 0.08) 0px, transparent 48%),
-        radial-gradient(at 88% 14%, rgba(16, 185, 129, 0.07) 0px, transparent 45%),
-        linear-gradient(to right, rgba(148, 163, 184, 0.09) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(148, 163, 184, 0.09) 1px, transparent 1px);
+        radial-gradient(at 10% 6%, rgba(99, 102, 241, 0.08) 0px, transparent 48%),
+        radial-gradient(at 90% 12%, rgba(16, 185, 129, 0.07) 0px, transparent 45%),
+        linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
       background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
     }
     .font-mono-tech { font-family: 'Chivo Mono', monospace; }
 
-    /* Bento カードの洗練されたホバー挙動 */
+    /* Bento カードのホバー・タップ感触 */
     .bento-card {
       transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease;
     }
@@ -58,8 +56,11 @@
       transform: translateY(-4px);
       box-shadow: 0 18px 34px -10px rgba(15, 23, 42, 0.10), 0 6px 14px -4px rgba(15, 23, 42, 0.05);
     }
+    .bento-card:active {
+      transform: translateY(-1px);
+    }
 
-    /* ロボットアイコンの軽やかな浮遊アニメーション */
+    /* ロボットアイコンの浮遊アニメーション */
     @keyframes floatSlow {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-4px) rotate(2deg); }
@@ -72,7 +73,7 @@
 <body class="text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white">
 
   <!-- 上部テストモード通知バー（本番移行時は削除OK） -->
-  <div class="bg-slate-900 text-slate-200 text-[11px] font-bold py-1.5 px-4 text-center flex items-center justify-center gap-2">
+  <div class="bg-slate-900 text-slate-200 text-[11px] font-bold py-1.5 px-4 text-center flex flex-wrap items-center justify-center gap-2">
     <span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono-tech font-black text-[10px]">TEST PREVIEW</span>
     <span>新トップページ（10アプリ・Bento Grid版）プレビュー中</span>
     <a href="./index.html" class="underline text-indigo-300 hover:text-white ml-1">現在の本番ページを見る →</a>
@@ -96,9 +97,12 @@
 
       <!-- クイック検索ボックス（PC・タブレット表示） -->
       <div class="flex items-center gap-2.5">
-        <div class="relative hidden md:block w-60">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-          <input id="toolSearchInput" type="text" placeholder="ツール名・用途で探す..." class="w-full pl-9 pr-3 py-1.5 text-xs font-bold bg-slate-100/90 border border-slate-200/80 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none transition">
+        <div class="relative hidden md:block w-64">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="toolSearchInput" type="text" placeholder="ツール名・用途で探す..." class="w-full pl-9 pr-8 py-1.5 text-xs font-bold bg-slate-100/90 border border-slate-200/80 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none transition">
+          <button id="pcSearchClearBtn" type="button" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full" title="検索をクリア">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
         </div>
         <div class="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-3 py-1.5 rounded-xl">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -109,10 +113,10 @@
   </header>
 
   <!-- メインコンテンツ -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-8 pb-16 space-y-8">
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-7 pb-16 space-y-7">
 
     <!-- ヒーローセクション -->
-    <section class="relative bg-white/90 backdrop-blur-xs rounded-[2rem] border border-slate-200/90 p-6 sm:p-9 shadow-xs overflow-hidden">
+    <section class="relative bg-white/95 backdrop-blur-xs rounded-[2rem] border border-slate-200/90 p-6 sm:p-8 shadow-xs overflow-hidden">
       <div class="flex flex-col md:flex-row items-center justify-between gap-6">
         <div class="space-y-3 text-center md:text-left max-w-2xl">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-black">
@@ -122,33 +126,33 @@
             先生の<span class="text-indigo-600">「あと5分」</span>をつくる<br class="sm:hidden">10の道具箱
           </h1>
           <p class="text-xs sm:text-sm font-bold text-slate-500 leading-relaxed">
-            ログインもインストールも不要。職員室PC・iPad・Chromebookから開いてすぐ使える、プリント作成・電子黒板演出・学級経営ツールをまとめました。
+            ログインもインストールも不要。職員室PC・iPad・児童用端末から開いてすぐ使える、プリント作成・電子黒板演出・学級経営ツールをまとめました。
           </p>
         </div>
 
         <!-- ロボットマスコット＆最新リリース案内カード -->
-        <div class="shrink-0 flex items-center gap-4 bg-gradient-to-br from-slate-50 to-indigo-50/70 border border-indigo-100 rounded-3xl p-4 sm:p-5">
-          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white border border-indigo-100 shadow-sm p-2 flex items-center justify-center robot-float">
+        <a href="./shisha/" class="shrink-0 w-full md:w-auto flex items-center gap-4 bg-gradient-to-br from-slate-50 to-indigo-50/80 hover:from-indigo-50 hover:to-indigo-100/70 border border-indigo-200/80 rounded-3xl p-4 sm:p-5 transition group">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white border border-indigo-100 shadow-sm p-2 flex items-center justify-center shrink-0 robot-float">
             <img src="./logo.png" alt="センセイボックス マスコット" class="w-full h-full object-contain">
           </div>
-          <div class="space-y-1">
+          <div class="space-y-1 min-w-0">
             <span class="inline-block text-[10px] font-mono-tech font-black bg-emerald-500 text-white px-2 py-0.5 rounded-md">NEW RELEASE</span>
-            <p class="text-xs sm:text-sm font-black text-slate-900">視写＆ノート見本メーカー</p>
+            <p class="text-sm font-black text-slate-900 group-hover:text-indigo-700 transition">視写＆ノート見本メーカー</p>
             <p class="text-[11px] font-bold text-slate-500">縦書き句読点・ルビ・めあて枠対応！</p>
-            <a href="./shisha/" class="inline-flex items-center gap-1 text-xs font-black text-indigo-600 hover:text-indigo-800 pt-0.5">
+            <span class="inline-flex items-center gap-1 text-xs font-black text-indigo-600 pt-0.5">
               <span>今すぐ使ってみる</span>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
           </div>
-        </div>
+        </a>
       </div>
 
       <!-- 機能カテゴリーフィルタータブ ＋ モバイル検索 -->
-      <div class="mt-7 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div class="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div id="categoryTabs" class="flex flex-wrap items-center gap-1.5">
           <button data-cat="all" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs transition flex items-center gap-1.5">
             <span>すべて</span>
-            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">10</span>
+            <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white">10</span>
           </button>
           <button data-cat="print" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
             <span>🖨️ プリント・教材作成</span>
@@ -159,15 +163,18 @@
             <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
           </button>
           <button data-cat="admin" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
-            <span>📋 学級経営・事務</span>
+            <span>📋 学級経営・クラス</span>
             <span class="font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
           </button>
         </div>
 
         <!-- スマホ用検索入力 -->
         <div class="relative md:hidden">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-          <input id="mobileSearchInput" type="text" placeholder="ツール名・キーワードで検索..." class="w-full pl-9 pr-3 py-2 text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="mobileSearchInput" type="text" placeholder="ツール名・キーワードで検索..." class="w-full pl-9 pr-8 py-2 text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none">
+          <button id="mobSearchClearBtn" type="button" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full" title="検索をクリア">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
         </div>
       </div>
     </section>
@@ -178,7 +185,7 @@
         <span class="text-amber-500 text-base">★</span>
         <h2 class="text-sm font-black text-slate-800">よく使うツール（ピン留め中）</h2>
       </div>
-      <div id="pinnedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div id="pinnedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         <!-- JSでピン留めカードを複製表示 -->
       </div>
     </section>
@@ -186,33 +193,35 @@
     <!-- メイン Bento Grid（10アプリ一覧） -->
     <section class="space-y-3">
       <div class="flex items-center justify-between px-1">
-        <h2 id="currentCategoryHeading" class="text-sm font-black text-slate-700 flex items-center gap-2">
-          <span>すべてのツール（10個）</span>
+        <h2 id="currentCategoryHeading" class="text-sm font-black text-slate-700">
+          すべてのツール（10個）
         </h2>
-        <span class="text-[11px] font-bold text-slate-400">★マークで上部に固定できます</span>
+        <span class="text-[11px] font-bold text-slate-400">★ボタンで上部に固定できます</span>
       </div>
 
       <div id="toolsBentoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
 
-        <!-- 1. 視写＆ノート見本メーカー（大型ヒーローBentoカード：6カラム） -->
-        <article data-id="shisha" data-cat="print" data-keywords="視写 ししゃ ノート 見本 縦書き 横書き なぞり書き めあて 国語 印刷" class="tool-card bento-card lg:col-span-6 bg-white rounded-3xl border-2 border-indigo-500/80 p-6 shadow-xs flex flex-col justify-between relative overflow-hidden group">
-          <div class="absolute top-0 right-0 bg-indigo-600 text-white font-mono-tech font-black text-[10px] px-3.5 py-1 rounded-bl-2xl tracking-wider">
+        <!-- 1. 視写＆ノート見本メーカー（大型ヒーローBentoカード） -->
+        <article data-id="shisha" data-cat="print" data-featured="true" data-keywords="視写 ししゃ ノート 見本 縦書き 横書き なぞり書き めあて 国語 印刷" class="tool-card bento-card lg:col-span-6 bg-white rounded-3xl border-2 border-indigo-500/80 p-6 shadow-xs flex flex-col justify-between relative overflow-hidden group cursor-pointer">
+          <div class="absolute top-0 right-0 bg-indigo-600 text-white font-mono-tech font-black text-[10px] px-3.5 py-1 rounded-bl-2xl tracking-wider pointer-events-none">
             NEW!
           </div>
 
           <div class="space-y-3">
-            <div class="flex items-start justify-between gap-3 pr-10">
+            <div class="flex items-start justify-between gap-3 pr-11">
               <div class="flex items-center gap-3">
                 <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-2xl shrink-0">
                   ✍️
                 </div>
                 <div>
                   <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
-                  <h3 class="text-lg font-black text-slate-900 mt-0.5 group-hover:text-indigo-600 transition">視写＆ノート見本メーカー</h3>
+                  <h3 class="text-lg font-black text-slate-900 mt-0.5 group-hover:text-indigo-600 transition">
+                    <a href="./shisha/" class="card-main-link after:absolute after:inset-0 after:z-0">視写＆ノート見本メーカー</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="shisha" class="pin-btn p-2 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="shisha" class="pin-btn relative z-10 p-2 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
 
@@ -221,22 +230,21 @@
             </p>
           </div>
 
-          <!-- ミニUIビジュアルプレビュー -->
-          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-slate-600">
               <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">縦・横対応</span>
               <span class="px-2 py-1 rounded-lg bg-slate-100">なぞり書き</span>
               <span class="px-2 py-1 rounded-lg bg-slate-100">A4/B5実寸</span>
             </div>
-            <a href="./shisha/" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-xs transition flex items-center gap-1 shrink-0">
+            <span class="px-4 py-2 rounded-xl bg-indigo-600 group-hover:bg-indigo-700 text-white font-black text-xs shadow-xs transition flex items-center gap-1 shrink-0">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
-        <!-- 2. 方眼・マス目プリントメーカー（大型ヒーローBentoカード：6カラム） -->
-        <article data-id="grid" data-cat="print" data-keywords="方眼紙 マス目 原稿用紙 漢字練習 5mm 10mm 算数 国語 印刷" class="tool-card bento-card lg:col-span-6 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between relative group">
+        <!-- 2. 方眼・マス目プリントメーカー（大型ヒーローBentoカード） -->
+        <article data-id="grid" data-cat="print" data-featured="true" data-keywords="方眼紙 マス目 原稿用紙 漢字練習 5mm 10mm 算数 国語 印刷" class="tool-card bento-card lg:col-span-6 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-3">
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-center gap-3">
@@ -245,34 +253,36 @@
                 </div>
                 <div>
                   <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
-                  <h3 class="text-lg font-black text-slate-900 mt-0.5 group-hover:text-emerald-700 transition">方眼・マス目プリントメーカー</h3>
+                  <h3 class="text-lg font-black text-slate-900 mt-0.5 group-hover:text-emerald-700 transition">
+                    <a href="./grid/" class="card-main-link after:absolute after:inset-0 after:z-0">方眼・マス目プリントメーカー</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="grid" class="pin-btn p-2 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="grid" class="pin-btn relative z-10 p-2 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
 
             <p class="text-xs font-bold text-slate-500 leading-relaxed">
-              5mm方眼・10mm方眼・漢字練習マス・原稿用紙・100マス計算シートをミリ単位で精密作成。A4・A3・B5・B4の全サイズで実寸100%印刷が可能。
+              5mm方眼・10mm方眼・漢字練習マス・20×20原稿用紙・十字リーダーをミリ単位で精密作成。A4・A3・B5・B4の全サイズで実寸100%印刷が可能。
             </p>
           </div>
 
-          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-slate-600">
               <span class="px-2 py-1 rounded-lg bg-slate-100">mm実寸指定</span>
               <span class="px-2 py-1 rounded-lg bg-slate-100">十字リーダー</span>
-              <span class="px-2 py-1 rounded-lg bg-slate-100">100マス計算</span>
+              <span class="px-2 py-1 rounded-lg bg-slate-100">原稿用紙対応</span>
             </div>
-            <a href="./grid/" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-black text-xs shadow-xs transition flex items-center gap-1 shrink-0">
+            <span class="px-4 py-2 rounded-xl bg-slate-900 group-hover:bg-emerald-600 text-white font-black text-xs shadow-xs transition flex items-center gap-1 shrink-0">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
-        <!-- 3. 一括ルビ振りメーカー（4カラム） -->
-        <article data-id="ruby" data-cat="print" data-keywords="ルビ ふりがな 振り仮名 漢字 プリント 配布物 特別支援 外国人児童" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+        <!-- 3. 一括ルビ振りメーカー -->
+        <article data-id="ruby" data-cat="print" data-keywords="ルビ ふりがな 振り仮名 漢字 プリント 配布物 特別支援 外国人児童" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5">
@@ -281,11 +291,13 @@
                 </div>
                 <div>
                   <span class="text-[10px] font-black text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
-                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-sky-700 transition">一括ルビ振りメーカー</h3>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-sky-700 transition">
+                    <a href="./ruby/" class="card-main-link after:absolute after:inset-0 after:z-0">一括ルビ振りメーカー</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="ruby" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="ruby" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
             <p class="text-xs font-bold text-slate-500 leading-relaxed">
@@ -294,15 +306,15 @@
           </div>
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <span class="text-[10px] font-bold text-slate-400">HTML・印刷・コピー対応</span>
-            <a href="./ruby/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-sky-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-sky-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
-        <!-- 4. 漢字プリントメーカー（4カラム） -->
-        <article data-id="kanji" data-cat="print" data-keywords="漢字 テスト プリント 小テスト 読み 書き 練習" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+        <!-- 4. 漢字プリントメーカー -->
+        <article data-id="kanji" data-cat="print" data-keywords="漢字 テスト プリント 小テスト 読み 書き 練習" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5">
@@ -311,11 +323,13 @@
                 </div>
                 <div>
                   <span class="text-[10px] font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
-                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-amber-700 transition">漢字プリントメーカー</h3>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-amber-700 transition">
+                    <a href="./kanji/" class="card-main-link after:absolute after:inset-0 after:z-0">漢字プリントメーカー</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="kanji" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="kanji" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
             <p class="text-xs font-bold text-slate-500 leading-relaxed">
@@ -324,15 +338,15 @@
           </div>
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <span class="text-[10px] font-bold text-slate-400">問題・解答自動生成</span>
-            <a href="./kanji/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-amber-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-amber-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
-        <!-- 5. 授業タイマー（4カラム） -->
-        <article data-id="timer" data-cat="class" data-keywords="タイマー 時計 カウントダウン 電子黒板 グループ活動 テスト時間" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+        <!-- 5. 授業タイマー -->
+        <article data-id="timer" data-cat="class" data-keywords="タイマー 時計 カウントダウン 電子黒板 グループ活動 テスト時間" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5">
@@ -341,11 +355,13 @@
                 </div>
                 <div>
                   <span class="text-[10px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md">授業・電子黒板</span>
-                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-rose-600 transition">授業タイマー</h3>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-rose-600 transition">
+                    <a href="./timer/" class="card-main-link after:absolute after:inset-0 after:z-0">授業タイマー</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="timer" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="timer" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
             <p class="text-xs font-bold text-slate-500 leading-relaxed">
@@ -354,15 +370,15 @@
           </div>
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <span class="text-[10px] font-bold text-slate-400">大画面・プログレスバー</span>
-            <a href="./timer/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-rose-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-rose-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
-        <!-- 6. 効果音ポン出し（4カラム） -->
-        <article data-id="sound" data-cat="class" data-keywords="効果音 ポン出し ピンポン ブブー ドラムロール 拍手 お楽しみ会 授業" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+        <!-- 6. 効果音ポン出し -->
+        <article data-id="sound" data-cat="class" data-keywords="効果音 ポン出し ピンポン ブブー ドラムロール 拍手 お楽しみ会 授業" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5">
@@ -371,11 +387,13 @@
                 </div>
                 <div>
                   <span class="text-[10px] font-black text-violet-700 bg-violet-50 px-2 py-0.5 rounded-md">授業・電子黒板</span>
-                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-violet-700 transition">効果音ポン出し</h3>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-violet-700 transition">
+                    <a href="./sound/" class="card-main-link after:absolute after:inset-0 after:z-0">効果音ポン出し</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="sound" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="sound" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
             <p class="text-xs font-bold text-slate-500 leading-relaxed">
@@ -384,15 +402,15 @@
           </div>
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <span class="text-[10px] font-bold text-slate-400">即時再生・音源不要</span>
-            <a href="./sound/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-violet-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-violet-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
-        <!-- 7. クイズ・早押し（4カラム） -->
-        <article data-id="quiz" data-cat="class" data-keywords="クイズ 早押し 対戦 班対抗 お楽しみ会 授業 復習" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+        <!-- 7. クイズ・早押しツール（児童用端末・iPad・PC対応＆同種端末注意書き反映） -->
+        <article data-id="quiz" data-cat="class" data-keywords="クイズ 早押し 対戦 班対抗 お楽しみ会 授業 復習 児童用端末 iPad PC" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5">
@@ -401,28 +419,33 @@
                 </div>
                 <div>
                   <span class="text-[10px] font-black text-orange-700 bg-orange-50 px-2 py-0.5 rounded-md">授業・電子黒板</span>
-                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-orange-600 transition">クイズ・早押しツール</h3>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-orange-600 transition">
+                    <a href="./quiz/" class="card-main-link after:absolute after:inset-0 after:z-0">クイズ・早押しツール</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="quiz" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="quiz" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
             <p class="text-xs font-bold text-slate-500 leading-relaxed">
-              1台のiPadやPCを囲んで使える早押しボタン＆得点カウンター。単元の復習クイズや学期末のお楽しみ会が一気に盛り上がる。
+              児童用端末・iPad・PCから参加できる早押しボタン＆得点カウンター。単元の復習クイズや学期末のお楽しみ会が一気に盛り上がる。
             </p>
+            <div class="bg-amber-50/90 border border-amber-200/80 rounded-xl px-2.5 py-1.5 text-[10px] font-bold text-amber-900 leading-snug">
+              ※親機も子機も同じ種類の端末にしてください（児童用端末と先生用PCなど異なる端末同士では接続が不安定になります）。
+            </div>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-[10px] font-bold text-slate-400">複数人同時タッチ対応</span>
-            <a href="./quiz/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-orange-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+          <div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">児童用端末・iPad・PC対応</span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-orange-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
-        <!-- 8. 席替えメーカー（4カラム） -->
-        <article data-id="sekigae" data-cat="admin" data-keywords="席替え 座席表 クラス 配慮 固定 印刷 ランダム" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+        <!-- 8. 席替えメーカー -->
+        <article data-id="sekigae" data-cat="admin" data-keywords="席替え 座席表 クラス 配慮 固定 印刷 ランダム" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5">
@@ -430,12 +453,14 @@
                   🪑
                 </div>
                 <div>
-                  <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">学級経営・事務</span>
-                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-teal-700 transition">席替えメーカー</h3>
+                  <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">学級経営・クラス</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-teal-700 transition">
+                    <a href="./sekigae/" class="card-main-link after:absolute after:inset-0 after:z-0">席替えメーカー</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="sekigae" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="sekigae" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
             <p class="text-xs font-bold text-slate-500 leading-relaxed">
@@ -444,15 +469,15 @@
           </div>
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <span class="text-[10px] font-bold text-slate-400">固定席・配慮条件対応</span>
-            <a href="./sekigae/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-teal-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-teal-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
-        <!-- 9. くじ引き・グループ分け（4カラム） -->
-        <article data-id="kuji" data-cat="admin" data-keywords="くじ引き グループ分け 班決め ルーレット 順番決め 発表順" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+        <!-- 9. くじ引き・グループ分け -->
+        <article data-id="kuji" data-cat="admin" data-keywords="くじ引き グループ分け 班決め ルーレット 順番決め 発表順" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5">
@@ -460,12 +485,14 @@
                   🎲
                 </div>
                 <div>
-                  <span class="text-[10px] font-black text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md">学級経営・事務</span>
-                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-pink-600 transition">くじ引き・グループ分け</h3>
+                  <span class="text-[10px] font-black text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md">学級経営・クラス</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-pink-600 transition">
+                    <a href="./kuji/" class="card-main-link after:absolute after:inset-0 after:z-0">くじ引き・グループ分け</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="kuji" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="kuji" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
             <p class="text-xs font-bold text-slate-500 leading-relaxed">
@@ -474,15 +501,15 @@
           </div>
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <span class="text-[10px] font-bold text-slate-400">公平抽選・班自動編成</span>
-            <a href="./kuji/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-pink-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-pink-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
-        <!-- 10. 当番表メーカー（4カラム） -->
-        <article data-id="toban" data-cat="admin" data-keywords="当番表 給食当番 掃除当番 係活動 掲示物 印刷 ローテーション" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between group">
+        <!-- 10. 当番表メーカー -->
+        <article data-id="toban" data-cat="admin" data-keywords="当番表 給食当番 掃除当番 係活動 掲示物 印刷 ローテーション" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
           <div class="space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5">
@@ -490,12 +517,14 @@
                   🧹
                 </div>
                 <div>
-                  <span class="text-[10px] font-black text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-md">学級経営・事務</span>
-                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-cyan-700 transition">当番表メーカー</h3>
+                  <span class="text-[10px] font-black text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-md">学級経営・クラス</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-cyan-700 transition">
+                    <a href="./toban/" class="card-main-link after:absolute after:inset-0 after:z-0">当番表メーカー</a>
+                  </h3>
                 </div>
               </div>
-              <button data-pin="toban" class="pin-btn p-1.5 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition" title="よく使うツールに固定">
-                <i data-lucide="star" class="w-4 h-4"></i>
+              <button type="button" data-pin="toban" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </button>
             </div>
             <p class="text-xs font-bold text-slate-500 leading-relaxed">
@@ -504,10 +533,10 @@
           </div>
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <span class="text-[10px] font-bold text-slate-400">教室掲示用フォーマット</span>
-            <a href="./toban/" class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-cyan-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-cyan-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
               <span>開く</span>
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            </a>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
           </div>
         </article>
 
@@ -544,6 +573,9 @@
     let searchQuery = '';
     let pinnedIds = [];
 
+    const STAR_OUTLINE_SVG = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    const STAR_FILLED_SVG = '<svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+
     function loadPins() {
       try {
         const saved = localStorage.getItem(PIN_STORAGE_KEY);
@@ -575,28 +607,29 @@
       const pinnedGrid = document.getElementById('pinnedGrid');
       const emptyState = document.getElementById('emptySearchState');
 
-      // 1. ピン留めボタンの見た目更新
+      // 1. ピン留めボタン状態更新
       document.querySelectorAll('.pin-btn').forEach(btn => {
         const id = btn.dataset.pin;
         const isPinned = pinnedIds.includes(id);
+        const padClass = btn.closest('[data-featured="true"]') ? 'p-2' : 'p-1.5';
         if (isPinned) {
-          btn.className = 'pin-btn p-2 rounded-xl text-amber-500 bg-amber-50 hover:bg-amber-100 transition';
-          btn.innerHTML = '<i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>';
+          btn.className = `pin-btn relative z-10 ${padClass} rounded-xl bg-amber-50 border border-amber-300 text-amber-500 hover:bg-amber-100 transition`;
+          btn.innerHTML = STAR_FILLED_SVG;
         } else {
-          btn.className = 'pin-btn p-2 rounded-xl text-slate-300 hover:text-amber-500 hover:bg-amber-50 transition';
-          btn.innerHTML = '<i data-lucide="star" class="w-4 h-4"></i>';
+          btn.className = `pin-btn relative z-10 ${padClass} rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition`;
+          btn.innerHTML = STAR_OUTLINE_SVG;
         }
       });
 
-      // 2. ピン留めエリアの描画
+      // 2. ピン留めバー描画
       pinnedGrid.innerHTML = '';
       if (pinnedIds.length > 0) {
         pinnedSection.classList.remove('hidden');
         pinnedIds.forEach(id => {
           const orig = allCards.find(c => c.dataset.id === id);
           if (!orig) return;
-          const title = orig.querySelector('h3').textContent;
-          const href = orig.querySelector('a').getAttribute('href');
+          const title = orig.querySelector('h3 a').textContent.trim();
+          const href = orig.querySelector('h3 a').getAttribute('href');
           const icon = orig.querySelector('.rounded-2xl').textContent.trim();
 
           const miniCard = document.createElement('div');
@@ -606,7 +639,7 @@
               <span class="text-xl shrink-0">${icon}</span>
               <span class="text-xs font-black text-slate-900 truncate">${title}</span>
             </a>
-            <button data-unpin="${id}" class="text-[11px] font-bold text-slate-400 hover:text-rose-500 px-1.5 py-1 rounded-lg transition" title="ピン解除">✕</button>
+            <button type="button" data-unpin="${id}" class="text-[11px] font-bold text-slate-400 hover:text-rose-500 px-1.5 py-1 rounded-lg transition" title="ピン解除">✕</button>
           `;
           pinnedGrid.appendChild(miniCard);
         });
@@ -618,9 +651,9 @@
         pinnedSection.classList.add('hidden');
       }
 
-      // 3. カテゴリー＆検索フィルタリング
+      // 3. カテゴリー＆検索フィルタリング＋グリッド幅の自動最適化（歯抜け防止）
       const q = searchQuery.trim().toLowerCase();
-      let visibleCount = 0;
+      const visibleCards = [];
 
       allCards.forEach(card => {
         const cat = card.dataset.cat;
@@ -630,27 +663,46 @@
 
         if (matchCat && matchQuery) {
           card.classList.remove('hidden');
-          visibleCount++;
+          visibleCards.push(card);
         } else {
           card.classList.add('hidden');
         }
       });
 
-      const headingMap = {
-        all: `すべてのツール（${visibleCount}個）`,
-        print: `🖨️ プリント・教材作成（${visibleCount}個）`,
-        class: `🖥️ 授業・電子黒板（${visibleCount}個）`,
-        admin: `📋 学級経営・事務（${visibleCount}個）`
-      };
-      document.getElementById('currentCategoryHeading').textContent = headingMap[currentCategory] || `ツール一覧（${visibleCount}個）`;
+      // 表示カード数に応じてカラム幅を美しく再配分
+      visibleCards.forEach(card => {
+        card.classList.remove('lg:col-span-6', 'lg:col-span-4');
+        if (currentCategory === 'all' && !q) {
+          // 全体表示時は上位2つが6カラム、残り8つが4カラムの非対称Bento Grid
+          card.classList.add(card.dataset.featured === 'true' ? 'lg:col-span-6' : 'lg:col-span-4');
+        } else if (visibleCards.length === 4 || visibleCards.length === 2) {
+          // 4個または2個表示時は左右2列均等（6カラムずつ）で歯抜けなし
+          card.classList.add('lg:col-span-6');
+        } else {
+          // 3個や1個表示時は4カラム（3列均等）
+          card.classList.add('lg:col-span-4');
+        }
+      });
 
-      if (visibleCount === 0) {
+      const headingMap = {
+        all: `すべてのツール（${visibleCards.length}個）`,
+        print: `🖨️ プリント・教材作成（${visibleCards.length}個）`,
+        class: `🖥️ 授業・電子黒板（${visibleCards.length}個）`,
+        admin: `📋 学級経営・クラス（${visibleCards.length}個）`
+      };
+      document.getElementById('currentCategoryHeading').textContent = headingMap[currentCategory] || `ツール一覧（${visibleCards.length}個）`;
+
+      if (visibleCards.length === 0) {
         emptyState.classList.remove('hidden');
       } else {
         emptyState.classList.add('hidden');
       }
 
-      lucide.createIcons();
+      // クリアボタン表示制御
+      const pcClear = document.getElementById('pcSearchClearBtn');
+      const mobClear = document.getElementById('mobSearchClearBtn');
+      if (pcClear) pcClear.classList.toggle('hidden', !searchQuery);
+      if (mobClear) mobClear.classList.toggle('hidden', !searchQuery);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -674,28 +726,32 @@
         };
       });
 
-      // ピン留めボタン
+      // ピン留めボタン（カード全体のリンク遷移を止めてピン切替のみ実行）
       document.querySelectorAll('.pin-btn').forEach(btn => {
-        btn.onclick = () => togglePin(btn.dataset.pin);
+        btn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          togglePin(btn.dataset.pin);
+        };
       });
 
-      // PC＆モバイル検索連動
+      // PC＆モバイル検索連動＋クリアボタン
       const pcSearch = document.getElementById('toolSearchInput');
       const mobSearch = document.getElementById('mobileSearchInput');
-      if (pcSearch) {
-        pcSearch.oninput = (e) => {
-          searchQuery = e.target.value;
-          if (mobSearch) mobSearch.value = searchQuery;
-          renderPinsAndFilter();
-        };
-      }
-      if (mobSearch) {
-        mobSearch.oninput = (e) => {
-          searchQuery = e.target.value;
-          if (pcSearch) pcSearch.value = searchQuery;
-          renderPinsAndFilter();
-        };
-      }
+      const pcClear = document.getElementById('pcSearchClearBtn');
+      const mobClear = document.getElementById('mobSearchClearBtn');
+
+      const syncSearch = (val) => {
+        searchQuery = val;
+        if (pcSearch && pcSearch.value !== val) pcSearch.value = val;
+        if (mobSearch && mobSearch.value !== val) mobSearch.value = val;
+        renderPinsAndFilter();
+      };
+
+      if (pcSearch) pcSearch.oninput = (e) => syncSearch(e.target.value);
+      if (mobSearch) mobSearch.oninput = (e) => syncSearch(e.target.value);
+      if (pcClear) pcClear.onclick = () => { syncSearch(''); pcSearch.focus(); };
+      if (mobClear) mobClear.onclick = () => { syncSearch(''); mobSearch.focus(); };
 
       renderPinsAndFilter();
     });
