@@ -3,388 +3,773 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Google Search Console 所有権確認タグ -->
-  <meta name="google-site-verification" content="srsAyNcZ5tESYeG_jbmVL-l-hGoYNPTbrPBLM5AMXsI" />
-
-  <!-- URL正規化タグ（SNS経由のパラメータによる評価分散を防止） -->
-  <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/" />
-
-  <!-- 検索エンジン向けSEO設定 -->
-  <title>センセイボックス (SenseiBox) | 授業・学級経営をサポートする先生のためのWebツール</title>
-  <meta name="description" content="センセイボックス（SenseiBox）は、小・中学校の先生のための無料教室支援Webツール集です。個人情報を外部送信しない完全安心の「スマート席替えメーカー」「一括ルビ振りメーカー」「方眼・マス目プリントメーカー」「スマートくじ引きメーカー」「早押しクイズ」「当番表」「教室サウンドパッド」「授業用タイマー」「漢字配当チェッカー」を搭載。登録不要ですぐに使えます。">
-  <meta name="keywords" content="センセイボックス, SenseiBox, 席替え ルーレット, 授業用タイマー, 早押しクイズ, 当番表, ルビ振り 一括, Word ルビ, くじ引き アプリ, 方眼用紙 印刷, マス目プリント, 十字リーダー, 教室 効果音, 教員 便利ツール, 小学校 席替え, 電子黒板, ICT教育">
   <meta name="robots" content="index, follow">
+  <meta name="google-site-verification" content="srsAyNcZ5tESYeG_jbmVL-l-hGoYNPTbrPBLM5AMXsI" />
+  <link rel="canonical" href="https://sensei-otasuke.github.io/teacher-tools/" />
+  <title>センセイボックス｜登録不要・無料で使える小学校の先生向けWeb道具箱</title>
+  <meta name="description" content="小学校・特別支援の現場ですぐ使える無料Webツール集「センセイボックス」。視写＆ノート見本メーカー、方眼・マス目プリント、一括ルビ振り、漢字プリント、席替え、くじ引き、授業タイマー、効果音ポン出し、クイズ早押し、当番表まで登録不要・インストール不要で即利用可能。">
+  <meta name="keywords" content="小学校 先生 便利サイト, 教員 無料 ツール, 視写 プリント 作成, 方眼紙 印刷, ルビ振り 一括, 席替え アプリ, 授業 タイマー, センセイボックス">
 
-  <!-- OGP（SNS・LINE・Instagramシェア用） -->
-  <meta property="og:title" content="センセイボックス (SenseiBox) | 授業・学級経営Webツール">
-  <meta property="og:description" content="個人情報の外部送信ゼロ・登録不要。席替え・一括ルビ振り・方眼プリント作成・くじ引き・早押しクイズなど、先生の「ちょっと助かる」が揃うスマートツールボックス。">
+  <meta property="og:title" content="センセイボックス｜準備0秒、授業が回る。現場生まれのWeb道具箱">
+  <meta property="og:description" content="職員室PCでも、iPadでも、児童用端末でも。インストール不要で毎日使える教員向け無料Webツール集。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://sensei-otasuke.github.io/teacher-tools/">
   <meta property="og:image" content="https://sensei-otasuke.github.io/teacher-tools/logo.png">
   <meta property="og:site_name" content="センセイボックス">
 
-  <!-- Twitter / X カード -->
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="センセイボックス (SenseiBox)">
-  <meta name="twitter:description" content="登録不要・完全無料の先生向け教室Webツール集。">
-  <meta name="twitter:image" content="https://sensei-otasuke.github.io/teacher-tools/logo.png">
-
-  <!-- 構造化データ（Google検索エンジンにWebアプリ群として正確に認識させる） -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "センセイボックス (SenseiBox)",
-    "alternateName": "SenseiBox",
+    "@type": "WebSite",
+    "name": "センセイボックス",
     "url": "https://sensei-otasuke.github.io/teacher-tools/",
-    "description": "小・中学校の先生のための無料教室支援Webツール集。個人情報を外部送信しない完全安心設計で、席替え、一括ルビ振り、方眼・マス目プリント作成、くじ引き、早押しクイズ、当番表、タイマー、サウンドパッド、漢字配当チェッカーを搭載。",
-    "applicationCategory": "EducationalApplication",
-    "operatingSystem": "All",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "JPY"
-    }
+    "description": "小学校の先生のための登録不要・無料Webツール集（視写＆ノート見本、方眼紙、ルビ振り、漢字プリント、席替え、くじ引き、タイマー、効果音、クイズ、当番表）。"
   }
   </script>
 
-  <!-- ファビコン（タブのアイコン） -->
   <link rel="icon" href="./logo.png" type="image/png">
-
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@700;900&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    body { font-family: 'M PLUS Rounded 1c', sans-serif; }
-    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
-    
-    /* アプリカードのホバーエフェクト */
-    .app-card {
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background-color: #f8fafc;
+      background-image:
+        radial-gradient(at 10% 6%, rgba(99, 102, 241, 0.08) 0px, transparent 48%),
+        radial-gradient(at 90% 12%, rgba(16, 185, 129, 0.07) 0px, transparent 45%),
+        linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
     }
-    .app-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    .font-mono-tech { font-family: 'Chivo Mono', monospace; }
+
+    /* Bento カードのホバー・タップ感触 */
+    .bento-card {
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .bento-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 34px -10px rgba(15, 23, 42, 0.10), 0 6px 14px -4px rgba(15, 23, 42, 0.05);
+    }
+    .bento-card:active {
+      transform: translateY(-1px);
+    }
+
+    /* ロボットアイコンの浮遊アニメーション */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(2deg); }
+    }
+    .robot-float {
+      animation: floatSlow 3.6s ease-in-out infinite;
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+<body class="text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white">
 
   <!-- ヘッダー -->
-  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      
-      <!-- ロゴ＆サービス名 -->
-      <a href="./" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-2xl overflow-hidden border border-slate-200 bg-white p-0.5 shadow-xs group-hover:scale-105 transition-transform flex items-center justify-center">
-          <img src="./logo.png" onerror="this.onerror=null; this.src='./logo.jpg';" alt="センセイボックス ロゴ" class="w-full h-full object-cover rounded-xl">
+  <header class="bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <a href="./" class="flex items-center gap-3 group shrink-0">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-200/80 shadow-xs flex items-center justify-center overflow-hidden p-1 group-hover:scale-105 transition">
+          <img src="./logo.png" alt="センセイボックス ロボットロゴ" class="w-full h-full object-contain">
         </div>
         <div>
-          <div class="flex items-center gap-1.5">
-            <span class="text-lg font-black text-slate-900 tracking-tight">センセイボックス</span>
-            <span class="text-[10px] font-mono-tech font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.2 rounded-md">SenseiBox</span>
+          <div class="flex items-center gap-2">
+            <span class="text-base sm:text-lg font-black tracking-tight text-slate-900">センセイボックス</span>
+            <span class="hidden sm:inline-block text-[10px] font-mono-tech font-black bg-indigo-600 text-white px-2 py-0.5 rounded-full">ALL FREE</span>
           </div>
-          <p class="text-[10px] text-slate-400 font-bold hidden sm:block">先生の「ちょっと助かる」が揃う教室アプリ集</p>
+          <p class="text-[10px] font-bold text-slate-400 hidden md:block">登録不要・インストール不要・ブラウザ完結の教員支援ツール集</p>
         </div>
       </a>
 
-      <!-- 公式Instagramボタン ＆ セキュリティバッジ -->
-      <div class="flex items-center gap-2.5">
-        <span class="hidden md:inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          <span>登録不要・サーバー送信ゼロ</span>
-        </span>
+      <!-- 右側アクション：検索 ＋ Instagram ＋ 要望フォーム -->
+      <div class="flex items-center gap-2">
+        <!-- クイック検索ボックス（PC表示） -->
+        <div class="relative hidden lg:block w-52">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="toolSearchInput" type="text" placeholder="ツール名で検索..." class="w-full pl-9 pr-8 py-1.5 text-xs font-bold bg-slate-100/90 border border-slate-200/80 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none transition">
+          <button id="pcSearchClearBtn" type="button" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full" title="検索をクリア">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
 
-        <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 hover:opacity-90 active:scale-95 text-white font-black text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
-          <i data-lucide="instagram" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">公式リール更新中</span>
-          <span class="sm:hidden">Instagram</span>
+        <!-- 公式Instagramリンク -->
+        <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 hover:opacity-90 text-white font-black text-xs shadow-2xs transition" title="公式Instagram（@sensei_box_ict）">
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          <span class="hidden sm:inline">Instagram</span>
+        </a>
+
+        <!-- ご意見・新アプリ募集フォーム -->
+        <a href="https://forms.gle/vTiT5qM165xjWcpa7" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200/90 font-black text-xs transition" title="ご意見・作ってほしいアプリ募集フォーム">
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>ご意見・要望</span>
         </a>
       </div>
-
     </div>
   </header>
 
-  <!-- メインエリア -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8 sm:py-12 flex flex-col gap-10">
+  <!-- メインコンテンツ -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-7 pb-16 space-y-7">
 
     <!-- ヒーローセクション -->
-    <div class="text-center max-w-3xl mx-auto space-y-3">
-      <div class="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full shadow-2xs text-xs font-bold text-slate-600">
-        <span class="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
-        <span>方眼・マス目プリントメーカー新登場！全9アプリ公開中</span>
-      </div>
-      <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-snug">
-        <span class="inline-block">教室の「困った」を、</span><span class="inline-block">秒で解決する道具箱。</span>
-      </h1>
-      <p class="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
-        アカウント登録もインストールも不要。ブラウザを開くだけで、<br class="hidden sm:inline">
-        パソコンやタブレットですぐに使える先生のための特化ツール集です。
-      </p>
-    </div>
-
-    <!-- アプリ一覧グリッド（全9ツール：すべて別タブで開く設定） -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-
-      <!-- 1: 席替えメーカー -->
-      <a href="./sekigae/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-              🪑
-            </div>
-            <span class="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2.5 py-0.5 rounded-full">人気 No.1</span>
+    <section class="relative bg-white/95 backdrop-blur-xs rounded-[2rem] border border-slate-200/90 p-6 sm:p-8 shadow-xs overflow-hidden">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-3 text-center md:text-left max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-black">
+            <span>🏫 小学校・特別支援の現場発 Webアプリ集</span>
           </div>
-          <h2 class="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors">スマート席替えメーカー</h2>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-            配慮席の事前固定、iPadでのタッチ入れ替え・指ドラッグ、スロット演出、Excel出力・印刷対応。子どもたちが大盛り上がりする席替え決定版。
+          <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+            準備0秒、授業が回る。<br>
+            <span class="text-indigo-600">現場生まれのWeb道具箱</span>
+          </h1>
+          <p class="text-xs sm:text-sm font-bold text-slate-500 leading-relaxed">
+            職員室PCでも、iPadでも、児童用端末でも。インストール不要で毎日使える教員向けツールボックス。
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
-          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </a>
 
-      <!-- 2: 一括ルビ振りメーカー -->
-      <a href="./ruby/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-              🔤
-            </div>
-            <span class="text-[11px] font-bold text-violet-800 bg-violet-50 border border-violet-200 px-2.5 py-0.5 rounded-full">Word書式維持</span>
+        <!-- ロボットマスコット＆最新リリース案内カード -->
+        <a href="./shisha/" class="shrink-0 w-full md:w-auto flex items-center gap-4 bg-gradient-to-br from-slate-50 to-indigo-50/80 hover:from-indigo-50 hover:to-indigo-100/70 border border-indigo-200/80 rounded-3xl p-4 sm:p-5 transition group">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white border border-indigo-100 shadow-sm p-2 flex items-center justify-center shrink-0 robot-float">
+            <img src="./logo.png" alt="センセイボックス マスコット" class="w-full h-full object-contain">
           </div>
-          <h2 class="text-lg font-black text-slate-900 group-hover:text-violet-600 transition-colors">一括ルビ振りメーカー</h2>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-            Wordファイル（.docx）の書式を残したまま学年別未習漢字に一括ルビ振り！マイ辞書登録・縦書きA4横向き印刷にも対応。
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-violet-700">
-          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </a>
-
-      <!-- 3: 方眼・マス目プリントメーカー（NEW） -->
-      <a href="./grid/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border-2 border-emerald-300/80 p-6 flex flex-col justify-between group shadow-xs relative overflow-hidden">
-        <div class="absolute top-0 right-0 bg-emerald-600 text-white font-black text-[10px] px-3 py-1 rounded-bl-xl tracking-wider uppercase">
-          NEW RELEASE
-        </div>
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-              📐
-            </div>
-            <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full mr-12">A4/A3/B5/B4</span>
+          <div class="space-y-1 min-w-0">
+            <span class="inline-block text-[10px] font-mono-tech font-black bg-emerald-500 text-white px-2 py-0.5 rounded-md">NEW RELEASE</span>
+            <p class="text-sm font-black text-slate-900 group-hover:text-indigo-700 transition">視写＆ノート見本メーカー</p>
+            <p class="text-[11px] font-bold text-slate-500">縦書き句読点・ルビ・めあて枠対応！</p>
+            <span class="inline-flex items-center gap-1 text-xs font-black text-indigo-600 pt-0.5">
+              <span>今すぐ使ってみる</span>
+              <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
           </div>
-          <h2 class="text-lg font-black text-slate-900 group-hover:text-emerald-600 transition-colors">方眼・マス目プリントメーカー</h2>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-            実寸mm・マス数指定で方眼用紙を即印刷！低学年向け十字リーダー、漢字練習帳レイアウト、黒・青・緑の3色カラー対応。
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
-          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </a>
-
-      <!-- 4: スマートくじ引きメーカー -->
-      <a href="./kuji/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-              🎯
-            </div>
-            <span class="text-[11px] font-bold text-orange-800 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-full">班分け・発表画面</span>
-          </div>
-          <h2 class="text-lg font-black text-slate-900 group-hover:text-orange-600 transition-colors">スマートくじ引きメーカー</h2>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-            欠席者ワンタップ除外、複数人同時指名、グループ（班）自動分け、ドラムロール抽選！「発表画面のみモード」でテレビ投影も快適。
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-orange-700">
-          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </a>
-
-      <!-- 5: 早押しクイズツール -->
-      <a href="./quiz/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-              🚨
-            </div>
-            <span class="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">端末連携</span>
-          </div>
-          <h2 class="text-lg font-black text-slate-900 group-hover:text-amber-600 transition-colors">早押しクイズツール</h2>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-            黒板のQRコードをタブレットで読むだけ！誰が最初に押したかをミリ秒単位で判定・ランキング表示。
-          </p>
-          <p class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200/80 rounded-lg px-2.5 py-1.5 mt-2.5 font-bold flex items-start gap-1">
-            <i data-lucide="info" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600"></i>
-            <span>※学校で使う際は、黒板側も予備の児童端末で起動してください</span>
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
-          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </a>
-
-      <!-- 6: 当番ローテーション表 -->
-      <a href="./toban/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-              🍱
-            </div>
-            <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">学級経営</span>
-          </div>
-          <h2 class="text-lg font-black text-slate-900 group-hover:text-emerald-600 transition-colors">当番ローテーション表</h2>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-            給食・掃除当番をワンクリックで翌週へスライド！席替え名簿の引継ぎやA4印刷・電子黒板投影に対応。
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
-          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </a>
-
-      <!-- 7: 教室サウンドパッド -->
-      <a href="./sound/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-              🔊
-            </div>
-            <span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200/60 px-2.5 py-0.5 rounded-full">簡単操作</span>
-          </div>
-          <h2 class="text-lg font-black text-slate-900 group-hover:text-rose-600 transition-colors">教室サウンドパッド</h2>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-            ピンポン・ブブー・ドラムロールなど10種。キーボードの1〜0で即鳴らせる演出ツール。
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600">
-          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </a>
-
-      <!-- 8: 授業用大型タイマー -->
-      <a href="./timer/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-              ⏱️
-            </div>
-            <span class="text-[11px] font-bold text-sky-700 bg-sky-50 border border-sky-200/60 px-2.5 py-0.5 rounded-full">CD / CU 両対応</span>
-          </div>
-          <h2 class="text-lg font-black text-slate-900 group-hover:text-sky-600 transition-colors">授業用大型タイマー</h2>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-            後ろの席からでも一目で時間がわかる特大フォント。カウントダウン・カウントアップ切替、学校チャイム音・全画面対応。
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600">
-          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </a>
-
-      <!-- 9: 漢字配当チェッカー -->
-      <a href="./kanji/" target="_blank" rel="noopener noreferrer" class="app-card bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col justify-between group shadow-xs">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-              📖
-            </div>
-            <span class="text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200/60 px-2.5 py-0.5 rounded-full">教材作成</span>
-          </div>
-          <h2 class="text-lg font-black text-slate-900 group-hover:text-teal-600 transition-colors">漢字配当チェッカー</h2>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-            プリントやテストの文章を貼るだけ。選択した学年で「まだ習っていない漢字」を瞬時にハイライト。
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-600">
-          <span class="flex items-center gap-1">アプリを開く <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-70"></i></span>
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </a>
-
-    </div>
-
-    <!-- 安心・安全へのこだわりバナー -->
-    <div class="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="flex items-start gap-3.5">
-        <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-          <i data-lucide="shield-check" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h3 class="font-black text-slate-800 text-sm">個人情報をサーバー送信ゼロ</h3>
-          <p class="text-xs text-slate-500 mt-1 leading-relaxed">児童名簿や入力データはすべて先生のPCだけで安全に処理されます。</p>
-        </div>
+        </a>
       </div>
 
-      <div class="flex items-start gap-3.5">
-        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
-          <i data-lucide="user-x" class="w-5 h-5"></i>
+      <!-- 機能カテゴリーフィルタータブ ＋ モバイル・タブレット検索 -->
+      <div class="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div id="categoryTabs" class="flex flex-wrap items-center gap-1.5">
+          <button data-cat="all" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs transition flex items-center gap-1.5">
+            <span>すべて</span>
+            <span class="cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white">10</span>
+          </button>
+          <button data-cat="print" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
+            <span>🖨️ プリント・教材作成</span>
+            <span class="cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">4</span>
+          </button>
+          <button data-cat="class" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
+            <span>🖥️ 授業・電子黒板</span>
+            <span class="cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
+          </button>
+          <button data-cat="admin" class="cat-tab px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 font-black text-xs transition flex items-center gap-1.5">
+            <span>📋 学級経営・クラス</span>
+            <span class="cat-count font-mono-tech text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600">3</span>
+          </button>
+        </div>
+
+        <!-- スマホ・タブレット用検索入力 -->
+        <div class="relative lg:hidden">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="mobileSearchInput" type="text" placeholder="ツール名・キーワードで検索..." class="w-full pl-9 pr-8 py-2 text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none">
+          <button id="mobSearchClearBtn" type="button" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full" title="検索をクリア">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ピン留め（お気に入り）セクション（1つ以上ピン留め時のみ自動表示） -->
+    <section id="pinnedSection" class="hidden space-y-3">
+      <div class="flex items-center gap-2 px-1">
+        <span class="text-amber-500 text-base">★</span>
+        <h2 class="text-sm font-black text-slate-800">よく使うツール（ピン留め中）</h2>
+      </div>
+      <div id="pinnedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <!-- JSでピン留めカードを複製表示 -->
+      </div>
+    </section>
+
+    <!-- メイン Bento Grid（アプリ一覧） -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <h2 id="currentCategoryHeading" class="text-sm font-black text-slate-700">
+          すべてのツール（10個）
+        </h2>
+        <span class="text-[11px] font-bold text-slate-400">★ボタンで上部に固定できます</span>
+      </div>
+
+      <div id="toolsBentoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
+
+        <!-- 1. 視写＆ノート見本メーカー（大型ヒーローBentoカード） -->
+        <article data-id="shisha" data-cat="print" data-featured="true" data-keywords="視写 ししゃ ノート 見本 縦書き 横書き なぞり書き めあて 国語 印刷" class="tool-card bento-card lg:col-span-6 bg-white rounded-3xl border-2 border-indigo-500/80 p-6 shadow-xs flex flex-col justify-between relative overflow-hidden group cursor-pointer">
+          <div class="absolute top-0 right-0 bg-indigo-600 text-white font-mono-tech font-black text-[10px] px-3.5 py-1 rounded-bl-2xl tracking-wider pointer-events-none">
+            NEW!
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-3 pr-11">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-2xl shrink-0">
+                  ✍️
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
+                  <h3 class="text-lg font-black text-slate-900 mt-0.5 group-hover:text-indigo-600 transition">
+                    <a href="./shisha/" class="card-main-link after:absolute after:inset-0 after:z-0">視写＆ノート見本メーカー</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="shisha" class="pin-btn relative z-10 p-2 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              文章を入れるだけで「見本＋空欄」「なぞり書き」の視写プリントや、赤枠・吹き出しつきのノート書き方見本を実寸印刷。縦書きの句読点・ふりがなも自動配置。
+            </p>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-slate-600">
+              <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">縦・横対応</span>
+              <span class="px-2 py-1 rounded-lg bg-slate-100">なぞり書き</span>
+              <span class="px-2 py-1 rounded-lg bg-slate-100">A4/B5実寸</span>
+            </div>
+            <span class="px-4 py-2 rounded-xl bg-indigo-600 group-hover:bg-indigo-700 text-white font-black text-xs shadow-xs transition flex items-center gap-1 shrink-0">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+        <!-- 2. 方眼・マス目プリントメーカー（大型ヒーローBentoカード） -->
+        <article data-id="grid" data-cat="print" data-featured="true" data-keywords="方眼紙 マス目 原稿用紙 漢字練習 5mm 10mm 算数 国語 印刷" class="tool-card bento-card lg:col-span-6 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between relative group cursor-pointer">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-2xl shrink-0">
+                  📏
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
+                  <h3 class="text-lg font-black text-slate-900 mt-0.5 group-hover:text-emerald-700 transition">
+                    <a href="./grid/" class="card-main-link after:absolute after:inset-0 after:z-0">方眼・マス目プリントメーカー</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="grid" class="pin-btn relative z-10 p-2 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              5mm方眼・10mm方眼・漢字練習マス・20×20原稿用紙・十字リーダーをミリ単位で精密作成。A4・A3・B5・B4の全サイズで実寸100%印刷が可能。
+            </p>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-slate-600">
+              <span class="px-2 py-1 rounded-lg bg-slate-100">mm実寸指定</span>
+              <span class="px-2 py-1 rounded-lg bg-slate-100">十字リーダー</span>
+              <span class="px-2 py-1 rounded-lg bg-slate-100">原稿用紙対応</span>
+            </div>
+            <span class="px-4 py-2 rounded-xl bg-slate-900 group-hover:bg-emerald-600 text-white font-black text-xs shadow-xs transition flex items-center gap-1 shrink-0">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+        <!-- 3. 一括ルビ振りメーカー -->
+        <article data-id="ruby" data-cat="print" data-keywords="ルビ ふりがな 振り仮名 漢字 プリント 配布物 特別支援 外国人児童" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-xl shrink-0">
+                  🔤
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-sky-700 transition">
+                    <a href="./ruby/" class="card-main-link after:absolute after:inset-0 after:z-0">一括ルビ振りメーカー</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="ruby" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              長文を貼り付けるだけで漢字に自動でふりがなを付与。学年別の習熟度や支援配慮に合わせたプリント作成が数秒で完了。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">HTML・印刷・コピー対応</span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-sky-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+        <!-- 4. 漢字プリントメーカー -->
+        <article data-id="kanji" data-cat="print" data-keywords="漢字 テスト プリント 小テスト 読み 書き 練習" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-xl shrink-0">
+                  🀄
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md">プリント・教材作成</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-amber-700 transition">
+                    <a href="./kanji/" class="card-main-link after:absolute after:inset-0 after:z-0">漢字プリントメーカー</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="kanji" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              出題したい漢字と問題文を入力するだけで、読み・書き小テストや確認プリントを自動レイアウト。朝学習や宿題プリントに最適。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">問題・解答自動生成</span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-amber-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+        <!-- 5. 授業タイマー -->
+        <article data-id="timer" data-cat="class" data-keywords="タイマー 時計 カウントダウン 電子黒板 グループ活動 テスト時間" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-xl shrink-0">
+                  ⏱️
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md">授業・電子黒板</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-rose-600 transition">
+                    <a href="./timer/" class="card-main-link after:absolute after:inset-0 after:z-0">授業タイマー</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="timer" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              電子黒板や大型モニターで見やすい大画面タイマー。残り時間の視覚バーとチャイム音で、児童が自分で時間を意識して動ける。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">大画面・プログレスバー</span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-rose-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+        <!-- 6. 効果音ポン出し -->
+        <article data-id="sound" data-cat="class" data-keywords="効果音 ポン出し ピンポン ブブー ドラムロール 拍手 お楽しみ会 授業" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-xl shrink-0">
+                  🔊
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-violet-700 bg-violet-50 px-2 py-0.5 rounded-md">授業・電子黒板</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-violet-700 transition">
+                    <a href="./sound/" class="card-main-link after:absolute after:inset-0 after:z-0">効果音ポン出し</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="sound" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              正解ピンポン・不正解ブブー・ドラムロール・拍手・チャイムをワンタップ再生。クイズ大会や学級レク、授業のメリハリづけに。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">即時再生・音源不要</span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-violet-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+        <!-- 7. クイズ・早押しツール -->
+        <article data-id="quiz" data-cat="class" data-keywords="クイズ 早押し 対戦 班対抗 お楽しみ会 授業 復習 児童用端末 iPad PC" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center text-xl shrink-0">
+                  🚨
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-orange-700 bg-orange-50 px-2 py-0.5 rounded-md">授業・電子黒板</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-orange-600 transition">
+                    <a href="./quiz/" class="card-main-link after:absolute after:inset-0 after:z-0">クイズ・早押しツール</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="quiz" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              児童用端末・iPad・PCから参加できる早押しボタン＆得点カウンター。単元の復習クイズや学期末のお楽しみ会が一気に盛り上がる。
+            </p>
+            <div class="bg-amber-50/90 border border-amber-200/80 rounded-xl px-2.5 py-1.5 text-[10px] font-bold text-amber-900 leading-snug">
+              ※親機も子機も同じ種類の端末にしてください（児童用端末と先生用PCなど異なる端末同士では接続が不安定になります）。
+            </div>
+          </div>
+          <div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">児童用端末・iPad・PC対応</span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-orange-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+        <!-- 8. 席替えメーカー -->
+        <article data-id="sekigae" data-cat="admin" data-keywords="席替え 座席表 クラス 配慮 固定 印刷 ランダム" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-xl shrink-0">
+                  🪑
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">学級経営・クラス</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-teal-700 transition">
+                    <a href="./sekigae/" class="card-main-link after:absolute after:inset-0 after:z-0">席替えメーカー</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="sekigae" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              視力配慮（前列固定）や離したいペア設定にも対応した座席表作成ツール。黒板側・教卓側視点の切替や掲示用印刷もワンクリック。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">固定席・配慮条件対応</span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-teal-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+        <!-- 9. くじ引き・グループ分け -->
+        <article data-id="kuji" data-cat="admin" data-keywords="くじ引き グループ分け 班決め ルーレット 順番決め 発表順" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-pink-50 border border-pink-200 flex items-center justify-center text-xl shrink-0">
+                  🎲
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md">学級経営・クラス</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-pink-600 transition">
+                    <a href="./kuji/" class="card-main-link after:absolute after:inset-0 after:z-0">くじ引き・グループ分け</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="kuji" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              発表順の抽選や、修学旅行・校外学習・授業の班分けを一瞬で公平に決定。男女バランスや人数指定での自動グループ編成も可能。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">公平抽選・班自動編成</span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-pink-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+        <!-- 10. 当番表メーカー -->
+        <article data-id="toban" data-cat="admin" data-keywords="当番表 給食当番 掃除当番 係活動 掲示物 印刷 ローテーション" class="tool-card bento-card lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between relative group cursor-pointer">
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-xl shrink-0">
+                  🧹
+                </div>
+                <div>
+                  <span class="text-[10px] font-black text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-md">学級経営・クラス</span>
+                  <h3 class="text-base font-black text-slate-900 mt-0.5 group-hover:text-cyan-700 transition">
+                    <a href="./toban/" class="card-main-link after:absolute after:inset-0 after:z-0">当番表メーカー</a>
+                  </h3>
+                </div>
+              </div>
+              <button type="button" data-pin="toban" class="pin-btn relative z-10 p-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition" title="よく使うツールに固定">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+            </div>
+            <p class="text-xs font-bold text-slate-500 leading-relaxed">
+              給食当番・掃除当番・日直ローテーション表を自動作成。教室の背面黒板やロッカー横にそのまま貼れる見やすいレイアウトで印刷。
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400">教室掲示用フォーマット</span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-cyan-600 text-slate-800 group-hover:text-white font-black text-xs transition flex items-center gap-1">
+              <span>開く</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- 検索ヒット0件時のメッセージ -->
+      <div id="emptySearchState" class="hidden bg-white rounded-3xl border border-slate-200 p-10 text-center space-y-2">
+        <p class="text-sm font-black text-slate-700">一致するツールが見つかりませんでした</p>
+        <p class="text-xs font-bold text-slate-400">別のキーワードで検索するか、「すべて」タブに戻してください。</p>
+      </div>
+    </section>
+
+    <!-- リクエスト募集＆公式Instagram案内セクション -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+      <!-- 新ツール・改善リクエスト募集カード -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between gap-4">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-[11px] font-black">
+            <span>💡 現場の声をカタチに</span>
+          </div>
+          <h2 class="text-base sm:text-lg font-black text-slate-900">「こんなアプリがあったらいいのに」募集中！</h2>
+          <p class="text-xs font-bold text-slate-500 leading-relaxed">
+            「このプリントを作るのが毎回大変」「既存のツールのここを直してほしい」など、現場のリアルなアイデアをお気軽にお送りください。順次アップデート・新規開発します。
+          </p>
         </div>
         <div>
-          <h3 class="font-black text-slate-800 text-sm">面倒なアカウント登録なし</h3>
-          <p class="text-xs text-slate-500 mt-1 leading-relaxed">メールアドレスやパスワードの設定は一切不要。思い立った瞬間にすぐ授業で使えます。</p>
+          <a href="https://forms.gle/vTiT5qM165xjWcpa7" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-black text-xs shadow-xs transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>ご意見・リクエストフォームを開く</span>
+          </a>
         </div>
       </div>
 
-      <div class="flex items-start gap-3.5">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-          <i data-lucide="sparkles" class="w-5 h-5"></i>
+      <!-- 公式Instagram案内カード -->
+      <div class="bg-gradient-to-br from-rose-50/70 via-white to-purple-50/70 rounded-3xl border border-pink-200/80 p-6 shadow-xs flex flex-col justify-between gap-4">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-100/80 text-pink-800 text-[11px] font-black">
+            <span>📱 最新アップデート配信中</span>
+          </div>
+          <h2 class="text-base sm:text-lg font-black text-slate-900">公式Instagram（@sensei_box_ict）</h2>
+          <p class="text-xs font-bold text-slate-500 leading-relaxed">
+            新しいWebツールの公開お知らせや、授業・学級経営での具体的な活用アイデアをわかりやすく発信しています。フォローやDMでの感想もお待ちしています！
+          </p>
         </div>
         <div>
-          <h3 class="font-black text-slate-800 text-sm">現場の先生が作った実用ツール</h3>
-          <p class="text-xs text-slate-500 mt-1 leading-relaxed">「教室のこんな機能が欲しかった」を形に。授業のテンポと業務効率化を徹底サポート。</p>
+          <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:opacity-90 text-white font-black text-xs shadow-xs transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            <span>Instagramをフォローする</span>
+          </a>
         </div>
       </div>
-    </div>
+    </section>
 
   </main>
 
   <!-- フッター -->
-  <footer class="mt-auto py-8 px-4 border-t border-slate-200 bg-white text-center text-xs text-slate-400">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <div class="w-6 h-6 rounded-lg overflow-hidden border border-slate-200 bg-white">
-          <img src="./logo.png" onerror="this.onerror=null; this.src='./logo.jpg';" alt="ロゴ" class="w-full h-full object-cover">
+  <footer class="bg-white border-t border-slate-200/80 py-8 px-4 sm:px-6 mt-auto">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <img src="./logo.png" alt="センセイボックス" class="w-8 h-8 object-contain shrink-0">
+        <div>
+          <p class="text-xs font-black text-slate-800">センセイボックス（Sensei Box）</p>
+          <p class="text-[11px] font-bold text-slate-400">入力された児童名やテキストはすべてお使いの端末内のみで処理され、外部サーバーへ送信されません。</p>
         </div>
-        <span class="font-bold text-slate-700">センセイボックス (SenseiBox)</span>
-        <span class="font-mono-tech text-[11px]">&copy; 2026</span>
       </div>
-      <div class="flex items-center gap-4 text-[11px]">
-        <a href="https://forms.gle/vTiT5qM165xjWcpa7" target="_blank" rel="noopener noreferrer" class="text-slate-500 hover:text-indigo-600 font-bold transition flex items-center gap-1">
-          <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
-          <span>ご意見・ご要望</span>
-        </a>
-        <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="text-slate-500 hover:text-pink-600 font-bold transition flex items-center gap-1">
-          <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
-          <span>公式Instagram</span>
-        </a>
-        <span>学校教育現場を応援する教員支援プロジェクト</span>
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-slate-500">
+        <a href="https://www.instagram.com/sensei_box_ict/" target="_blank" rel="noopener noreferrer" class="hover:text-pink-600 transition">公式Instagram</a>
+        <a href="https://forms.gle/vTiT5qM165xjWcpa7" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition">ご意見・要望フォーム</a>
+        <span class="font-mono-tech text-[11px] text-slate-400">&copy; 2026 Sensei Box</span>
       </div>
     </div>
   </footer>
 
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-    });
-  </script>
-</body>
-</html>
+    const PIN_STORAGE_KEY = 'sensei_box_pinned_tools_v1';
+    let currentCategory = 'all';
+    let searchQuery = '';
+    let pinnedIds = [];
+
+    const STAR_OUTLINE_SVG = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    const STAR_FILLED_SVG = '<svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+
+    function loadPins() {
+      try {
+        const saved = localStorage.getItem(PIN_STORAGE_KEY);
+        pinnedIds = saved ? JSON.parse(saved) : [];
+      } catch (e) {
+        pinnedIds = [];
+      }
+    }
+
+    function savePins() {
+      try {
+        localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(pinnedIds));
+      } catch (e) {}
+    }
+
+    function togglePin(toolId) {
+      if (pinnedIds.includes(toolId)) {
+        pinnedIds = pinnedIds.filter(id => id !== toolId);
+      } else {
+        pinnedIds.push(toolId);
+      }
+      savePins();
+      renderPinsAndFilter();
+    }
+
+    function updateCategoryCounts() {
+      const allCards = Array.from(document.querySelectorAll('#toolsBentoGrid .tool-card'));
+      const counts = { all: allCards.length, print: 0, class: 0, admin: 0 };
+      allCards.forEach(c => {
+        if (counts[c.dataset.cat] !== undefined) counts[c.dataset.cat]++;
+      });
+      document.querySelectorAll('.cat-tab').forEach(tab => {
+        const badge = tab.querySelector('.cat-count');
+        if (badge && counts[tab.dataset.cat] !== undefined) {
+          badge.textContent = counts[tab.dataset.cat];
+        }
+      });
+    }
+
+    function renderPinsAndFilter() {
+      const allCards = Array.from(document.querySelectorAll('#toolsBentoGrid .tool-card'));
+      const pinnedSection = document.getElementById('pinnedSection');
+      const pinnedGrid = document.getElementById('pinnedGrid');
+      const emptyState = document.getElementById('emptySearchState');
+
+      // 1. ピン留めボタン状態更新
+      document.querySelectorAll('.pin-btn').forEach(btn => {
+        const id = btn.dataset.pin;
+        const isPinned = pinnedIds.includes(id);
+        const padClass = btn.closest('[data-featured="true"]') ? 'p-2' : 'p-1.5';
+        if (isPinned) {
+          btn.className = `pin-btn relative z-10 ${padClass} rounded-xl bg-amber-50 border border-amber-300 text-amber-500 hover:bg-amber-100 transition`;
+          btn.innerHTML = STAR_FILLED_SVG;
+        } else {
+          btn.className = `pin-btn relative z-10 ${padClass} rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition`;
+          btn.innerHTML = STAR_OUTLINE_SVG;
+        }
+      });
+
+      // 2. ピン留めバー描画
+      pinnedGrid.innerHTML = '';
+      if (pinnedIds.length > 0) {
+        pinnedSection.classList.remove('hidden');
+        pinnedIds.forEach(id => {
+          const orig = allCards.find(c => c.dataset.id === id);
+          if (!orig) return;
+          const title = orig.querySelector('h3 a').textContent.trim();
+          const href = orig.querySelector('h3 a').getAttribute('href');
+          const icon = orig.querySelector('.rounded-2xl').textContent.trim();
+
+          const miniCard = document.createElement('div');
+          miniCard.className = 'bg-white rounded-2xl border border-amber-200/90 p-3.5 shadow-2xs flex items-center justify-between gap-2 hover:border-amber-400 transition';
+          miniCard.innerHTML = `
+            <a href="${href}" class="flex items-center gap-2.5 min-w-0 flex-1">
+              <span class="text-xl shrink-0">${icon}</span>
+              <span class="text-xs font-black text-slate-900 truncate">${title}</span>
+            </a>
+            <button type="button" data-unpin="${id}" class="text-[11px] font-bold text-slate-400 hover:text-rose-500 px-1.5 py-1 rounded-lg transition" title="ピン解除">✕</button>
+          `;
+          pinnedGrid.appendChild(miniCard);
+        });
+
+        pinnedGrid.querySelectorAll('[data-unpin]').forEach(btn => {
+          btn.onclick = () => togglePin(btn.dataset.unpin);
+        });
+      } else {
+        pinnedSection.classList.add('hidden');
+      }
+
+      // 3. カテゴリー＆検索フィルタリング＋グリッド幅の自動最適化（歯抜け防止）
+      const q = searchQuery.trim().toLowerCase();
+      const visibleCards = [];
+
+      allCards.forEach(card => {
+        const cat = card.dataset.cat;
+        const text = (card.textContent + ' ' + (card.dataset.keywords || '')).toLowerCase();
+        const matchCat = currentCategory === 'all' || cat === currentCategory;
+        const matchQuery = !q || text.includes(q);
+
+        if (matchCat && matchQuery) {
+          card.classList.remove('hidden');
+          visibleCards.push(card);
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      visibleCards.forEach(card => {
+        card.classList.remove('lg:col-span-6', 'lg:col-span-4');
+        if (currentCategory === 'all' && !q) {
+          card.classList.add(card.dataset.featured === 'true' ? 'lg:col-span-6' : 'lg:col-span-4');
+        } else if (visibleCards.length === 4 || visibleCards.length === 2) {
+          card.classList.add('lg:col-span-6');
+        } else {
+          card.classList.add('lg:col-span-4');
+        }
+      });
+
+      const headingMap = {
+        all: `すべてのツール（${visibleCards.length}個）`,
+        print: `🖨️ プリント・教材作成（${visibleCards.length}個）`,
+        class: `🖥️ 授業・電子黒板（${visibleCards.length}個）`,
+        admin: `📋 学級経営・クラス（${visibleCards.length}個）`
+      };
+      document.getElementById('currentCategoryHeading').textContent = headingMap[currentCategory] || `ツール一覧（${visibleCards.length}個）`;
+
+      if (visibleCards.length === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      const pcClear = document.getElementById('pcSearchClearBtn');
+      const mobClear = document.getElementById('mobSearchClearBtn');
+      if (pcClear) pcClear.classList.toggle('hidden', !searchQuery);
+      if (mobClear) mobClear.classList.toggle('hidden', !searchQuery);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPins();
+      updateCategoryCounts();
+
+      // カテゴリータブ
+      document.querySelectorAll('.cat-tab').forEach(tab => {
+        tab.onclick = () => {
+          currentCategory = tab.dataset.cat;
+          document.querySelectorAll('.cat-tab').forEach(t => {
+            const countBadge = t.querySelector('.cat-count');
+            if (t.dataset.cat === currentCategory) {
+              t.className = 'cat-tab px-3.5 py-2 rounded-xl bg-slate-900 text-white font-black text-xs shadow-2xs transition flex items-center gap-1.5';
+              if (countBadge) countBadge.className = 'cat-count font-mono-tech text-[10
